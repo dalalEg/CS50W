@@ -1,0 +1,226 @@
+/* General Styling */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Roboto', sans-serif;
+}
+body {
+    padding: 10px;
+    background-color:bisque;
+    font-size: 32px;
+}
+h2 {
+    font-size: 48px !important;
+    color: #0f0e0e !important;
+    text-align: center;
+    margin-top: 20px;
+}
+
+a{
+    text-decoration: none;
+    color: brown;
+}
+/*Search*/
+.search{
+    width: 50%;
+    margin-top: 20px;
+    padding: 8px;
+    font-size: 16px;
+    border-radius: 5px;
+}
+/* listing Page Styling */
+.image-container {
+    width: 300px; 
+    height: 300px;
+    overflow: hidden; /* Prevent image overflow */
+    position: center;
+    margin-left: 30%;
+}
+
+
+.image-container img {
+    width: 100%; /* Adjust to container's width */
+    height: 100%; /* Adjust to container's height */
+    object-fit: cover; /* Ensures proper scaling and cropping */
+    display: block; /* Remove extra space caused by inline images */
+}
+.ActiveListingPage {
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: antiquewhite;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+
+/* Auction Details */
+.ActiveListingPage p {
+    font-size: 18px;
+    color: #555;
+    margin-bottom: 10px;
+}
+
+/* Comments Section */
+h3 {
+    margin-top: 20px;
+    font-size: 22px;
+    color: #444;
+    text-align: left;
+}
+
+ .comment{
+    margin-top: 20px;
+    font-size: 22px;
+    color: #444;
+    text-align: left;
+}
+
+.win{
+    background-color: lightgreen;
+    padding: 16px;
+    width: 40%;
+    margin-left: 64px;
+}
+.closed{
+    background-color:chocolate;
+    padding: 16px;
+    width:80%;
+    margin-left: 64px;
+}
+
+
+/* veiw listing styling */
+.listing {
+    padding: 20px;
+    margin: 20px auto;
+    background-color: antiquewhite;
+    width: 70%; 
+    border-radius: 8px;
+}
+
+.Element {
+    display: flex;
+    align-items: center; /* Ensures vertical alignment */
+    margin-top: 24px;
+    border: 1px solid #ddd; /* Light gray for better contrast */
+    border-radius: 8px;
+    height: auto; /* Adjust height dynamically based on content */
+    padding: 16px;
+    background-color: rgba(250, 212, 172, 0.923); /* Better contrast */
+}
+
+.Element:hover {
+    transform: scale(1.02); /* Slight hover effect */
+}
+
+.Element img {
+    height: 150px; /* Reduced height for better proportion */
+    width: 150px; /* Ensure square shape */
+    object-fit: cover;
+    border-radius: 8px;
+    margin-right: 16px; /* Space between image and text */
+    border: 2px solid #f5c6a5; /* Match with antiquewhite background */
+}
+
+.Element a {
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+    text-decoration: none;
+    transition: color 0.3s ease-in-out;
+}
+
+.Element a:hover {
+    color: darkred;
+}
+
+.Element p {
+    margin: 4px 0;
+    color: #555;
+}
+
+p{
+    margin: 0;
+    padding-left: 16px;
+}
+.category{
+    font-size: 32px;
+    color: grey;
+
+}
+
+
+
+.description{
+    overflow: hidden;
+    white-space: normal;
+    text-overflow: ellipsis;        
+    font-size: 18px;
+    max-width: 500px; /* Set max width as needed */
+}
+
+
+/* Forms */
+.ActiveListingPage form {
+    margin-top: 10px;
+    text-align: center;
+}
+.form-group{
+    width: 50%;
+    margin-left: 320px;
+    margin-top: 20px;
+    padding: 8px;
+    font-size: 16px;
+    border-radius: 5px;
+}
+
+/* Buttons */
+.button {
+    background-color:bisque;
+
+    color: rgb(4, 4, 4);
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.button:hover {
+    background-color: #f2ba04;
+}
+.btn {
+    background-color: brown;
+    color: bisque;
+    padding: 10px 15px;
+    border-radius: 5px;
+    font-size: 32px;
+    cursor: pointer;
+    margin-left: 640px;
+}
+/* Inputs */
+input[type="text"] {
+    padding: 8px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    width: 80%;
+    margin: 5px 0;
+}
+input[type="number"] {
+    padding: 8px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    width: 50%;
+    margin: 5px 0;
+}
+
+
+
+
+
+

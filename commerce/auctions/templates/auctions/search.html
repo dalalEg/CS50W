@@ -1,0 +1,29 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+    <h2>Active Listings</h2>
+    {% if auctions %}
+    <ul class="listing">
+        {% for auction in auctions %}
+            <li class="Element">
+               
+                {% if auction.image%}
+                    <img src="{{ auction.image }}" alt="Image for {{ auction.title }}">
+                {% else %}
+                    <img src="https://via.placeholder.com/300" alt="Placeholder Image">
+                {% endif %}
+                <a href="{% url 'listingPage' auction.id %}">{{ auction.title }}</a>
+                <p class="description">{{ auction.description }}</p>
+                <p>Current bid: ${{ auction.starting_bid }}</p>
+                <p>Category: {{ auction.category }}</p>
+                
+          
+            </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+        <p>No auctions found</p>
+    {% endif %}
+   
+
+{% endblock %}

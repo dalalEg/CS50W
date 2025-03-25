@@ -1,0 +1,13 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+    <h2>Profile</h2>
+    Hello, {{ user.username }}!
+    Your email is {{ user.email }}.
+    <h3><a href="{% url 'changePassword' %}">Change Password</a></h3>
+    <h3><a href ="{% url 'won' %}">Won Auctions</a></h3>
+    <h3><a href=" {% url 'listing' %}">Your Auctions</a></h3>
+    <h3><a href =" {%url 'bids' %}">Your Bids</a></h3>
+    <h3><a href="{%url 'comments'%}">Comments</a></h3>
+   
+{% endblock %}
