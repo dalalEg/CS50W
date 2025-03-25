@@ -1,0 +1,25 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+    Hello, {{ user.username }}!
+    {% if won %}
+        <h4>You won at this auctions</h4>
+        <ul class="listing">
+            {% for auction in won %}
+                <li class="Element">
+                    {% if auction.image%}
+                        <img src="{{ auction.image }}" alt="Image for {{ auction.title }}">
+                    {% else %}
+                        <img src="https://via.placeholder.com/150x150" alt="Placeholder Image">
+                    {% endif %}
+                    <a href="{% url 'listingPage' auction.id %}">{{ auction.title }}</a>
+                    <p>Final bid: ${{ auction.starting_bid }}</p>
+                    <p>Category: {{ auction.category }}</p>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>You have not won any auctions.</p>
+    {% endif %}
+ 
+{% endblock %}

@@ -1,0 +1,67 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+    <h2>Listing: {{ auction.title }}</h2>
+    {% if message %}
+        <div>{{ message }}</div>
+    {% endif %}
+    <div class="ActiveListingPage">
+        <div class="image-container">
+            {% if auction.image%}
+                <img src="{{ auction.image }}" alt="Image for {{ auction.title }}">
+            {% else %}
+                <img src="" alt="There is no Image for this Auction">
+            {% endif %}
+        </div>
+       
+        <p>Description: {{ auction.description }}</p>
+        <p>Current bid: ${{ auction.starting_bid }}</p> 
+        <p>Latest bid was by: {{ auction.current }}</p>
+        <p>Category: {{ auction.category }}</p>
+        <p>Created by: {{ auction.user }}</p>
+        {% if user.is_authenticated %}
+            {% if user == auction.user %}
+            <!-- Close Auction Form --> 
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="close" value="close">
+                    <button class="button" type="submit">Close Auction</button>
+                </form>
+            {% endif %} 
+            <!-- Bid Submission Form -->
+            <form method="post">
+                {% csrf_token %}
+                <label for="bid">Bid:</label>
+                <input type="number" name="bid" id="bid" step="0.01" min="{{ auction.starting_bid }}">
+                <button class="button" type="submit">Place Bid</button>
+            </form>
+        
+            <!-- Watchlist Form -->
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="watchlist" value="{% if watchlist %}remove{% else %}add{% endif %}">
+                <button class="button" type="submit">
+                    {% if watchlist %}Remove from Watchlist{% else %}Add to Watchlist{% endif %}
+                </button>
+            </form>
+            <!-- Comments Form -->
+
+            <h2 style="text-align: left;">Comments:</h2>
+            <form method="post">
+                {% csrf_token %}
+                <label style="text-align: left;"for="comment">Add Comment:</label>
+                <input type="text" name="comment" id="comment">
+                <button class="button" type="submit">Submit Comment</button>
+            </form>
+            <ul>
+                {% for comment in comments %}
+                    <li class="comment">{{ comment.user }}: {{ comment.text }}</li>
+                {% endfor %}
+            </ul>
+        
+        {% else %}
+            <p><a href="{% url 'login' %}">Log in</a> to place a bid , add to watchlist or to comment.</p>
+        {% endif %}
+    </div>
+    
+{% endblock %}

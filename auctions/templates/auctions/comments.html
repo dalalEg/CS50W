@@ -1,0 +1,19 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+    <h3>Your Comments</h3>
+    {% if comments %}
+        <ul>
+            {% for comment in comments %}
+                <li>
+                    <a href="{% url 'listingPage' comment.auction.id %}">Auction name: {{ comment.auction.title }}</a>
+                    <p>{{ comment.text }}</p>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>You have not commented on any auctions.</p>
+    {% endif %}
+{% endblock %}
+
+    
