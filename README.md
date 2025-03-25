@@ -1,2 +1,0 @@
-# dalalProjects
-Hello my na
