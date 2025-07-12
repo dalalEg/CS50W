@@ -53,14 +53,25 @@
     
         </nav>
         
-        
+        <div class="sidebar">
+          <input type="text" id="search-input" placeholder="Search users or posts" />
+          <button id="search-btn" class="btn btn-primary btn-sm">Search</button>
+        </div>
+        <div class="main-content">
          <div class = "posts"> </div>
+        <div class="search-results" style="display:none"></div>
+        <div class="profile"> </div>
+         <div class="following"></div>
+        <div class="post"></div>
+        <div class="followers"></div>
+          {% block body %}
+          {% endblock %}
+
+        </div>
 
         {% block scripts %}
             <script src="{% static 'network/index.js' %}" ></script>
-        {% endblock %}
-        {% block body %}
-
+       
         {% endblock %}
     </body>
 </html>

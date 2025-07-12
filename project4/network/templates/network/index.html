@@ -3,18 +3,17 @@
 
 {% block body %}
     {% if user.is_authenticated %}  
-        <div class="profile"> </div>
         <div class ="NewPost">
             <h3>New Post</h3>    
             <textarea class="form-control" id="post_content" placeholder="Body"></textarea>
             <input type="submit" id="post_submit" class="btn btn-primary"/>
         </div>
-        <div class="post"></div>
-        <div class="following"></div>
-        <div class="followers"></div>
+        
+      
         <div class="all_posts"></div>
     {%endif%}
-     
+       
+
 {% endblock %}
 {% block scripts %}
     <script>

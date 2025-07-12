@@ -20,7 +20,7 @@ urlpatterns = [
     path("api/posts/<int:post_id>/", views.post, name="post_detail"),
     path("api/posts/<int:post_id>/like/", views.like_post, name="like_post"),
     path("api/posts/<int:post_id>/comment/", views.comment, name="comment_post"),
-    
+    path("api/search/", views.search, name="search"),
     # to refresh the page
     re_path(r'^(?!api/).*$', views.spa_shell, name="spa_shell"),
 ]

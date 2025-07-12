@@ -33,11 +33,26 @@ document.addEventListener("DOMContentLoaded", function () {
 
   const postSubmit = document.querySelector("#post_submit");
   if (postSubmit) {
-    postSubmit.addEventListener("click", function () {
+    postSubmit.addEventListener("click", function (event) {
+       event.preventDefault();
       handleSubmitPost();
     });
+    
   }
-  // default page load
+    const searchBtn = document.getElementById("search-btn");
+  const searchInput = document.getElementById("search-input");
+  if (searchBtn && searchInput) {
+    searchBtn.addEventListener("click", function () {
+      const query = searchInput.value.trim();
+      if (!query) return;
+      handleSearch(query);
+    });
+    searchInput.addEventListener("keydown", function (e) {
+      if (e.key === "Enter") {
+        searchBtn.click();
+      }
+    });
+  }
 });
 window.onpopstate = function (event) {
   const currentURL = window.location.pathname;
@@ -114,6 +129,7 @@ function showOnlySection(sectionId) {
     "register_form",
     "post",
     "all_posts",
+    "search-results",
   ];
 
   sections.forEach((id) => {
@@ -215,6 +231,7 @@ function renderPosts({
       if (!response.ok) throw new Error("Network response was not ok");
       return response.json();
     })
+     // ...existing code...
     .then((data) => {
       if (pushState) {
         history.pushState(
@@ -223,32 +240,38 @@ function renderPosts({
           `${urlPath}?page=${page}`,
         );
       }
-
+    
       const posts_content = document.createElement("div");
       posts_content.innerHTML = `
-      <h1>${title}</h1>
-      ${data.posts
-        .map(
-          (post) => `
-        <div class="post-card" data-post-id="${post.id}" style="cursor:pointer;">
-          <div class="post-header">${post.user}</div>
-          <div class="post-meta">${post.updated_at}</div>
-          <div class="post-content">${post.content}</div>
-          <div class="post-footer">
-            <span>Likes: <span class="like-count">${post.likes_count}</span></span>
-            <button class="like-btn btn btn-sm ${post.is_liked ? "btn-danger" : "btn-outline-primary"}">
-              ${post.is_liked ? "Unlike" : "Like"}
-            </button>
-          </div>
+        <h1>${title}</h1>
+        ${
+          data.posts.length === 0
+            ? `<div class="alert alert-info text-center my-4">No posts to display.</div>`
+            : data.posts
+                .map(
+                  (post) => `
+                <div class="post-card" data-post-id="${post.id}" style="cursor:pointer;">
+                  <div class="post-header">
+  <a href="#" class="user-link" data-username="${post.user}">${post.user}</a>
+</div>
+                  <div class="post-meta">${timeAgo(post.created_at)} (${post.created_at})  </div>
+                  <div class="post-content">${post.content}</div>
+                  <div class="post-footer">
+                    <span>Likes: <span class="like-count">${post.likes_count}</span></span>
+                    <button class="like-btn btn btn-sm ${post.is_liked ? "btn-danger" : "btn-outline-primary"}">
+                      ${post.is_liked ? "Unlike" : "Like"}
+                    </button>
+                  </div>
+                </div>
+              `,
+                )
+                .join("")
+        }
+        <div class="pagination">
+          <button id="prev-page" ${!data.has_previous ? "disabled" : ""}>Previous</button>
+          <button id="next-page" ${!data.has_next ? "disabled" : ""}>Next</button>
         </div>
-      `,
-        )
-        .join("")}
-      <div class="pagination">
-        <button id="prev-page" ${!data.has_previous ? "disabled" : ""}>Previous</button>
-        <button id="next-page" ${!data.has_next ? "disabled" : ""}>Next</button>
-      </div>
-    `;
+      `;
       const postsContainer = document.querySelector(containerSelector);
       if (postsContainer) {
         postsContainer.innerHTML = "";
@@ -288,7 +311,7 @@ function renderPosts({
               });
           });
         });
-
+              addUserLinkListeners(); // or addUserLinkListeners(containerElement) if you want to scope it
         // Pagination handlers
         posts_content.querySelector("#prev-page").onclick = function () {
           if (data.has_previous)
@@ -316,10 +339,14 @@ function renderPosts({
         };
 
         // Add click event to each post card
-        posts_content.querySelectorAll(".post-card").forEach((card) => {
+               posts_content.querySelectorAll(".post-card").forEach((card) => {
           card.addEventListener("click", function (e) {
-            // Prevent like button from triggering post view
-            if (e.target.classList.contains("like-btn")) return;
+            // Prevent like button or user-link from triggering post view
+            if (
+              e.target.classList.contains("like-btn") ||
+              e.target.classList.contains("user-link") ||
+              e.target.closest(".user-link")
+            ) return;
             const postId = this.getAttribute("data-post-id");
             renderSinglePost(postId);
           });
@@ -361,7 +388,7 @@ function renderProfile(username = null) {
 
       const profile_content = document.createElement("div");
       profile_content.innerHTML = `
-        <h1>${data.username}'s Profile</h1>
+        <h1>${data.username}</h1>
         <p>
           <span id="followers-link" style="cursor:pointer; color:#007bff; text-decoration:underline;">
             Followers: ${data.followers}
@@ -371,19 +398,18 @@ function renderProfile(username = null) {
             Following: ${data.following}
           </span>
         </p>
-        ${username ? `<button id="follow-btn">${data.is_following ? "Unfollow" : "Follow"}</button>` : ""}
-        <h3>
-          <span id="show-all-posts" style="cursor:pointer; color:#007bff; text-decoration:underline;">Posts</span>:
-        </h3>
-        <ul id="profile-posts-list">
-          ${data.posts.map((post) => `<li>${post.content} (${post.updated_at})</li>`).join("")}
-        </ul>
+        ${window.userIsAuthenticated === "true" && username ? 
+          `<button id="follow-btn">${data.is_following ? "Unfollow" : "Follow"}</button>` 
+          : ""
+        }
+       
+                <div class="profile-posts"></div>
         ${
           !username
             ? `
-        <h3>All Usernames:</h3>
+        <h3>Maybe you want to Follow:</h3>
         <ul>
-          ${data.all_users
+          ${data.random_users
             .map(
               (u) =>
                 `<li><a href="#" class="user-link" data-username="${u}">${u}</a></li>`,
@@ -400,9 +426,15 @@ function renderProfile(username = null) {
       `;
 
       document.querySelector(".profile").append(profile_content);
-
+                renderPosts({
+          apiUrl: `/api/profile/${data.username}/posts/`,
+          containerSelector: ".profile-posts",
+          page: 1,
+          title: `${data.username}'s Posts`,
+          pushState: false
+        });
       // Only show follow/unfollow for other users
-      if (username) {
+      if (username && window.userIsAuthenticated === "true") {
         const followBtn = document.getElementById("follow-btn");
         if (data.is_their_profile) {
           followBtn.style.display = "none";
@@ -433,44 +465,10 @@ function renderProfile(username = null) {
       }
 
       // Add event listeners for user links (only on own profile)
-      if (!username) {
-        document.querySelectorAll(".user-link").forEach((link) => {
-          link.addEventListener("click", function (e) {
-            e.preventDefault();
-            const uname = this.dataset.username;
-            renderProfile(uname);
-          });
-        });
+           if (!username) {
+        addUserLinkListeners(document.querySelector(".profile"));
       }
 
-      const showAllPosts = document.getElementById("show-all-posts");
-      if (showAllPosts) {
-        showAllPosts.addEventListener("click", function () {
-          // Show all posts for this user
-          showOnlySection("posts");
-          // Update the URL and history state
-          history.pushState(
-            { page: "profile", showAll: true, username: data.username },
-            `${data.username}'s All Posts`,
-            `/profile/${data.username}?all=true`,
-          );
-
-          // Render all posts for this user
-          // Use the same renderPosts function but with the all=true parameter
-          // This assumes the API supports a query parameter to fetch all posts
-          const url = `/api/profile/${data.username}/posts/`;
-
-          renderPosts({
-            apiUrl: url,
-            containerSelector: ".posts",
-            page: 1,
-            title: `${data.username}'s Posts`,
-            pushState: true,
-            stateObj: { page: "profile_posts", username: data.username },
-            urlPath: `/profile/${data.username}/posts`,
-          });
-        });
-      }
       // Followers link
       const followersLink = document.getElementById("followers-link");
       if (followersLink) {
@@ -555,8 +553,8 @@ function renderSinglePost(postId) {
       .map(
         (c) => `
       <div class="comment">
-        <strong>${c.user}</strong>: ${c.content}
-        <span class="comment-date">${c.created_at}</span>
+        <strong  class="user-link" data-username="${c.user}">${c.user}</strong>: ${c.content}
+        <span class="comment-date">${timeAgo(c.created_at)}</span>
       </div>
     `
       )
@@ -564,8 +562,11 @@ function renderSinglePost(postId) {
 
     postsContainer.innerHTML = `
       <div class="post-card" data-post-id="${post.id}">
-        <div class="post-header">${post.user}</div>
-        <div class="post-meta">${post.updated_at}</div>
+        <div class="post-header">
+  <a href="#" class="user-link" data-username="${post.user}">${post.user}</a>
+</div>
+                          <div class="post-meta">${timeAgo(post.created_at)} (${post.created_at})  </div>
+
         <div class="post-content" id="post-content">${post.content}</div>
         <div class="post-footer">
           <span>Likes: <span class="like-count">${post.likes_count}</span></span>
@@ -600,7 +601,8 @@ function renderSinglePost(postId) {
         </div>
       </div>
     `;
-
+    // Add user link listeners
+    addUserLinkListeners(postsContainer);
     // Like/Unlike handler
     const likeBtn = postsContainer.querySelector(".like-btn");
     if (likeBtn) {
@@ -635,9 +637,13 @@ function renderSinglePost(postId) {
         e.stopPropagation();
         const contentDiv = postsContainer.querySelector("#post-content");
         const oldContent = contentDiv.textContent;
-        contentDiv.innerHTML = `<textarea id="edit-content" class="form-control">${oldContent}</textarea>
-        <button id="save-edit" class="btn btn-success btn-sm mt-2">Save</button>
-        <button id="cancel-edit" class="btn btn-secondary btn-sm mt-2">Cancel</button>`;
+                contentDiv.innerHTML = `
+          <textarea id="edit-content" class="form-control">${oldContent}</textarea>
+          <div style="margin-top:8px;">
+            <button id="save-edit" class="btn btn-success btn-sm mt-2">Save</button>
+            <button id="cancel-edit" class="btn btn-secondary btn-sm mt-2">Cancel</button>
+          </div>
+        `;
         document.getElementById("save-edit").onclick = function () {
           const newContent = document.getElementById("edit-content").value;
           fetch(`/api/posts/${post.id}/`, {
@@ -706,17 +712,18 @@ function showFollowers(username) {
   })
     .then((response) => response.json())
     .then((data) => {
+      const followersList = data.followers_list;
       document.querySelector(".followers").innerHTML = `
-      <h2>${username}'s Followers</h2>
-      <ul>
-        ${data.followers_list.map((u) => `<li><a href="#" class="user-link" data-username="${u}">${u}</a></li>`).join("")}      </ul>
-    `;
-      document.querySelectorAll(".followers .user-link").forEach((link) => {
-        link.addEventListener("click", function (e) {
-          e.preventDefault();
-          renderProfile(this.dataset.username);
-        });
-      });
+        <h2>${username}'s Followers</h2>
+        ${
+          followersList.length === 0
+            ? `<div class="alert alert-info text-center my-4">No followers yet.</div>`
+            : `<ul>
+                ${followersList.map((u) => `<li><a href="#" class="user-link" data-username="${u}">${u}</a></li>`).join("")}
+              </ul>`
+        }
+      `;
+      addUserLinkListeners(document.querySelector(".followers"));
     });
 }
 
@@ -737,15 +744,15 @@ function showFollowing(username) {
       document.querySelector(".following").innerHTML = `
       <h2>${username} is Following</h2>
       <ul>
-        ${data.following_list.map((u) => `<li><a href="#" class="user-link" data-username="${u}">${u}</a></li>`).join("")}      </ul>
-      </ul>
+        ${
+          data.following_list.length === 0
+            ? `<div class="alert alert-info text-center my-4">Not following anyone yet.</div>`
+            : `<ul>
+          ${data.following_list.map((u) => `<li><a href="#" class="user-link" data-username="${u}">${u}</a></li>`).join("")}     
+      </ul>`
+        }
     `;
-      document.querySelectorAll(".following .user-link").forEach((link) => {
-        link.addEventListener("click", function (e) {
-          e.preventDefault();
-          renderProfile(this.dataset.username);
-        });
-      });
+      addUserLinkListeners(document.querySelector(".following"));
     });
 }
 
@@ -761,22 +768,26 @@ function showUserComments(username) {
     .then((data) => {
       document.querySelector(".posts").innerHTML = `
         <h2>${username}'s Comments</h2>
-        <ul>
-          ${data.comments
-            .map(
-              (c) => `
-                <li>
-                  <strong>${c.user}</strong> 
-                  <a href="#" class="post-link" data-post-id="${c.post}">
-                    ${c.content}
-                  </a>
-                  <br>
-                  "${c.content}"
-                </li>
-              `
-            )
-            .join("")}
-        </ul>
+        ${
+          data.comments.length === 0
+            ? `<div class="alert alert-info text-center my-4">No comments to display.</div>`
+            : `<ul>
+                ${data.comments
+                  .map(
+                    (c) => `
+                      <li>
+                        <strong>${c.user}</strong> 
+                        <a href="#" class="post-link" data-post-id="${c.post}">
+                          ${c.content}
+                        </a>
+                        <br>
+                        "${c.content}"
+                      </li>
+                    `
+                  )
+                  .join("")}
+              </ul>`
+        }
       `;
       // Add event listeners to post links
       document.querySelectorAll(".post-link").forEach(link => {
@@ -799,20 +810,24 @@ function showUserLikes(username) {
     .then((data) => {
       document.querySelector(".posts").innerHTML = `
         <h2>${username}'s Likes</h2>
-        <ul>
-          ${data.likes
-            .map(
-              (like) => `
-                <li>
-                  Liked post by <strong>${like.user}</strong>:
-                  <a href="#" class="post-link" data-post-id="${like.post_id}">
-                    ${like.post_content}
-                  </a>
-                </li>
-              `
-            )
-            .join("")}
-        </ul>
+        ${
+          data.likes.length === 0
+            ? `<div class="alert alert-info text-center my-4">No liked posts to display.</div>`
+            : `<ul>
+                ${data.likes
+                  .map(
+                    (like) => `
+                      <li>
+                        Liked post by <strong>${like.user}</strong>:
+                        <a href="#" class="post-link" data-post-id="${like.post_id}">
+                          ${like.post_content}
+                        </a>
+                      </li>
+                    `
+                  )
+                  .join("")}
+              </ul>`
+        }
       `;
       // Add event listeners to post links
       document.querySelectorAll(".post-link").forEach(link => {
@@ -822,4 +837,115 @@ function showUserLikes(username) {
         });
       });
     });
+}
+
+
+function addUserLinkListeners(scope = document) {
+  // Add click event listeners to user links within the specified scope
+  scope.querySelectorAll(".user-link").forEach(link => {
+    link.addEventListener("click", function(e) {
+      e.preventDefault();
+      renderProfile(this.dataset.username);
+    });
+  });
+}
+
+// Function to handle search functionality
+function handleSearch(query) {
+  //push history state for search
+  history.pushState(
+    { page: "search", query },
+    `Search results for "${query}"`,
+    `/search?q=${encodeURIComponent(query)}`,
+  );
+  // Show search results section
+  showOnlySection("search-results");
+  if (!query) return;
+  fetch(`/api/search/?q=${encodeURIComponent(query)}`, {
+    method: "GET",
+    credentials: "same-origin",
+    headers: {
+      "Content-Type": "application/json",
+      "X-CSRFToken": getCSRFToken(),
+    }, 
+  })
+    .then((response) => {
+      if (!response.ok) throw new Error("Network response was not ok");
+      return response.json();
+    })
+    .then((data) => { 
+      const resultsContainer = document.querySelector(".search-results");
+      if (!resultsContainer) {
+        console.error("Search results container not found.");
+        return;
+      }
+      resultsContainer.innerHTML = ""; // Clear previous results
+            const hasUsers = data.users && data.users.length > 0;
+      const hasPosts = data.posts && data.posts.length > 0;
+      
+      if (!hasUsers && !hasPosts) {
+        resultsContainer.innerHTML = `<div class="alert alert-info text-center my-4">No results found for "${query}".</div>`;
+        return;
+      }
+      
+      // Show users
+      if (hasUsers) {
+        resultsContainer.innerHTML += `<h4>Users</h4>`;
+        data.users.forEach((user) => {
+          resultsContainer.innerHTML += `
+            <div class="search-result">
+              <a href="#" class="user-link" data-username="${user.username}">${user.username}</a>
+            </div>
+          `;
+        });
+      }
+      
+            if (hasPosts) {
+        resultsContainer.innerHTML += `<h4>Posts</h4>`;
+        data.posts.forEach((post) => {
+          resultsContainer.innerHTML += `
+            <div class="search-result">
+              <a href="#" class="post-link" data-post-id="${post.id}">
+                ${post.content}
+              </a>
+              <p>by <span class="user-link" data-username="${post.user}">${post.user}</span></p>
+            </div>
+          `;
+        });
+        // Add click event listeners to post links
+        resultsContainer.querySelectorAll(".post-link").forEach(link => {
+          link.addEventListener("click", function(e) {
+            e.preventDefault();
+            renderSinglePost(this.dataset.postId);
+          });
+        });
+      }
+      
+      // Add user link listeners
+      addUserLinkListeners(resultsContainer);
+     
+    })
+    .catch((error) => {
+      console.error("There was a problem with the search operation:", error);
+      alert("There was a problem with the search operation: " + error.message);
+    } );
+}
+function timeAgo(dateString) {
+  const now = new Date();
+  const date = new Date(dateString);
+  const seconds = Math.floor((now - date) / 1000);
+
+  if (seconds < 60) return "just now";
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes} minute${minutes !== 1 ? "s" : ""} ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours} hour${hours !== 1 ? "s" : ""} ago`;
+  const days = Math.floor(hours / 24);
+  if (days < 7) return `${days} day${days !== 1 ? "s" : ""} ago`;
+  const weeks = Math.floor(days / 7);
+  if (weeks < 4) return `${weeks} week${weeks !== 1 ? "s" : ""} ago`;
+  const months = Math.floor(days / 30);
+  if (months < 12) return `${months} month${months !== 1 ? "s" : ""} ago`;
+  const years = Math.floor(days / 365);
+  return `${years} year${years !== 1 ? "s" : ""} ago`;
 }

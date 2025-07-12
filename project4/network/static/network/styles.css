@@ -53,6 +53,15 @@ body {
 .post-content {
   margin-bottom: 10px;
   font-size: 1.1em;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  white-space: pre-wrap;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;    /* Show only 3 lines */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  max-height: 4.5em;        /* fallback for browsers without -webkit-line-clamp */
+  cursor: pointer;
 }
 .post-footer {
   color: #555;
@@ -259,4 +268,86 @@ body {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     transition: all 0.3s ease;
     text-align: center;
+}
+.post-link ,.user-link {
+    color: #090a0b;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: medium;
+}.sidebar {
+  position: fixed;
+  top: 80px; /* adjust if you have a navbar */
+  right: 0;
+  width: 40px; /* collapsed width */
+  height: 240px;
+  background: #f8f9fa;
+  border-left: 1px solid #ddd;
+  z-index: 100;
+  box-shadow: -2px 0 8px rgba(0,0,0,0.04);
+  overflow: hidden;
+  transition: width 0.3s cubic-bezier(.4,0,.2,1);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: flex-start;
+}
+
+.sidebar:hover,
+.sidebar:focus-within {
+  width: 240px; /* expanded width */
+  box-shadow: -4px 0 16px rgba(0,0,0,0.08);
+}
+
+.sidebar input,
+.sidebar button {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+  margin-top: 10px;
+  margin-right: 10px;
+}
+
+.sidebar:hover input,
+.sidebar:hover button,
+.sidebar:focus-within input,
+.sidebar:focus-within button {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.sidebar input {
+  width: 180px;
+  padding: 8px 12px;
+  border-radius: 20px;
+  border: 1px solid #b0c4de;
+  font-size: 1em;
+  background: #fff;
+  margin-bottom: 8px;
+}
+
+.sidebar button {
+  width: 180px;
+  padding: 8px 0;
+  border-radius: 20px;
+  border: none;
+  background: linear-gradient(90deg, #10aedd 60%, #007bff 100%);
+  color: #fff;
+  font-size: 1em;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.sidebar::before {
+  content: "🔍";
+  font-size: 1.5em;
+  margin: 10px 10px 0 0;
+  display: block;
+  color: #007bff;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+.sidebar:hover::before,
+.sidebar:focus-within::before {
+  opacity: 0;
 }
