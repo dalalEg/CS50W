@@ -4,6 +4,39 @@ This repository contains completed projects from **CS50’s Web Programming with
 
 ---
 
+## 🌐 Network
+A Twitter-style social network built with Django and JavaScript as part of CS50W Project 4.
+
+### Features
+- User registration, login, logout, and session handling
+
+- Create, edit, and like/unlike posts
+
+- Follow/unfollow users with follower/following lists
+
+-Dynamic profile pages with user stats
+
+- Comments on posts with timestamps and sorting
+
+- Pagination across posts and profiles
+
+- SPA behavior via JavaScript (history.pushState, fetch, etc.)
+
+### Extras
+
+- View who liked or commented on posts via profile
+
+- Navigate directly to user profiles via clickable usernames
+
+- Friendly URLs like /profile/<username> and /posts/<id>
+
+- Only owners can edit their posts or delete their comments
+
+### 🚧 Coming Soon
+- Delete comment functionality
+
+- Threaded replies to comments (nested discussion)
+ - Highlight active user in followers/following lists
 ## 📬 Mail
 
 A single-page email client built using **JavaScript, HTML, and CSS**, interacting with a RESTful backend.
@@ -64,18 +97,4 @@ More projects from CS50W such as:
 - Git & GitHub • SQLite • Markdown
 
 ---
-
-## 📂 Setup Instructions
-
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/yourusername/cs50w-projects.git
-   cd cs50w-projects
-2. Follow the setup instructions in each project folder's README (or inside the project code).
-3. Run the Django server locally to test the backend projects:
-   ```bash
-   python manage.py runserver
-📄 License
-These projects were completed as part of Harvard’s CS50W course. For educational use and portfolio demonstration.
-
 
