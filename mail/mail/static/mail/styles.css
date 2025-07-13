@@ -173,3 +173,7 @@ label{
     margin-top: 32px;
     background-color: rgb(183, 178, 178);
 }
+.navbar-nav {
+  width: 100%;
+  justify-content: center !important;
+}
