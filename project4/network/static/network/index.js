@@ -629,43 +629,61 @@ function renderSinglePost(postId) {
           });
       });
     }
+const editBtn = postsContainer.querySelector(".edit-btn");
+if (editBtn) {
+  editBtn.addEventListener("click", function (e) {
+    e.stopPropagation();
+    if (postsContainer.querySelector("#edit-content")) return;
 
-    // Edit handler
-    const editBtn = postsContainer.querySelector(".edit-btn");
-    if (editBtn) {
-      editBtn.addEventListener("click", function (e) {
-        e.stopPropagation();
-        const contentDiv = postsContainer.querySelector("#post-content");
-        const oldContent = contentDiv.textContent;
-                contentDiv.innerHTML = `
-          <textarea id="edit-content" class="form-control">${oldContent}</textarea>
-          <div style="margin-top:8px;">
-            <button id="save-edit" class="btn btn-success btn-sm mt-2">Save</button>
-            <button id="cancel-edit" class="btn btn-secondary btn-sm mt-2">Cancel</button>
-          </div>
-        `;
-        document.getElementById("save-edit").onclick = function () {
-          const newContent = document.getElementById("edit-content").value;
-          fetch(`/api/posts/${post.id}/`, {
-            method: "PUT",
-            credentials: "same-origin",
-            headers: {
-              "Content-Type": "application/json",
-              "X-CSRFToken": getCSRFToken(),
-            },
-            body: JSON.stringify({ content: newContent }),
-          })
-            .then((response) => response.json())
-            .then((updated) => {
-              contentDiv.textContent = updated.content;
-            });
-        };
-        document.getElementById("cancel-edit").onclick = function () {
-          contentDiv.textContent = oldContent;
-        };
-      });
-    }
+    const contentDiv = postsContainer.querySelector("#post-content");
+    const oldContent = contentDiv.textContent;
+    editBtn.style.display = "none";
 
+    contentDiv.innerHTML = `
+      <textarea id="edit-content" class="form-control">${oldContent}</textarea>
+      <div style="margin-top:8px;">
+        <button id="save-edit" class="btn btn-success btn-sm mt-2">Save</button>
+        <button id="cancel-edit" class="btn btn-secondary btn-sm mt-2">Cancel</button>
+      </div>
+    `;
+    contentDiv.className = "edit-content";
+
+      document.getElementById("save-edit").onclick = function () {
+      const newContent = document.getElementById("edit-content").value;
+      fetch(`/api/posts/${postId}/`, {
+        method: "PUT",
+        credentials: "same-origin",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": getCSRFToken(),
+        },
+        body: JSON.stringify({ content: newContent }),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.error) {
+            alert(data.error); // Show the backend error
+            return;
+          }
+          renderSinglePost(postId); // Only re-render if no error
+        })
+        .catch((error) => {
+          alert("There was a problem saving your edit: " + error.message);
+          contentDiv.innerHTML = oldContent;
+          contentDiv.id = "post-content";
+          contentDiv.className = "post-content";
+          editBtn.style.display = "";
+        });
+    };
+
+    document.getElementById("cancel-edit").onclick = function () {
+      contentDiv.innerHTML = oldContent;
+      contentDiv.id = "post-content";
+      contentDiv.className = "post-content";
+      editBtn.style.display = "";
+    };
+  });
+}
     // Comment submit handler
     if (window.userIsAuthenticated === "true") {
       const submitCommentBtn = document.getElementById("submit-comment");
