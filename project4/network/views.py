@@ -14,6 +14,7 @@ import json
 from random import sample
 
 def index(request):
+    """Return the index page."""
     return render(request, "network/index.html")
 
 
@@ -82,8 +83,8 @@ def register(request):
             return render(request, "network/register.html", {
                 "message": "Passwords must match."
             })
-        try:        # Attempt to create new user
-
+        try:        
+        # Attempt to create new user
             user = User.objects.create_user(username, email, password)
             user.save()
         except IntegrityError:
@@ -237,6 +238,7 @@ def other_profile(request, username):
                     return JsonResponse({"error": "You are not following this user."}, status=404)
         except ObjectDoesNotExist:
             return JsonResponse({"error": "User not found."}, status=404)
+        
 @login_required
 def following(request):
     """Return the posts of users that the logged-in user is following."""

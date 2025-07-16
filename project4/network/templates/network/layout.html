@@ -15,42 +15,39 @@
 
     </head>
     <body>
-
         <nav class="navbar navbar-expand-lg navbar-light bg-light">
             <a class="navbar-brand" href="#" >Network</a>
             <div>
-              <ul class="navbar-nav mr-auto">
-                {% if user.is_authenticated %}
-                    <li class="nav-item" >
-                        <a class="nav-link" id ="profile_link" href="#" ><strong>{{ user.username }}</strong></a>
-                    </li>
+                <ul class="navbar-nav mr-auto">
+                    {% if user.is_authenticated %}
+                        <li class="nav-item" >
+                            <a class="nav-link" id ="profile_link" href="#" ><strong>{{ user.username }}</strong></a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id ="add_link" href="#">Add Post</a>
+                        </li>
+                        
+                    {% endif %}
                     <li class="nav-item">
-                        <a class="nav-link" id ="add_link" href="#">Add Post</a>
+                        <a class="nav-link" id ="all_post_link" href="#">All Posts</a>
                     </li>
-                    
-                {% endif %}
-                <li class="nav-item">
-                    <a class="nav-link" id ="all_post_link" href="#">All Posts</a>
-                </li>
-                {% if user.is_authenticated %}
-                    <li class="nav-item">
-                        <a class="nav-link" id="following_link" href="/">Following</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link"  href="{% url 'logout' %}">Log Out</a>
-                    </li>
-                {% else %}
-                    <li class="nav-item">
-                        <a class="nav-link"  href="{% url 'login' %}">Log In</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link"  href="{% url 'register' %}">Register</a>
-                    </li>
-                {% endif %}
-              </ul>
+                    {% if user.is_authenticated %}
+                        <li class="nav-item">
+                            <a class="nav-link" id="following_link" href="/">Following</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link"  href="{% url 'logout' %}">Log Out</a>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link"  href="{% url 'login' %}">Log In</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link"  href="{% url 'register' %}">Register</a>
+                        </li>
+                    {% endif %}
+                </ul>
             </div>
-    
-    
         </nav>
         
         <div class="sidebar">
@@ -58,20 +55,17 @@
           <button id="search-btn" class="btn btn-primary btn-sm">Search</button>
         </div>
         <div class="main-content">
-         <div class = "posts"> </div>
+        <div class = "posts"> </div>
         <div class="search-results" style="display:none"></div>
         <div class="profile"> </div>
-         <div class="following"></div>
+        <div class="following"></div>
         <div class="post"></div>
         <div class="followers"></div>
           {% block body %}
           {% endblock %}
-
         </div>
-
         {% block scripts %}
             <script src="{% static 'network/index.js' %}" ></script>
-       
         {% endblock %}
     </body>
 </html>

@@ -1,248 +1,255 @@
-document.addEventListener("DOMContentLoaded", function () {
-  const profileLink = document.querySelector("#profile_link");
-  if (profileLink) {
-    profileLink.addEventListener("click", function () {
-      renderProfile();
-    });
-  }
-
-  const allPostLink = document.querySelector("#all_post_link");
-  if (allPostLink) {
-    allPostLink.addEventListener("click", function (event) {
-      event.preventDefault();
-      handleAllPostsClick();
-    });
-  }
-
-  const followingLink = document.querySelector("#following_link");
-  if (followingLink) {
-    followingLink.addEventListener("click", function (event) {
-      event.preventDefault();
-
-      handleFollowingClick();
-    });
-  }
-
-  const addLink = document.querySelector("#add_link");
-  if (addLink) {
-    addLink.addEventListener("click", function (event) {
-      event.preventDefault();
-      handleAddPostClick();
-    });
-  }
-
-  const postSubmit = document.querySelector("#post_submit");
-  if (postSubmit) {
-    postSubmit.addEventListener("click", function (event) {
-       event.preventDefault();
-      handleSubmitPost();
-    });
-    
-  }
-    const searchBtn = document.getElementById("search-btn");
-  const searchInput = document.getElementById("search-input");
-  if (searchBtn && searchInput) {
-    searchBtn.addEventListener("click", function () {
-      const query = searchInput.value.trim();
-      if (!query) return;
-      handleSearch(query);
-    });
-    searchInput.addEventListener("keydown", function (e) {
-      if (e.key === "Enter") {
-        searchBtn.click();
-      }
-    });
-  }
-});
-window.onpopstate = function (event) {
-  const currentURL = window.location.pathname;
-  if (event.state) {
-    // User profile (with or without username)
-    if (currentURL.startsWith("/profile/")) {
-      // Followers
-      if (currentURL.endsWith("/followers")) {
-        const username = currentURL
-          .split("/profile/")[1]
-          .replace("/followers", "");
-        showFollowers(username);
-      }
-      // Following
-      else if (currentURL.endsWith("/following")) {
-        const username = currentURL
-          .split("/profile/")[1]
-          .replace("/following", "");
-        showFollowing(username);
-      }
-      // User comments
-      else if (currentURL.endsWith("/comments")) {
-        const username = currentURL
-          .split("/profile/")[1]
-          .replace("/comments", "");
-        showUserComments(username);
-      }
-      // User likes
-      else if (currentURL.endsWith("/likes")) {
-        const username = currentURL.split("/profile/")[1].replace("/likes", "");
-        showUserLikes(username);
-      }
-      // User posts (optional, if you have a posts tab)
-      else if (currentURL.endsWith("/posts")) {
-        const username = currentURL.split("/profile/")[1].replace("/posts", "");
-        // You may want to call a function to show all posts for this user
-        renderProfile(username);
-      }
-      // Default: user profile
-      else {
-        const username = currentURL.split("/profile/")[1];
-        renderProfile(username || null);
-      }
-    } else if (currentURL === "/profile") {
-      renderProfile();
-    } else if (currentURL === "/add_post") {
-      showOnlySection("NewPost");
-    } else if (currentURL === "/posts" || currentURL === "/") {
-      handleAllPostsClick();
-    } else if (currentURL === "/following") {
-      handleFollowingClick();
-    } else if (currentURL === "/followers") {
-      showOnlySection("followers");
-    } else if (currentURL.startsWith("/posts/")) {
-      // Single post view
-      const postId = currentURL.split("/posts/")[1];
-      if (postId) {
-        renderSinglePost(postId);
-      } else {
-        handleAllPostsClick();
-      }
+document.addEventListener("DOMContentLoaded", function() {
+    // Check if the profile link was clicked
+    const profileLink = document.querySelector("#profile_link");
+    if (profileLink) {
+        profileLink.addEventListener("click", function() {
+            renderProfile();
+        });
     }
-  }
+    // Check if the all posts link was clicked
+    const allPostLink = document.querySelector("#all_post_link");
+    if (allPostLink) {
+        allPostLink.addEventListener("click", function(event) {
+            event.preventDefault();
+            handleAllPostsClick();
+        });
+    }
+    // Check if the followers link was clicked
+    const followingLink = document.querySelector("#following_link");
+    if (followingLink) {
+        followingLink.addEventListener("click", function(event) {
+            event.preventDefault();
+            handleFollowingClick();
+        });
+    }
+    // Check if the add post link was clicked
+    const addLink = document.querySelector("#add_link");
+    if (addLink) {
+        addLink.addEventListener("click", function(event) {
+            event.preventDefault();
+            handleAddPostClick();
+        });
+    }
+    // Check if the submit button was clicked
+    const postSubmit = document.querySelector("#post_submit");
+    if (postSubmit) {
+        postSubmit.addEventListener("click", function(event) {
+            event.preventDefault();
+            handleSubmitPost();
+        });
+
+    }
+    // check if the Search button was clicked or Enter key was pressed
+    const searchBtn = document.getElementById("search-btn");
+    const searchInput = document.getElementById("search-input");
+    if (searchBtn && searchInput) {
+        searchBtn.addEventListener("click", function() {
+            const query = searchInput.value.trim();
+            if (!query) return;
+            handleSearch(query);
+        });
+        searchInput.addEventListener("keydown", function(e) {
+            if (e.key === "Enter") {
+                searchBtn.click();
+            }
+        });
+    }
+});
+
+// Function to handle navigation (clicking back/forward buttons)
+window.onpopstate = function(event) {
+    const currentURL = window.location.pathname;
+    if (event.state) {
+        // User profile (with or without username)
+        if (currentURL.startsWith("/profile/")) {
+            // Followers
+            if (currentURL.endsWith("/followers")) {
+                const username = currentURL
+                    .split("/profile/")[1]
+                    .replace("/followers", "");
+                showFollowers(username);
+            }
+            // Following
+            else if (currentURL.endsWith("/following")) {
+                const username = currentURL
+                    .split("/profile/")[1]
+                    .replace("/following", "");
+                showFollowing(username);
+            }
+            // User comments
+            else if (currentURL.endsWith("/comments")) {
+                const username = currentURL
+                    .split("/profile/")[1]
+                    .replace("/comments", "");
+                showUserComments(username);
+            }
+            // User likes
+            else if (currentURL.endsWith("/likes")) {
+                const username = currentURL.split("/profile/")[1].replace("/likes", "");
+                showUserLikes(username);
+            }
+            // Default: user profile
+            else {
+                const username = currentURL.split("/profile/")[1];
+                renderProfile(username || null);
+            }
+        } else if (currentURL === "/profile") {
+            renderProfile();
+        } else if (currentURL === "/add_post") { // Add post page
+            showOnlySection("NewPost");
+        } else if (currentURL === "/posts" || currentURL === "/") { // All posts page
+            handleAllPostsClick();
+        } else if (currentURL === "/following") {  // Following page
+            handleFollowingClick();
+        } else if (currentURL === "/followers") {
+            showOnlySection("followers");
+        } else if (currentURL.startsWith("/posts/")) {
+            // Single post view
+            const postId = currentURL.split("/posts/")[1];
+            if (postId) {
+                renderSinglePost(postId);
+            } else {
+                handleAllPostsClick();
+            }
+        }
+    }
 };
 // Function to show only the specified section and hide others
 function showOnlySection(sectionId) {
-  const sections = [
-    "profile",
-    "NewPost",
-    "posts",
-    "following",
-    "followers",
-    "login_form",
-    "register_form",
-    "post",
-    "all_posts",
-    "search-results",
-  ];
+    const sections = [
+        "profile",
+        "NewPost",
+        "posts",
+        "following",
+        "followers",
+        "login_form",
+        "register_form",
+        "post",
+        "all_posts",
+        "search-results",
+    ];
 
-  sections.forEach((id) => {
-    const el = document.querySelector(`.${id}`);
-    if (el) {
-      el.style.display = id === sectionId ? "block" : "none";
-    }
-  });
+    sections.forEach((id) => {
+        const el = document.querySelector(`.${id}`);
+        if (el) {
+            el.style.display = id === sectionId ? "block" : "none";
+        }
+    });
 }
 
 // Function to handle the click event for the add post link
 function handleAddPostClick() {
-  showOnlySection("NewPost");
-  history.pushState({ page: "add_post" }, "add_post", "/add_post");
-  const postContentInput = document.querySelector("#post_content");
-  if (postContentInput) {
-    postContentInput.value = ""; // Clear the input field
-  }
-  console.log("Add post link clicked, navigating to add post page.");
+    showOnlySection("NewPost");
+    history.pushState({
+        page: "add_post"
+    }, "add_post", "/add_post");
+    const postContentInput = document.querySelector("#post_content");
+    if (postContentInput) {
+        postContentInput.value = ""; // Clear the input field
+    }
+    //console.log("Add post link clicked, navigating to add post page.");
 }
 
+// Function to handle the click event for the following link
 function handleSubmitPost() {
-  // Validate the post content
-  console.log("Submit post button clicked.");
-  const postContent = document.querySelector("#post_content").value;
-  if (postContent.trim() === "") {
-    alert("Post content cannot be empty.");
-    return;
-  }
+    // Validate the post content
+    //console.log("Submit post button clicked.");
+    const postContent = document.querySelector("#post_content").value;
+    if (postContent.trim() === "") {
+        alert("Post content cannot be empty.");
+        return;
+    }
 
-  // Send the post content to the server
-  fetch("/api/posts/", {
-    method: "POST",
-    credentials: "same-origin",
+    // Send the post content to the server
+    fetch("/api/posts/", {
+            method: "POST",
+            credentials: "same-origin",
 
-    headers: {
-      "Content-Type": "application/json",
-      "X-CSRFToken": getCSRFToken(), // <-- Add this line
-    },
-    body: JSON.stringify({ content: postContent }),
-  })
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error("Network response was not ok");
-      }
-      return response.json();
-    })
-    .then((data) => {
-      console.log("Post submitted successfully:", data);
-      // Optionally, redirect to the posts page or update the UI
-      handleAllPostsClick();
-    })
-    .catch((error) => {
-      alert("There was a problem with the post submission: " + error.message);
-      console.error("Error submitting post:", error);
-    });
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": getCSRFToken(), // Get CSRF token for security
+            },
+            body: JSON.stringify({
+                content: postContent // Send the post content as JSON
+            }),
+        })
+        .then((response) => {
+            if (!response.ok) { 
+                throw new Error("Network response was not ok"); 
+            }
+            return response.json();
+        })
+        .then((data) => {
+            //console.log("Post submitted successfully:", data);
+            handleAllPostsClick();
+        })
+        .catch((error) => {
+            alert("There was a problem with the post submission: " + error.message);
+            console.error("Error submitting post:", error);
+        });
 }
 
 // Function to handle the click event for the all posts link
 function handleAllPostsClick(page = 1) {
-  showOnlySection("posts");
-  renderPosts({
-    apiUrl: "/api/posts/",
-    containerSelector: ".posts",
-    page,
-    title: "All Posts",
-    pushState: true,
-    stateObj: { page: "posts" },
-    urlPath: "/posts",
-  });
+    showOnlySection("posts");
+    renderPosts({
+        apiUrl: "/api/posts/",
+        containerSelector: ".posts",
+        page,
+        title: "All Posts",
+        pushState: true,
+        stateObj: {
+            page: "posts"
+        },
+        urlPath: "/posts",
+    });
 }
 
+// Function that renders all posts in the specified container
+// It takes an object with the following properties:
 function renderPosts({
-  apiUrl,
-  containerSelector,
-  page = 1,
-  title = "Posts",
-  pushState = true,
-  stateObj = {},
-  urlPath = "",
+    apiUrl,
+    containerSelector,
+    page = 1,
+    title = "Posts",
+    pushState = true,
+    stateObj = {},
+    urlPath = "",
 }) {
-  //push history state
-  history.pushState(
-    { ...stateObj, page_num: page },
-    title.toLowerCase(),
-    `${urlPath}?page=${page}`,
-  );
+    //push history state
+    history.pushState({...stateObj,
+            page_num: page
+        },
+        title.toLowerCase(),
+        `${urlPath}?page=${page}`,
+    );
 
-  // Show the posts section
-  fetch(`${apiUrl}?page=${page}`, {
-    method: "GET",
-    credentials: "same-origin",
-    headers: {
-      "Content-Type": "application/json",
-      "X-CSRFToken": getCSRFToken(),
-    },
-  })
-    .then((response) => {
-      if (!response.ok) throw new Error("Network response was not ok");
-      return response.json();
-    })
-     // ...existing code...
-    .then((data) => {
-      if (pushState) {
-        history.pushState(
-          { ...stateObj, page_num: page },
-          title.toLowerCase(),
-          `${urlPath}?page=${page}`,
-        );
-      }
-    
-      const posts_content = document.createElement("div");
-      posts_content.innerHTML = `
+    // Fetch posts from the API
+    fetch(`${apiUrl}?page=${page}`, {
+            method: "GET",
+            credentials: "same-origin",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": getCSRFToken(),
+            },
+        })
+        .then((response) => {  // Check if the response is ok (status in the range 200-299)
+            // If the response is not ok, throw an error
+            if (!response.ok) throw new Error("Network response was not ok");
+            return response.json();
+        })
+        .then((data) => {
+                if (pushState) {
+                    history.pushState({...stateObj,
+                            page_num: page
+                        },
+                        title.toLowerCase(),
+                        `${urlPath}?page=${page}`,
+                    );
+                }
+
+                const posts_content = document.createElement("div"); 
+                posts_content.innerHTML = `
         <h1>${title}</h1>
         ${
           data.posts.length === 0
@@ -252,8 +259,8 @@ function renderPosts({
                   (post) => `
                 <div class="post-card" data-post-id="${post.id}" style="cursor:pointer;">
                   <div class="post-header">
-  <a href="#" class="user-link" data-username="${post.user}">${post.user}</a>
-</div>
+                    <a href="#" class="user-link" data-username="${post.user}">${post.user}</a>
+                  </div>
                   <div class="post-meta">${timeAgo(post.created_at)} (${post.created_at})  </div>
                   <div class="post-content">${post.content}</div>
                   <div class="post-footer">
@@ -272,6 +279,8 @@ function renderPosts({
           <button id="next-page" ${!data.has_next ? "disabled" : ""}>Next</button>
         </div>
       `;
+      // Find the container where posts should be rendered
+      // and replace its content with the new posts
       const postsContainer = document.querySelector(containerSelector);
       if (postsContainer) {
         postsContainer.innerHTML = "";
@@ -284,11 +293,13 @@ function renderPosts({
               alert("You must be signed in to like posts.");
               return;
             }
+
             const postCard = this.closest(".post-card");
             const postId = postCard.getAttribute("data-post-id");
             const likeCountSpan = postCard.querySelector(".like-count");
             const isLiked = this.textContent === "Unlike";
-
+            // Send like/unlike request to the server
+            // Use fetch API to send a POST request to the server
             fetch(`/api/posts/${postId}/like/`, {
               method: isLiked ? "DELETE" : "POST",
               credentials: "same-origin",
@@ -311,7 +322,7 @@ function renderPosts({
               });
           });
         });
-              addUserLinkListeners(); // or addUserLinkListeners(containerElement) if you want to scope it
+        addUserLinkListeners(); // Add user link listeners to the posts
         // Pagination handlers
         posts_content.querySelector("#prev-page").onclick = function () {
           if (data.has_previous)
@@ -338,8 +349,9 @@ function renderPosts({
             });
         };
 
-        // Add click event to each post card
-               posts_content.querySelectorAll(".post-card").forEach((card) => {
+          // Add click event to each post card to view single post
+        // This will allow users to click on a post card to view the full post
+          posts_content.querySelectorAll(".post-card").forEach((card) => {
           card.addEventListener("click", function (e) {
             // Prevent like button or user-link from triggering post view
             if (
@@ -360,6 +372,10 @@ function renderPosts({
     });
 }
 
+// Function that reders profile of a user
+// If username is provided, it will render that user's profile
+// If no username is provided, it will render the current user's profile
+// It also updates the browser history state to allow navigation back to this profile
 function renderProfile(username = null) {
   showOnlySection("profile");
   let url, pushStateObj, pushUrl;
@@ -380,7 +396,7 @@ function renderProfile(username = null) {
   fetch(url)
     .then((response) => {
       if (!response.ok) throw new Error("Network response was not ok");
-      return response.json();
+        return response.json();
     })
     .then((data) => {
       document.querySelector(".profile").innerHTML = "";
@@ -403,7 +419,7 @@ function renderProfile(username = null) {
           : ""
         }
        
-                <div class="profile-posts"></div>
+        <div class="profile-posts"></div>
         ${
           !username
             ? `
@@ -419,20 +435,20 @@ function renderProfile(username = null) {
         `
             : ""
         }
- <div style="margin-top:20px;">
+        <div style="margin-top:20px;">
           <a href="#" id="show-user-comments" style="margin-right:20px; color:#007bff; text-decoration:underline;">All Comments</a>
           <a href="#" id="show-user-likes" style="color:#007bff; text-decoration:underline;">All Likes</a>
         </div>
       `;
 
       document.querySelector(".profile").append(profile_content);
-                renderPosts({
+      renderPosts({
           apiUrl: `/api/profile/${data.username}/posts/`,
           containerSelector: ".profile-posts",
           page: 1,
           title: `${data.username}'s Posts`,
           pushState: false
-        });
+      });
       // Only show follow/unfollow for other users
       if (username && window.userIsAuthenticated === "true") {
         const followBtn = document.getElementById("follow-btn");
@@ -463,20 +479,17 @@ function renderProfile(username = null) {
           };
         }
       }
-
       // Add event listeners for user links (only on own profile)
-           if (!username) {
+      if (!username) {
         addUserLinkListeners(document.querySelector(".profile"));
       }
-
       // Followers link
       const followersLink = document.getElementById("followers-link");
       if (followersLink) {
         followersLink.addEventListener("click", function () {
-          showFollowers(data.username);
+        showFollowers(data.username);
         });
       }
-
       // Following link
       const followingLink = document.getElementById("following-link");
       if (followingLink) {
@@ -484,6 +497,7 @@ function renderProfile(username = null) {
           showFollowing(data.username);
         });
       }
+      // Add event listeners for user comments and likes
       const showUserCommentsBtn = document.getElementById("show-user-comments");
       if (showUserCommentsBtn) {
         showUserCommentsBtn.addEventListener("click", function (e) {
@@ -491,7 +505,7 @@ function renderProfile(username = null) {
           showUserComments(data.username); // Now this refers to the function!
         });
       }
-
+      // Show user likes
       const showUserLikesBtn = document.getElementById("show-user-likes");
       if (showUserLikesBtn) {
         showUserLikesBtn.addEventListener("click", function (e) {
@@ -504,6 +518,8 @@ function renderProfile(username = null) {
       console.error("There was a problem with the fetch operation:", error);
     });
 }
+
+// Function to show following page (posts of users that the current user is following)
 function handleFollowingClick(page = 1) {
   showOnlySection("following");
   renderPosts({
@@ -516,6 +532,9 @@ function handleFollowingClick(page = 1) {
     urlPath: "/following",
   });
 }
+
+// Function to handle CSRF token retrieval
+// This function retrieves the CSRF token from cookies
 function getCSRFToken() {
   const name = "csrftoken";
   const cookies = document.cookie.split(";");
@@ -528,6 +547,8 @@ function getCSRFToken() {
   return null;
 }
 
+// Function to render single post by its ID
+// This function fetches the post and its comments, then displays them
 function renderSinglePost(postId) {
   showOnlySection("posts");
   history.pushState(
@@ -563,10 +584,9 @@ function renderSinglePost(postId) {
     postsContainer.innerHTML = `
       <div class="post-card" data-post-id="${post.id}">
         <div class="post-header">
-  <a href="#" class="user-link" data-username="${post.user}">${post.user}</a>
-</div>
-                          <div class="post-meta">${timeAgo(post.created_at)} (${post.created_at})  </div>
-
+          <a href="#" class="user-link" data-username="${post.user}">${post.user}</a>
+        </div>
+        <div class="post-meta">${timeAgo(post.created_at)} (${post.created_at})  </div>
         <div class="post-content" id="post-content">${post.content}</div>
         <div class="post-footer">
           <span>Likes: <span class="like-count">${post.likes_count}</span></span>
@@ -629,25 +649,22 @@ function renderSinglePost(postId) {
           });
       });
     }
-const editBtn = postsContainer.querySelector(".edit-btn");
-if (editBtn) {
-  editBtn.addEventListener("click", function (e) {
-    e.stopPropagation();
-    if (postsContainer.querySelector("#edit-content")) return;
-
-    const contentDiv = postsContainer.querySelector("#post-content");
-    const oldContent = contentDiv.textContent;
-    editBtn.style.display = "none";
-
-    contentDiv.innerHTML = `
-      <textarea id="edit-content" class="form-control">${oldContent}</textarea>
-      <div style="margin-top:8px;">
-        <button id="save-edit" class="btn btn-success btn-sm mt-2">Save</button>
-        <button id="cancel-edit" class="btn btn-secondary btn-sm mt-2">Cancel</button>
-      </div>
-    `;
-    contentDiv.className = "edit-content";
-
+    const editBtn = postsContainer.querySelector(".edit-btn");
+    if (editBtn) {
+      editBtn.addEventListener("click", function (e) {
+      e.stopPropagation();
+      if (postsContainer.querySelector("#edit-content")) return;
+      const contentDiv = postsContainer.querySelector("#post-content");
+      const oldContent = contentDiv.textContent;
+      editBtn.style.display = "none";
+      contentDiv.innerHTML = `
+        <textarea id="edit-content" class="form-control">${oldContent}</textarea>
+        <div style="margin-top:8px;">
+          <button id="save-edit" class="btn btn-success btn-sm mt-2">Save</button>
+          <button id="cancel-edit" class="btn btn-secondary btn-sm mt-2">Cancel</button>
+        </div>
+      `;
+      contentDiv.className = "edit-content";
       document.getElementById("save-edit").onclick = function () {
       const newContent = document.getElementById("edit-content").value;
       fetch(`/api/posts/${postId}/`, {
@@ -676,14 +693,14 @@ if (editBtn) {
         });
     };
 
-    document.getElementById("cancel-edit").onclick = function () {
-      contentDiv.innerHTML = oldContent;
-      contentDiv.id = "post-content";
-      contentDiv.className = "post-content";
-      editBtn.style.display = "";
-    };
-  });
-}
+      document.getElementById("cancel-edit").onclick = function () {
+        contentDiv.innerHTML = oldContent;
+        contentDiv.id = "post-content";
+        contentDiv.className = "post-content";
+        editBtn.style.display = "";
+      };
+    });
+  }
     // Comment submit handler
     if (window.userIsAuthenticated === "true") {
       const submitCommentBtn = document.getElementById("submit-comment");
@@ -715,6 +732,8 @@ if (editBtn) {
   });
 }
 
+// Function to show followers of a user
+// This function fetches the followers of a user and displays them
 function showFollowers(username) {
   //push history state for followers
   history.pushState(
@@ -745,6 +764,8 @@ function showFollowers(username) {
     });
 }
 
+// Function to show following users of a user
+// This function fetches the users that a user is following and displays them
 function showFollowing(username) {
   //push history state for following
   history.pushState(
@@ -774,6 +795,9 @@ function showFollowing(username) {
     });
 }
 
+// Function to show comments made by a user
+// This function fetches the comments made by a user and displays them
+// It also allows users to click on a post link to view the full post
 function showUserComments(username) {
   showOnlySection("posts");
   history.pushState(
@@ -816,6 +840,11 @@ function showUserComments(username) {
       });
     });
 }
+
+
+// Function to show likes made by a user
+// This function fetches the likes made by a user and displays them
+// It also allows users to click on a post link to view the full post
 function showUserLikes(username) {
   showOnlySection("posts");
   history.pushState(
@@ -857,7 +886,8 @@ function showUserLikes(username) {
     });
 }
 
-
+// Function to add click event listeners to user links
+// Renders the user's profile when a user link is clicked
 function addUserLinkListeners(scope = document) {
   // Add click event listeners to user links within the specified scope
   scope.querySelectorAll(".user-link").forEach(link => {
@@ -948,6 +978,10 @@ function handleSearch(query) {
       alert("There was a problem with the search operation: " + error.message);
     } );
 }
+
+
+// Function to calculate time ago from a date string
+// This function takes a date string and returns a human-readable time ago format
 function timeAgo(dateString) {
   const now = new Date();
   const date = new Date(dateString);
