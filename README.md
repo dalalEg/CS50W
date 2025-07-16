@@ -4,39 +4,29 @@ This repository contains completed projects from **CS50’s Web Programming with
 
 ---
 
-## 🌐 Network
-A Twitter-style social network built with Django and JavaScript as part of CS50W Project 4.
+## 📱 Social Network 
+A full-stack social media web application built using Django, JavaScript, HTML, and CSS, allowing users to interact through posts, follows, likes, and comments.
 
 ### Features
-- User registration, login, logout, and session handling
+- Create, edit, and like/unlike posts.
 
-- Create, edit, and like/unlike posts
+- Follow and unfollow users; view profile pages.
 
-- Follow/unfollow users with follower/following lists
+- Comment on posts and view total likes/comments.
 
--Dynamic profile pages with user stats
+- Personalized feed of followed users' posts.
 
-- Comments on posts with timestamps and sorting
+- Search for users or post content.
 
-- Pagination across posts and profiles
+- Recommended users to follow on your own profile.
 
-- SPA behavior via JavaScript (history.pushState, fetch, etc.)
+- Pagination and asynchronous updates using Fetch API.
 
-### Extras
+### Skills:
+Python (Django), JavaScript, DOM Manipulation, REST API, User Auth, HTML/CSS, Pagination, UI State
 
-- View who liked or commented on posts via profile
+---
 
-- Navigate directly to user profiles via clickable usernames
-
-- Friendly URLs like /profile/<username> and /posts/<id>
-
-- Only owners can edit their posts or delete their comments
-
-### 🚧 Coming Soon
-- Delete comment functionality
-
-- Threaded replies to comments (nested discussion)
- - Highlight active user in followers/following lists
 ## 📬 Mail
 
 A single-page email client built using **JavaScript, HTML, and CSS**, interacting with a RESTful backend.
