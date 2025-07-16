@@ -276,9 +276,9 @@ body {
     font-size: medium;
 }.sidebar {
   position: fixed;
-  top: 80px; /* adjust if you have a navbar */
+  top: 80px; 
   right: 0;
-  width: 40px; /* collapsed width */
+  width: 40px; 
   height: 240px;
   background: #f8f9fa;
   border-left: 1px solid #ddd;
