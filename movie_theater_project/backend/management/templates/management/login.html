@@ -1,0 +1,31 @@
+{% extends "management/index.html" %}
+
+{% block body %}
+<div class="container d-flex justify-content-center align-items-center vh-100">
+  <div class="card shadow p-4" style="min-width: 300px; max-width: 500px; width: 100%;">
+    <div class="card-body">
+      <h2 class="card-title text-center mb-3">{{ title }}</h2>
+      <p class="text-center">Welcome to Dali Movie Theater management system. Please log in to continue.</p>
+
+      {% if error %}
+        <div class="alert alert-danger">{{ error }}</div>
+      {% endif %}
+
+      <form action="{% url 'login' %}" method="post">
+        {% csrf_token %}
+        <div class="form-group mb-3">
+          <input autofocus class="form-control" type="text" name="username" placeholder="Username">
+        </div>
+        <div class="form-group mb-3">
+          <input class="form-control" type="password" name="password" placeholder="Password">
+        </div>
+        <button class="btn btn-primary w-100" type="submit">Login</button>
+      </form>
+
+      <div class="text-center mt-3">
+        Don't have an account? <a href="{% url 'register' %}">Register here</a>.
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
