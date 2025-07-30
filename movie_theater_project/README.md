@@ -1,34 +1,83 @@
-# 🎬 Movie Theater Booking Web App (CS50W Capstone)
+# 🎬 Movie Theater Web App (WIP)
 
-Welcome to the upcoming final project for CS50's Web Programming with Python and JavaScript!
+A full-stack web application for booking movie tickets, featuring dynamic seat selection, user reviews, and an admin management system. Built with Django (REST API) and React
+## 🛠 Features
+- Dynamic seat selection per showtime
+- Admin panel for movies, showtimes, bookings
+- Booking with ticket confirmation
+- User ratings & reviews
+- Search by genre, language, actor
+- “Retro Request” voting system
+- “Coming Soon” notifications
+- Mobile responsive (Bootstrap)
+- Dockerized
+- CI/CD with GitHub Actions
 
-## 🚧 Project Status
-**In development** — this repository will contain a full-featured movie theater web app with dynamic seat booking, showtime browsing, and more.
+## 📦 Tech Stack
+- Backend: Django + DRF
+- Frontend: React + Bootstrap
+- Database: PostgreSQL
+- Auth: Django Sessions (later: JWT)
+- Payment: Stripe(planned) or mocked
 
-## 📌 Planned Features
-- Movie browsing with showtimes
-- Interactive seat selection and booking
-- Admin panel for managing showtimes and movies
-- Movie ratings and reviews
-- Retro section: vote for classic movies to bring back
-- Notifications for upcoming movies
-- VIP ticket system
-- Mobile responsive design (Bootstrap)
-- React.js frontend + Django backend
+## 🚧 Roadmap 
+### 📥 Backlog (Ideas/future)
+#### 🧩 Features
+- Add movie trailers or previews
+- Build rating/review system
+- VIP ticket logic
+- Retro section voting system
 
-## 🛠️ Technologies
-- Django (backend/API)
-- React.js (frontend)
-- PostgreSQL (database)
-- Bootstrap (UI responsiveness)
-- JavaScript (interactivity)
-- Optional: Stripe API, Email confirmations
+#### 💳 Payments & Bookings
+- Payment integration with Stripe
+- Implement seat selection logic
+- Implement booking logic
 
-## 📅 Timeline
-Project scheduled to be completed within 4 weeks.
+#### 📢 Engagement
+- Build voting feature for retro movies
+- “Coming Soon” notifications logic
+- Sidebar: Most watched this week
 
-> ✅ Initial commit — project scaffold setup.
+#### 🧰 DevOps
+- Setup Docker (Dockerfile + docker-compose)
+- Setup GitHub Actions CI
 
----
 
-📌 **This README will be expanded as development progresses.**
+
+
+### 🏗️ In Progress 
+- Create REST APIs using Django REST Framework
+- Create React project with routing
+- Connect Django and React via proxy
+  
+### 🧪 Testing
+- Unit tests for booking logic
+- API tests with DRF test client
+- React component tests (Jest)
+- CI test pipeline with GitHub Actions
+### ✅ Done
+- Setup project structure (Django + React)
+- Finalize feature list
+- Plan DB schema /Design models: Movie, Showtime, Booking, Seat, Genre....
+- Create Django project/app
+- Implement models 
+- Migrate & test in Admin
+- Seed test data
+- Setup API views
+
+
+
+### 🧠 Future Enhancements
+- Add analytics dashboard (popular movies, revenue)
+- User watchlist/favorites
+- Push notifications for new releases
+- Multi-language support
+- Dark mode toggle (React)
+
+## 📸 Screenshots
+<img width="1915" height="880" alt="image" src="https://github.com/user-attachments/assets/ac7a196e-adee-40c7-b621-d439a309f3b2" />
+
+
+> Project started: **July 2025**  
+> Maintained by: [Dalal Eghbaria](https://github.com/dalalEg)
+
