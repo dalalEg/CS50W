@@ -1,6 +1,9 @@
 # 🎬 Movie Theater Web App (WIP)
 
 A full-stack web application for booking movie tickets, featuring dynamic seat selection, user reviews, and an admin management system. Built with Django (REST API) and React
+⚠️ Note: This project is actively under development. Frontend integration and feature logic are in progress.
+
+
 ## 🛠 Features
 - Dynamic seat selection per showtime
 - Admin panel for movies, showtimes, bookings
