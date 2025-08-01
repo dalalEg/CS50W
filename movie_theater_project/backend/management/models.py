@@ -10,15 +10,6 @@ class User(AbstractUser):
    
     def __str__(self):
         return self.username
-    def serialize(self):
-        return {
-            "id": self.id,
-            "username": self.username,
-            "email": self.email,
-            "is_active": self.is_active,
-            "points": self.points,
-            "email_verified": self.email_verified,
-        }
 
 class Movie(models.Model):
     title = models.CharField(max_length=255)
@@ -27,72 +18,46 @@ class Movie(models.Model):
     rating = models.FloatField(default=0.0)
     created_at = models.DateTimeField(auto_now_add=True)
     genre =models.ManyToManyField('Genre', related_name='movies', blank=True)  # Add genre field
+    poster = models.ImageField(upload_to='posters/', blank=True, null=True)  # Add poster field
+    trailer = models.URLField(blank=True, null=True)  # Add trailer field
+    director = models.ForeignKey('Director', on_delete=models.CASCADE, related_name='movies', blank=True, null=True)  # Add director field
+    producer = models.ForeignKey('Producer', on_delete=models.CASCADE, related_name='movies', blank=True, null=True)
+    actors = models.ManyToManyField('Actor', related_name='movies', blank=True)  # Add actors field
+    
+    def get_genres(self):
+        return ", ".join([genre.name for genre in self.genre.all()]) if self.genre.exists() else "No genres"
+    
     def __str__(self):
         return self.title
-    def serialize(self):
-        return {
-            "id": self.id,
-            "title": self.title,
-            "description": self.description,
-            "release_date": self.release_date.isoformat(),
-            "rating": self.rating,
-            "created_at": self.created_at.isoformat(),
-            "genre": [genre.name for genre in self.genre.all()],
-        }
+   
 class Genre(models.Model):
     name = models.CharField(max_length=50, unique=True)
 
     def __str__(self):
         return self.name
 
-    def serialize(self):
-        return {
-            "id": self.id,
-            "name": self.name,
-        }
-    
 
 class Seat (models.Model):
     showtime = models.ForeignKey('Showtime', on_delete=models.CASCADE, related_name="seats")
     seat_number = models.CharField(max_length=10)
     is_booked = models.BooleanField(default=False)
-
+    price = models.DecimalField(max_digits=6, decimal_places=2, default=10.00)  # Add price field
     def __str__(self):
         return f"{self.showtime.movie.title} - Seat {self.seat_number}"
     
-    def serialize(self):
-        return {
-            "id": self.id,
-            "movie": self.showtime.movie.title,
-            "seat_number": self.seat_number,
-            "is_booked": self.is_booked,
-        }
-    
-
-
+  
 class Showtime(models.Model):
     movie = models.ForeignKey(Movie, on_delete=models.CASCADE, related_name="showtimes")
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
-    location = models.CharField(max_length=255, blank=True, null=True)  # Add location field
     is_VIP = models.BooleanField(default=False)  # Add is_VIP field
     thD_available = models.BooleanField(default=False)  # Add 3D_available field
     parking_available = models.BooleanField(default=False)  # Add parking_available field
     language = models.CharField(max_length=50, default='English')  # Add language field
+    auditorium = models.ForeignKey('Auditorium', on_delete=models.CASCADE, related_name='showtimes', blank=True, null=True)  # Add auditorium field
     def __str__(self):
         return f"{self.movie.title} - {self.start_time} to {self.end_time}"
-    def serialize(self):
-        return {
-            "id": self.id,
-            "movie": self.movie.title,
-            "start_time": self.start_time.isoformat(),
-            "end_time": self.end_time.isoformat(),
-            "location": self.location,
-            "is_VIP": self.is_VIP,
-            "thD_available": self.thD_available,
-            "parking_available": self.parking_available,
-            "language": self.language,
-        }
+    
     
 class Review(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="reviews")
@@ -100,19 +65,9 @@ class Review(models.Model):
     content = models.TextField()
     rating = models.FloatField(default=0.0)
     created_at = models.DateTimeField(auto_now_add=True)
-
     def __str__(self):
         return f"{self.user.username} - {self.movie.title} Review"
-    def serialize(self):
-        return {
-            "id": self.id,
-            "user": self.user.username,
-            "movie": self.movie.title,
-            "content": self.content,
-            "rating": self.rating,
-            "created_at": self.created_at.isoformat(),
-        }
-    
+   
 
 class Booking(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="bookings")
@@ -120,18 +75,10 @@ class Booking(models.Model):
     booking_date = models.DateTimeField(auto_now_add=True)
     seats = models.PositiveIntegerField(default=1)  # Add seats field
     created_at = models.DateTimeField(auto_now_add=True)
+    cost = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)  # Add cost field
     def __str__(self):
         return f"{self.user.username} booked {self.showtime.movie.title} on {self.booking_date}"
-    def serialize(self):
-        return {
-            "id": self.id,
-            "user": self.user.username,
-            "movie": self.showtime.movie.title,
-            "showtime": self.showtime.start_time.isoformat(),
-            "booking_date": self.booking_date.isoformat(),
-            "seats": self.seats,
-            "created_at": self.created_at.isoformat(),
-        }
+    
     
 class Notification(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="notifications")
@@ -141,15 +88,68 @@ class Notification(models.Model):
 
     def __str__(self):
         return f"Notification for {self.user.username}: {self.message}"
-    def serialize(self):
-        return {
-            "id": self.id,
-            "user": self.user.username,
-            "message": self.message,
-            "is_read": self.is_read,
-            "created_at": self.created_at.isoformat(),
-        }
-    
+   
 
 
     
+class Actor(models.Model):
+    name = models.CharField(max_length=100)
+    date_of_birth = models.DateField(blank=True, null=True)
+    biography = models.TextField(blank=True, null=True)
+    def __str__(self):
+        return self.name
+    
+class Director(models.Model):
+    name = models.CharField(max_length=100)
+    date_of_birth = models.DateField(blank=True, null=True)
+    biography = models.TextField(blank=True, null=True)
+    def __str__(self):
+        return self.name
+    
+class Producer(models.Model):
+    name = models.CharField(max_length=100)
+    date_of_birth = models.DateField(blank=True, null=True)
+    biography = models.TextField(blank=True, null=True)
+    def __str__(self):
+        return self.name
+    
+class Payment(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="payments")
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    payment_date = models.DateTimeField(auto_now_add=True)
+    payment_method = models.CharField(max_length=50)
+    status = models.CharField(max_length=20, choices=[('Pending', 'Pending'), ('Completed', 'Completed'), ('Failed', 'Failed')], default='Pending')
+
+    def __str__(self):
+        return f"{self.user.username} - {self.amount} on {self.payment_date}"
+    
+class watchlist(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="watchlists")
+    movie = models.ForeignKey(Movie, on_delete=models.CASCADE, related_name="watchlists")
+    added_at = models.DateTimeField(auto_now_add=True)  
+    def __str__(self):
+        return f"{self.user.username} - {self.movie.title} Watchlist"
+    
+
+class Role(models.Model):
+    actor = models.ForeignKey(Actor, on_delete=models.CASCADE, related_name='roles')
+    movie = models.ForeignKey(Movie, on_delete=models.CASCADE, related_name='roles')
+    character_name = models.CharField(max_length=100)
+    def __str__(self):
+        return f"{self.actor.name} as {self.character_name} in {self.movie.title}"
+    
+
+class Auditorium(models.Model):
+    name = models.CharField(max_length=100)
+    total_seats = models.PositiveIntegerField()
+    available_seats = models.PositiveIntegerField(default=0)
+    theater= models.ForeignKey('Theater', on_delete=models.CASCADE, related_name='auditorium', blank=True, null=True)  # Add theater field
+    def __str__(self):
+        return f"{self.name} - {self.location} ({self.total_seats} seats)"
+    
+class Theater(models.Model):
+    name = models.CharField(max_length=100)
+    location = models.CharField(max_length=255)
+    auditoriums = models.ManyToManyField(Auditorium, related_name='theaters', blank=True)
+    def __str__(self):
+        return f"{self.name} - {self.location}"

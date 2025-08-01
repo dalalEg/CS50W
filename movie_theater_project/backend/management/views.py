@@ -2,13 +2,26 @@ from django.http import HttpResponse
 from django.db import IntegrityError
 from django.shortcuts import render, redirect
 # Create your views here.
+from rest_framework import viewsets
+from django.utils import timezone
+from datetime import datetime
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
 from django.views.decorators.csrf import csrf_exempt
+from .permissions import IsAdminOrReadOnly, IsReviewOwnerOrReadOnly, IsBookingOwnerOrStaff, IsNotificationOwnerOrStaff
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.contrib.auth import authenticate, login, logout
-
-from .models import User, Movie, Booking, Showtime, Seat,Genre,Review,Notification
+from .serializers import( MovieSerializer, ShowtimeSerializer, SeatSerializer, 
+                         GenreSerializer, ReviewSerializer, NotificationSerializer,
+                         BookingSerializer, ActorSerializer, DirectorSerializer,
+                         ProducerSerializer, PaymentSerializer, WatchlistSerializer,
+                         RoleSerializer, TheaterSerializer,UserSerializer,AuditoriumSerializer)
+from rest_framework import serializers
+from django.shortcuts import get_object_or_404
+from .models import (User, Movie, Genre,Seat,Showtime,Review, 
+                     Notification,Booking,Actor,Director,Auditorium,Producer,Payment,watchlist,Role,Theater)
 
 def index(request):
     return render(request, 'management/index.html')
@@ -28,6 +41,8 @@ def login_view(request,user=None):
         if user is not None:
             login(request, user)
             # Redirect to a success page or the index page
+            if user.is_superuser:
+                return HttpResponseRedirect(reverse("admin:index"))
             return  render(request, 'management/index.html', {
                 'title': 'Home',
                 'name': user.username,
@@ -88,3 +103,100 @@ def register(request):
         return HttpResponseRedirect(reverse("index", args=(user.username,)))
     else:
         return render(request, "management/register.html")
+    
+
+
+
+
+
+
+
+
+
+ #API views (generic class-based or viewsets).
+class GenreViewSet(viewsets.ModelViewSet):
+    """ViewSet for managing genres."""
+    queryset = Genre.objects.all()
+    serializer_class = GenreSerializer
+    permission_classes = [IsAdminOrReadOnly]
+
+class ActorViewSet(viewsets.ModelViewSet):
+    """ViewSet for managing actors."""
+    queryset = Actor.objects.all()
+    serializer_class = ActorSerializer
+    permission_classes = [IsAdminOrReadOnly]
+
+class DirectorViewSet(viewsets.ModelViewSet):
+    """ViewSet for managing directors."""
+    queryset = Director.objects.all()
+    serializer_class = DirectorSerializer
+    permission_classes = [IsAdminOrReadOnly]
+
+class ProducerViewSet(viewsets.ModelViewSet):
+    """ViewSet for managing producers."""
+    queryset = Producer.objects.all()
+    serializer_class = ProducerSerializer
+    permission_classes = [IsAdminOrReadOnly]
+
+class RoleViewSet(viewsets.ModelViewSet):
+    """ViewSet for managing roles."""
+    queryset = Role.objects.all()
+    serializer_class = RoleSerializer
+    permission_classes = [IsAdminOrReadOnly]
+
+class MovieViewSet(viewsets.ModelViewSet):
+    """ViewSet for managing movies."""
+    queryset = Movie.objects.all()
+    serializer_class = MovieSerializer
+    permission_classes = [IsAdminOrReadOnly]
+class SeatViewSet(viewsets.ModelViewSet):
+    """ViewSet for managing seats."""
+    queryset = Seat.objects.all()
+    serializer_class = SeatSerializer
+    permission_classes = [IsAdminOrReadOnly]
+class TheaterViewSet(viewsets.ModelViewSet):
+    """ViewSet for managing theaters."""
+    queryset = Theater.objects.all()
+    serializer_class = TheaterSerializer
+    permission_classes = [IsAdminOrReadOnly]
+
+class AuditoriumViewSet(viewsets.ModelViewSet):
+    """ViewSet for managing auditoriums."""
+    queryset = Auditorium.objects.all()
+    serializer_class = AuditoriumSerializer
+    permission_classes = [IsAdminOrReadOnly]
+
+class ShowtimeViewSet(viewsets.ModelViewSet):
+    """ViewSet for managing showtimes."""
+    queryset = Showtime.objects.all()
+    serializer_class = ShowtimeSerializer
+    permission_classes = [IsAdminOrReadOnly]
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_staff:
+            return Showtime.objects.all()
+        return Showtime.objects.filter(showtime__gte=datetime.now())
+
+class ReviewViewSet(viewsets.ModelViewSet):
+    queryset = Review.objects.all()
+    serializer_class = ReviewSerializer
+    permission_classes = [IsReviewOwnerOrReadOnly]
+
+class NotificationViewSet(viewsets.ModelViewSet):
+    """ViewSet for managing notifications."""
+    queryset = Notification.objects.all()
+    serializer_class = NotificationSerializer
+    permission_classes = [IsNotificationOwnerOrStaff]
+
+
+class BookingViewSet(viewsets.ModelViewSet):
+    """ViewSet for managing bookings."""
+    queryset = Booking.objects.all()
+    permission_classes = [IsBookingOwnerOrStaff]
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_staff:
+           return Booking.objects.all()
+        return Booking.objects.filter(user=user)
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
