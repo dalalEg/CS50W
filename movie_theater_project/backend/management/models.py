@@ -56,7 +56,9 @@ class Showtime(models.Model):
     language = models.CharField(max_length=50, default='English')  # Add language field
     auditorium = models.ForeignKey('Auditorium', on_delete=models.CASCADE, related_name='showtimes', blank=True, null=True)  # Add auditorium field
     def __str__(self):
-        return f"{self.movie.title} - {self.start_time} to {self.end_time}"
+        start = self.start_time.strftime("%Y-%m-%d %H:%M:%S")
+        end = self.end_time.strftime("%Y-%m-%d %H:%M:%S")
+        return f"{self.movie.title} - {start} to {end}"
     
     
 class Review(models.Model):
