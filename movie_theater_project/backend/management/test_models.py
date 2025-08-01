@@ -7,7 +7,6 @@ from datetime import timedelta
 from django.utils.timezone import make_aware, datetime
 # Define the User model for testing
 # Ensure you have the correct User model imported
-
 User = get_user_model()
 class UserModelTest(TestCase):
     """Test case for User model."""
@@ -219,3 +218,70 @@ class BookingModelTest(TestCase):
         self.assertEqual(str(booking), f"{self.user.username} booked {self.movie.title} on {booking.booking_date}")
 
 
+class RoleModelTest(TestCase):
+    """Test case for Role model."""
+    def setUp(self):
+        """Create a role instance for testing."""
+        self.actor = Actor.objects.create(name="Leonardo DiCaprio")
+        self.movie = Movie.objects.create(title="Inception", description="A mind-bending thriller.", release_date="2024-01-01")
+        self.role = Role.objects.create(character_name="Protagonist", actor=self.actor, movie=self.movie)
+
+    def test_role_creation(self):
+        """Test that the role is created with the correct attributes."""
+        self.assertEqual(self.role.character_name, "Protagonist")
+        self.assertEqual(self.role.actor, self.actor)
+        self.assertEqual(self.role.movie, self.movie)
+
+    def test_role_str(self):
+        """Test the string representation of the role."""
+        self.assertEqual(str(self.role),f"{self.actor.name} as {self.role.character_name} in {self.movie.title}")
+
+class TheaterModelTest(TestCase):
+    """Test case for Theater model."""
+    def setUp(self):
+        """Create a theater instance for testing."""
+        self.audittoriums =[ Auditorium.objects.create(name="Main Auditorium", total_seats=200),
+                            Auditorium.objects.create(name="VIP Auditorium", total_seats=100) ]
+        self.theater = Theater.objects.create(name="Cineplex", location="Downtown")
+        self.theater.auditoriums.set(self.audittoriums)  # Set the many-to-many relationship
+    def test_theater_creation(self):
+        """Test that the theater is created with the correct attributes."""
+        self.assertEqual(self.theater.name, "Cineplex")
+        self.assertEqual(self.theater.location, "Downtown")
+        self.assertEqual(self.theater.auditoriums.count(), 2)
+        self.assertIn(self.audittoriums[0], self.theater.auditoriums.all())
+        self.assertIn(self.audittoriums[1], self.theater.auditoriums.all())
+    def test_theater_str(self):
+        """Test the string representation of the theater."""
+        self.assertEqual(str(self.theater), "Cineplex - Downtown")
+
+class NotificationModelTest(TestCase):
+    """Test case for Notification model."""
+    def setUp(self):
+        """Create a notification instance for testing."""
+        self.user = User.objects.create_user(username="dalal", password="test123")
+        self.notification = Notification.objects.create(user=self.user, message="Your booking is confirmed.")
+    def test_notification_creation(self):
+        """Test that the notification is created with the correct attributes."""
+        self.assertEqual(self.notification.user, self.user)
+        self.assertEqual(self.notification.message, "Your booking is confirmed.")
+        self.assertFalse(self.notification.is_read)
+    def test_notification_str(self):
+        """Test the string representation of the notification."""
+        self.assertEqual(str(self.notification), f"Notification for {self.user.username}: Your booking is confirmed.")
+
+
+class AuditoriumModelTest(TestCase):
+    """Test case for Auditorium model."""
+    def setUp(self):    
+        """Create an auditorium instance for testing."""
+        self.theater = Theater.objects.create(name="Cineplex", location="Downtown")
+        self.auditorium = Auditorium.objects.create(name="Main Auditorium", total_seats=200, theater=self.theater)
+    def test_auditorium_creation(self):
+        """Test that the auditorium is created with the correct attributes."""
+        self.assertEqual(self.auditorium.name, "Main Auditorium")
+        self.assertEqual(self.auditorium.total_seats, 200)
+        self.assertEqual(self.auditorium.theater, self.theater)      
+    def test_auditorium_str(self):
+        """Test the string representation of the auditorium."""
+        self.assertEqual(str(self.auditorium), "Main Auditorium - Downtown (200 seats)")

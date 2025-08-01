@@ -112,7 +112,6 @@ def register(request):
 
 
 
-
  #API views (generic class-based or viewsets).
 class GenreViewSet(viewsets.ModelViewSet):
     """ViewSet for managing genres."""

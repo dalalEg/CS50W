@@ -147,7 +147,7 @@ class Auditorium(models.Model):
     available_seats = models.PositiveIntegerField(default=0)
     theater= models.ForeignKey('Theater', on_delete=models.CASCADE, related_name='auditorium', blank=True, null=True)  # Add theater field
     def __str__(self):
-        return f"{self.name} - {self.location} ({self.total_seats} seats)"
+        return f"{self.name} - {self.theater.location} ({self.total_seats} seats)"
     
 class Theater(models.Model):
     name = models.CharField(max_length=100)
