@@ -5,10 +5,10 @@ from django.shortcuts import render, redirect
 from rest_framework import viewsets
 from django.utils import timezone
 from datetime import datetime
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, action
 from rest_framework.response import Response
 from django.views.decorators.csrf import csrf_exempt
-from .permissions import IsAdminOrReadOnly, IsReviewOwnerOrReadOnly, IsBookingOwnerOrStaff, IsNotificationOwnerOrStaff
+from .permissions import IsAdminOrReadOnly, IsReviewOwnerOrReadOnly,IsAuthenticated, IsBookingOwnerOrStaff, IsNotificationOwnerOrStaff
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
 from django.urls import reverse
@@ -148,6 +148,15 @@ class MovieViewSet(viewsets.ModelViewSet):
     queryset = Movie.objects.all()
     serializer_class = MovieSerializer
     permission_classes = [IsAdminOrReadOnly]
+    @action(detail=False, methods=['get'], url_path='popular')
+    def get_popular_movies(self, request):
+        """Custom action to get popular movies."""
+        popular_movies = Movie.objects.filter(rating__gte=4.0).order_by('-rating')[:10]
+        serializer = self.get_serializer(popular_movies, many=True)
+        return Response(serializer.data)
+
+
+
 class SeatViewSet(viewsets.ModelViewSet):
     """ViewSet for managing seats."""
     queryset = Seat.objects.all()
@@ -174,7 +183,7 @@ class ShowtimeViewSet(viewsets.ModelViewSet):
         user = self.request.user
         if user.is_staff:
             return Showtime.objects.all()
-        return Showtime.objects.filter(showtime__gte=datetime.now())
+        return Showtime.objects.filter(start_time__gte=timezone.now())
 
 class ReviewViewSet(viewsets.ModelViewSet):
     queryset = Review.objects.all()
@@ -185,13 +194,16 @@ class NotificationViewSet(viewsets.ModelViewSet):
     """ViewSet for managing notifications."""
     queryset = Notification.objects.all()
     serializer_class = NotificationSerializer
-    permission_classes = [IsNotificationOwnerOrStaff]
+    permission_classes = [IsNotificationOwnerOrStaff, IsAuthenticated]
+    def perform_create(self, serializer):       
+        serializer.save(user=self.request.user)  
 
 
 class BookingViewSet(viewsets.ModelViewSet):
     """ViewSet for managing bookings."""
     queryset = Booking.objects.all()
-    permission_classes = [IsBookingOwnerOrStaff]
+    serializer_class = BookingSerializer
+    permission_classes = [IsBookingOwnerOrStaff, IsAuthenticated]
     def get_queryset(self):
         user = self.request.user
         if user.is_staff:

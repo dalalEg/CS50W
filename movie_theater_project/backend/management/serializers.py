@@ -19,18 +19,18 @@ class GenreSerializer(serializers.ModelSerializer):
 class ActorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Actor
-        fields = ['id', 'name', 'bio', 'photo']
+        fields = ['id', 'name', 'biography']
 
 
 class DirectorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Director
-        fields = ['id', 'name', 'bio', 'photo']
+        fields = ['id', 'name', 'biography']
 
 class ProducerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Producer
-        fields = ['id', 'name', 'bio', 'photo']
+        fields = ['id', 'name', 'biography', ]
 
 class MovieSerializer(serializers.ModelSerializer):
     genre = GenreSerializer(many=True, read_only=True)
@@ -51,24 +51,29 @@ class TheaterSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'location']
 
 class AuditoriumSerializer(serializers.ModelSerializer):
-    theater = TheaterSerializer(read_only=True)
     class Meta:
         model = Auditorium
-        fields = ['id', 'name', 'theater', 'capacity']
+        fields = ['id', 'name', 'theater', 'total_seats']
+
 class ShowtimeSerializer(serializers.ModelSerializer):
     movie = MovieSerializer(read_only=True)
-    auditorium = AuditoriumSerializer(read_only=True)
+    auditorium = AuditoriumSerializer(read_only=True)  # for reading
+
+    # To allow POST/PUT, use a writable field as well:
+    auditorium_id = serializers.PrimaryKeyRelatedField(
+        source='auditorium', queryset=Auditorium.objects.all(), write_only=True
+    )
+
     class Meta:
         model = Showtime
         fields = [
             'id', 'movie', 'start_time', 'end_time',
-            'location', 'is_VIP', 'thD_available',
-            'parking_available', 'language'
+            'parking_available', 'thD_available', 'language',
+            'is_VIP', 'auditorium', 'auditorium_id'
         ]
 
-
 class SeatSerializer(serializers.ModelSerializer):
-    showtime = ShowtimeSerializer(read_only=True)
+    showtime = serializers.PrimaryKeyRelatedField(queryset=Showtime.objects.all())
 
     class Meta:
         model = Seat
@@ -80,16 +85,19 @@ class ReviewSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Review
-        fields = ['id', 'user', 'movie', 'rating', 'content', 'created_at', 'cost']
+        fields = ['id', 'user', 'movie', 'rating', 'content', 'created_at']
 
 
 class BookingSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
-    showtime = ShowtimeSerializer(read_only=True)
-
+    showtime = serializers.PrimaryKeyRelatedField(queryset=Showtime.objects.all())
+  
     class Meta:
         model = Booking
-        fields = ['id', 'user', 'showtime', 'seats', 'booking_date', 'created_at']
+        fields = '__all__'
+        extra_kwargs = {
+            'user': {'read_only': True},  # user is set in view
+        }
 
 
 class NotificationSerializer(serializers.ModelSerializer):
@@ -116,9 +124,9 @@ class WatchlistSerializer(serializers.ModelSerializer):
         fields = ['id', 'user', 'movie', 'added_at']
 
 class RoleSerializer(serializers.ModelSerializer):
-    actor = ActorSerializer(read_only=True)
-    movie = MovieSerializer(read_only=True)
+    actor = serializers.PrimaryKeyRelatedField(queryset=Actor.objects.all())
+    movie = serializers.PrimaryKeyRelatedField(queryset=Movie.objects.all())
     class Meta:
         model = Role
-        fields = ['id', 'actor', 'movie', 'character_name']
+        fields = ['id', 'character_name', 'actor', 'movie']
 
