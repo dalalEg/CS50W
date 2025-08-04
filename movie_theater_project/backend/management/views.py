@@ -5,7 +5,8 @@ from django.shortcuts import render, redirect
 from rest_framework import viewsets
 from django.utils import timezone
 from datetime import datetime
-from rest_framework.decorators import api_view, action
+from rest_framework.decorators import api_view, action,permission_classes
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from django.views.decorators.csrf import csrf_exempt
 from .permissions import IsAdminOrReadOnly, IsReviewOwnerOrReadOnly,IsAuthenticated, IsBookingOwnerOrStaff, IsNotificationOwnerOrStaff
@@ -105,12 +106,54 @@ def register(request):
         return render(request, "management/register.html")
     
 
+#API views (login and register).
+@api_view(['POST'])
+def api_login(request):
+    """API endpoint for user login."""
+    username = request.data.get('username')
+    password = request.data.get('password')
+    if not username or not password:
+        return Response({'error': 'Username and password are required.'}, status=400)
+    user = authenticate(request, username=username, password=password)
+    if user is not None:
+        login(request, user)
+        return Response({'message': 'Login successful.'})
+    else:
+        return Response({'error': 'Invalid username or password.'}, status=401)
 
+@api_view(['POST'])
+def api_register(request):
+    """API endpoint for user registration."""
+    username = request.data.get('username')
+    email = request.data.get('email')
+    password = request.data.get('password')
+    confirmation = request.data.get('confirmation')
+    if not username or not email or not password or not confirmation:
+        return Response({'error': 'All fields are required.'}, status=400)
+    if password != confirmation:
+        return Response({'error': 'Passwords must match.'}, status=400)
+    if User.objects.filter(username=username).exists():
+        return Response({'error': 'Username already taken.'}, status=400)
+    if User.objects.filter(email=email).exists():
+        return Response({'error': 'Email already taken.'}, status=400)
+    user = User.objects.create_user(username=username, email=email, password=password)
+    login(request, user)
+    return Response({'message': 'Registration successful.'})
 
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def api_logout(request):
+    """API endpoint for user logout."""
+    logout(request)
+    return Response({'message': 'Logout successful.'}, status=204)
 
-
-
-
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def api_user_profile(request):
+    """API endpoint to get the authenticated user's profile."""
+    user = request.user
+    serializer = UserSerializer(user)
+    return Response(serializer.data)
 
  #API views (generic class-based or viewsets).
 class GenreViewSet(viewsets.ModelViewSet):

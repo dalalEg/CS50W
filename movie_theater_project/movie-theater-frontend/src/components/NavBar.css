@@ -1,0 +1,25 @@
+.navbar {
+  display: flex;
+  align-items: center;
+  padding: .75rem 1.5rem;
+  background-color: #333;
+  color: #fff;
+}
+
+/* brand link on the left */
+.navbar .navbar-link {
+  font-size: 1.25rem;
+  text-decoration: none;
+  color: #fff;
+  margin-right: 2rem;
+}
+
+/* wrapper for all the other links */
+.navbar .navbar-links {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  /* if you want them pushed to the right: */
+  margin-left: auto;
+}
+

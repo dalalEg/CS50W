@@ -41,9 +41,12 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'management',  # Include the management app
     'rest_framework', # Django REST framework for API support
+    'corsheaders',  # For handling CORS
+
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',  # Middleware for CORS
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -58,6 +61,22 @@ REST_FRAMEWORK = {
     ]
 }
 
+MEDIA_ROOT = BASE_DIR / "media"
+MEDIA_URL  = "/media/"
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",  # React dev server
+]
+# Trust the React origin for CSRF purposes
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:3000",
+]
+CSRF_COOKIE_SECURE = False
+SESSION_COOKIE_SECURE = False
+CSRF_COOKIE_SAMESITE = None
+SESSION_COOKIE_SAMESITE = None
+# In development, allow all origins for CORS
+CORS_ALLOW_CREDENTIALS = True  # Allow cookies to be included in CORS requests
 ROOT_URLCONF = 'movie_theater.urls'
 
 TEMPLATES = [

@@ -1,10 +1,10 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-
+from rest_framework import routers
 from . import views 
 
 # Create a router and register our viewsets with it.
-router = DefaultRouter()
+router = routers.DefaultRouter()
 router.register(r'movies', views.MovieViewSet)
 router.register(r'showtimes', views.ShowtimeViewSet)
 router.register(r'genres', views.GenreViewSet)
@@ -25,6 +25,10 @@ urlpatterns = [
     path ('login/', views.login_view, name='login'),
     path('logout/', views.logout_view, name='logout'),
     path('register/', views.register, name='register'),
+    path('api/auth/login/',   views.api_login,        name='api-login'),
+    path('api/auth/logout/',  views.api_logout,       name='api-logout'),
+    path('api/auth/user/',    views.api_user_profile, name='api-current-user'),
+    path('api/auth/register/', views.api_register, name='api-register'),
     path('api/', include(router.urls)),  # Include the API URLs
 
 ]
