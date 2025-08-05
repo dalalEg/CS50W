@@ -4,6 +4,7 @@ from .models import (
     Genre, Review, Notification, Actor, Director,Producer, Payment,
     watchlist, Role, Auditorium, Theater
 )
+from rest_framework.validators import UniqueValidator
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -15,22 +16,29 @@ class GenreSerializer(serializers.ModelSerializer):
         model = Genre
         fields = ['id', 'name']
 
-
 class ActorSerializer(serializers.ModelSerializer):
+    name = serializers.CharField(
+      validators=[UniqueValidator(queryset=Actor.objects.all())]
+    )
     class Meta:
         model = Actor
-        fields = ['id', 'name', 'biography']
-
+        fields = ['id','name','date_of_birth','biography']
 
 class DirectorSerializer(serializers.ModelSerializer):
+    name = serializers.CharField(
+      validators=[UniqueValidator(queryset=Director.objects.all())]
+    )
     class Meta:
         model = Director
-        fields = ['id', 'name', 'biography']
+        fields = ['id','name','date_of_birth','biography']
 
 class ProducerSerializer(serializers.ModelSerializer):
+    name = serializers.CharField(
+      validators=[UniqueValidator(queryset=Producer.objects.all())]
+    )
     class Meta:
         model = Producer
-        fields = ['id', 'name', 'biography', ]
+        fields = ['id','name','date_of_birth','biography']
 
 class MovieSerializer(serializers.ModelSerializer):
     genre_list = serializers.SerializerMethodField()
@@ -38,6 +46,7 @@ class MovieSerializer(serializers.ModelSerializer):
     actors = ActorSerializer(many=True, read_only=True)
     producer = ProducerSerializer(read_only=True)
     poster = serializers.ImageField(use_url=True, required=False)
+
     class Meta:
         model = Movie
         fields = [

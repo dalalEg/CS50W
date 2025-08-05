@@ -12,7 +12,7 @@ class User(AbstractUser):
         return self.username
 
 class Movie(models.Model):
-    title = models.CharField(max_length=255)
+    title = models.CharField(max_length=255, unique=True)
     description = models.TextField()
     release_date = models.DateField()
     rating = models.FloatField(default=0.0)
@@ -95,21 +95,21 @@ class Notification(models.Model):
 
     
 class Actor(models.Model):
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, unique=True)
     date_of_birth = models.DateField(blank=True, null=True)
     biography = models.TextField(blank=True, null=True)
     def __str__(self):
         return self.name
     
 class Director(models.Model):
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, unique=True)
     date_of_birth = models.DateField(blank=True, null=True)
     biography = models.TextField(blank=True, null=True)
     def __str__(self):
         return self.name
     
 class Producer(models.Model):
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, unique=True)
     date_of_birth = models.DateField(blank=True, null=True)
     biography = models.TextField(blank=True, null=True)
     def __str__(self):
@@ -152,6 +152,5 @@ class Auditorium(models.Model):
 class Theater(models.Model):
     name = models.CharField(max_length=100)
     location = models.CharField(max_length=255)
-    auditoriums = models.ManyToManyField(Auditorium, related_name='theaters', blank=True)
     def __str__(self):
         return f"{self.name} - {self.location}"

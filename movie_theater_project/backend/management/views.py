@@ -3,6 +3,7 @@ from django.db import IntegrityError
 from django.shortcuts import render, redirect
 # Create your views here.
 from rest_framework import viewsets
+from django_filters.rest_framework import DjangoFilterBackend
 from django.utils import timezone
 from datetime import datetime
 from rest_framework.decorators import api_view, action,permission_classes
@@ -197,8 +198,11 @@ class MovieViewSet(viewsets.ModelViewSet):
         popular_movies = Movie.objects.filter(rating__gte=4.0).order_by('-rating')[:10]
         serializer = self.get_serializer(popular_movies, many=True)
         return Response(serializer.data)
-
-
+    @action(detail=True, methods=['get'], url_path='showtimes')
+    def showtimes(self, request, pk=None):
+        shows = Showtime.objects.filter(movie_id=pk)
+        serializer = ShowtimeSerializer(shows, many=True)
+        return Response(serializer.data)
 
 class SeatViewSet(viewsets.ModelViewSet):
     """ViewSet for managing seats."""
@@ -222,11 +226,15 @@ class ShowtimeViewSet(viewsets.ModelViewSet):
     queryset = Showtime.objects.all()
     serializer_class = ShowtimeSerializer
     permission_classes = [IsAdminOrReadOnly]
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['movie']
     def get_queryset(self):
         user = self.request.user
         if user.is_staff:
             return Showtime.objects.all()
         return Showtime.objects.filter(start_time__gte=timezone.now())
+    
+ 
 
 class ReviewViewSet(viewsets.ModelViewSet):
     queryset = Review.objects.all()
