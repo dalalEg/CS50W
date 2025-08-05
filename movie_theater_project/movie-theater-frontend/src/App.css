@@ -1,6 +1,6 @@
 .App {
   text-align: center;
-  background-color: #282c34;
+  background-color: #b030cd;
 }
 
 .App-logo {
@@ -38,6 +38,6 @@
   }
 }
 
-.Route {
+.Routes {
   margin: 20px;
 }

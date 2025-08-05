@@ -63,7 +63,7 @@ function MovieDetail() {
           {movie.actors.map(a => a.name).join(', ')}
         </p>
 
-        <p><strong>Showtimes:</strong></p>
+        <p><strong>Available Showtimes:</strong></p>
         <ul>
           {showtimes.length === 0 ? (
             <li>No showtimes available</li>

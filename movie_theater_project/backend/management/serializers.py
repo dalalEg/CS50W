@@ -64,7 +64,7 @@ class TheaterSerializer(serializers.ModelSerializer):
 class AuditoriumSerializer(serializers.ModelSerializer):
     class Meta:
         model = Auditorium
-        fields = ['id', 'name', 'theater', 'total_seats']
+        fields = ['id', 'name', 'theater', 'total_seats', 'available_seats']
 
 class ShowtimeSerializer(serializers.ModelSerializer):
     movie = MovieSerializer(read_only=True)

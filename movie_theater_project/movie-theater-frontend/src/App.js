@@ -14,7 +14,7 @@ import Login       from './components/Login';
 import Register    from './components/Register';
 import Profile     from './components/Profile';
 import { api }     from './api/axios';
-
+import  ShowtimeList from './components/ShowtimeList';
 // Main App component
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -60,9 +60,9 @@ function App() {
         username={username}
         onLogout={handleLogout}
       />
-
-      <main className="container mt-4">
-        <Routes>
+         
+      <main className="container mt-4 ">
+        <Routes className="Routes">
           <Route path="/"            element={<MovieList />} />
           <Route path="/movies/:id"  element={<MovieDetail />} />
           <Route path="/login"       element={<Login onLogin={() => setIsAuthenticated(true)} />} />
@@ -76,6 +76,8 @@ function App() {
             }
           />
           <Route path="*"            element={<h2>Page not found</h2>} />
+          <Route path="/showtimes" element={<ShowtimeList />} />
+          {/* <Route path="/showtimes/:id" element={<ShowtimeList />} /> */}
         </Routes>
       </main>
     </Router>

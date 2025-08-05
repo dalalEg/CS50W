@@ -226,15 +226,19 @@ class ShowtimeViewSet(viewsets.ModelViewSet):
     queryset = Showtime.objects.all()
     serializer_class = ShowtimeSerializer
     permission_classes = [IsAdminOrReadOnly]
-    filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['movie']
+
     def get_queryset(self):
         user = self.request.user
         if user.is_staff:
             return Showtime.objects.all()
-        return Showtime.objects.filter(start_time__gte=timezone.now())
-    
- 
+        return Showtime.objects.all()
+    @action(detail=False, methods=['get'], url_path='seats')
+    def get_seats(self, request, pk=None):
+        """Custom action to get seats for a specific showtime."""
+        showtime = get_object_or_404(Showtime, pk=pk)
+        seats = Seat.objects.filter(showtime=showtime)
+        serializer = SeatSerializer(seats, many=True)
+        return Response(serializer.data)
 
 class ReviewViewSet(viewsets.ModelViewSet):
     queryset = Review.objects.all()
