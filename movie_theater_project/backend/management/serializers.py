@@ -62,6 +62,7 @@ class TheaterSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'location']
 
 class AuditoriumSerializer(serializers.ModelSerializer):
+    theater = TheaterSerializer(read_only=True)  # for reading
     class Meta:
         model = Auditorium
         fields = ['id', 'name', 'theater', 'total_seats', 'available_seats']

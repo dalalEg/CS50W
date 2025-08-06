@@ -1,0 +1,53 @@
+.seat-section {
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 1rem;
+  margin: 2rem 0;       /* push it away from the fields above */
+}
+
+/* make each seat a fixed square so it can’t stretch and overlap */
+.seat-map {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  gap: 8px;
+  margin: 1rem 0;
+}
+.showtime-detail {
+  font-family: 'Arial', sans-serif;
+  color: #333;
+  padding: 1rem;
+  background: #c8eaea;
+  border-radius: 8px;
+}
+
+.seat {
+  aspect-ratio: 1;         /* keep square */
+  padding: 0;
+  border: 1px solid #ccc;
+  background: #fafafa;
+  cursor: pointer;
+}
+
+.seat:hover {
+  transform: scale(1.05);
+}
+
+.seat.available:hover {
+  background: #e0f7fa;
+}
+
+.seat.selected {
+  background: #80deea;
+}
+
+.seat.booked {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.seat-price {
+  display: block;
+  font-size: 0.75rem;
+  color: #555;
+}

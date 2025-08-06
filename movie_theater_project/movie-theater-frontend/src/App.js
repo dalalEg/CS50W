@@ -15,6 +15,7 @@ import Register    from './components/Register';
 import Profile     from './components/Profile';
 import { api }     from './api/axios';
 import  ShowtimeList from './components/ShowtimeList';
+import ShowtimeDetail from './components/ShowtimeDatail';
 // Main App component
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -77,7 +78,7 @@ function App() {
           />
           <Route path="*"            element={<h2>Page not found</h2>} />
           <Route path="/showtimes" element={<ShowtimeList />} />
-          {/* <Route path="/showtimes/:id" element={<ShowtimeList />} /> */}
+          <Route path="/showtimes/:id" element={<ShowtimeDetail />} />
         </Routes>
       </main>
     </Router>

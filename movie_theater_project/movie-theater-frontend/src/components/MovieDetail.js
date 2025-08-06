@@ -73,6 +73,9 @@ function MovieDetail() {
                 {new Date(st.start_time).toLocaleString()} –{' '}
                 {st.auditorium?.name || 'Unknown auditorium'} –{' '}
                 {st.auditorium.available_seats} seats available
+                <Link to={`/showtimes/${st.id}`} className="showtime-link">
+                  Click For More Details
+                </Link>
               </li>
             ))
           )}
