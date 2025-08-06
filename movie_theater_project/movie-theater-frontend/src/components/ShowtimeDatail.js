@@ -1,18 +1,19 @@
-import React, { useEffect, useState } from 'react';
+import React, { use, useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { fetchShowtimeById } from '../api/showtimes';
 import { fetchSeats } from '../api/seats';
+import { useNavigate } from 'react-router-dom';
 import { createBooking } from '../api/booking';
 import './ShowtimeDetail.css';
 
 function ShowtimeDetail() {
   const { id } = useParams();
-  const [showtime, setShowtime] = useState(null);
-  const [seats, setSeats] = useState([]);
-  const [selectedSeats, setSelectedSeats] = useState([]);
-  const [error, setError] = useState(null);
-
-  const onSeatSelect = (selected) => setSelectedSeats(selected);
+  const [seats, setSeats]               = useState([]);
+  const [selected, setSelected]         = useState([]);
+  const [bookingResult, setBookingResult] = useState(null);
+  const [error, setError]               = useState(null);
+  const [showtime, setShowtime]         = useState(null);
+  const navigate = useNavigate();            // ← hook at top
 
   useEffect(() => {
     fetchShowtimeById(id)
@@ -21,31 +22,32 @@ function ShowtimeDetail() {
   }, [id]);
 
   useEffect(() => {
-    fetchSeats(id)
-      .then(res => setSeats(res.data))
-      .catch(err => console.error("Error loading seats", err));
+    fetchSeats(id).then(r => setSeats(r.data));
   }, [id]);
 
-  const toggleSelect = (seat) => {
+  const toggleSelect = seat => {
     if (seat.is_booked) return;
-
-    const updated = selectedSeats.includes(seat.id)
-      ? selectedSeats.filter(id => id !== seat.id)
-      : [...selectedSeats, seat.id];
-
-    setSelectedSeats(updated);
-    onSeatSelect(updated);
+    setSelected(sel =>
+      sel.includes(seat.id) ? sel.filter(x => x !== seat.id) : [...sel, seat.id]
+    );
   };
 
-  const handleBooking = () => {
-    createBooking(id, selectedSeats)
-      .then(() => {
-        alert(`Successfully booked ${selectedSeats.length} seat(s)!`);
-        fetchSeats(id).then(r => setSeats(r.data));
-        setSelectedSeats([]);
-      })
-      .catch(() => setError('Booking failed'));
+  // sum up prices
+  const selectedSeatObjs = seats.filter(s => selected.includes(s.id));
+  const totalCost = selectedSeatObjs
+  .map(seat => seat.price)
+  .reduce((sum, price) => sum + Number(price), 0); 
+
+  const handlePrepareBooking = () => {
+    if (selectedSeatObjs.length === 0) {
+      setError("Please select at least one seat to book.");
+      return;
+    }
+    navigate('/booking', {
+      state: { showtimeId: id, seats: selectedSeatObjs }
+    });
   };
+
 
   if (error) return <p className="error">{error}</p>;
   if (!showtime) return <p className="loading">Loading…</p>;
@@ -64,32 +66,59 @@ function ShowtimeDetail() {
         <p><strong>3D:</strong> {showtime.thD_available ? 'Yes' : 'No'} | <strong>Parking:</strong> {showtime.parking_available ? 'Yes' : 'No'}</p>
       </div>
 
-      <div className="seat-section">
-        <h4 className="mb-2">Select Your Seats</h4>
-        <div className="seat-map">
-          {seats.map(seat => (
-            <button
-              key={seat.id}
-              className={`seat ${seat.is_booked ? 'booked' : selectedSeats.includes(seat.id) ? 'selected' : 'available'}`}
-              onClick={() => toggleSelect(seat)}
-              disabled={seat.is_booked}
-            >
-              {seat.seat_number}
-              <br />
-              <span className="seat-price">${seat.price}</span>
-            </button>
-          ))}
-        </div>
-        <div className="mt-3">
+      <h4>Select Your Seats</h4>
+      <div className="seat-map">
+        {seats.map(seat => (
           <button
-            className="btn btn-primary"
-            disabled={selectedSeats.length === 0}
-            onClick={handleBooking}
+            key={seat.id}
+            className={`seat ${seat.is_booked ? 'booked' : selected.includes(seat.id) ? 'selected' : 'available'}`}
+            onClick={() => toggleSelect(seat)}
+            disabled={seat.is_booked}
           >
-            Book {selectedSeats.length} Seat{selectedSeats.length !== 1 && 's'}
+            {seat.seat_number}
+            <br />
+            <span className="seat-price">${seat.price}</span>
           </button>
-        </div>
+        ))}
       </div>
+
+      {/* price table */}
+      {selectedSeatObjs.length > 0 && (
+        <table className="price-table">
+          <thead>
+            <tr><th>Seat</th><th>Price</th></tr>
+          </thead>
+          <tbody>
+            {selectedSeatObjs.map(s => (
+              <tr key={s.id}>
+                <td>{s.seat_number}</td>
+                <td>${s.price}</td>
+              </tr>
+            ))}
+            <tr className="total">
+              <td><strong>Total</strong></td>
+              <td><strong>${totalCost}</strong></td>
+            </tr>
+          </tbody>
+        </table>
+      )}
+
+      {/* book button */}
+      <button
+        className="btn btn-primary"
+        disabled={selectedSeatObjs.length === 0}
+        onClick={handlePrepareBooking}
+      >
+        Book {selectedSeatObjs.length} Seat{selectedSeatObjs.length > 1 && 's'}
+      </button>
+
+      {/* show saved booking cost */}
+      {bookingResult && (
+        <p className="booking-success">
+          Booking #{bookingResult.id} created. Total cost: $
+          {bookingResult.cost}
+        </p>
+      )}
     </div>
   );
 }

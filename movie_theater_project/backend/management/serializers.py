@@ -5,7 +5,7 @@ from .models import (
     watchlist, Role, Auditorium, Theater
 )
 from rest_framework.validators import UniqueValidator
-
+from django.db import transaction
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
@@ -99,18 +99,27 @@ class ReviewSerializer(serializers.ModelSerializer):
         model = Review
         fields = ['id', 'user', 'movie', 'rating', 'content', 'created_at']
 
-
 class BookingSerializer(serializers.ModelSerializer):
-    user = UserSerializer(read_only=True)
-    showtime = serializers.PrimaryKeyRelatedField(queryset=Showtime.objects.all())
-  
-    class Meta:
-        model = Booking
-        fields = '__all__'
-        extra_kwargs = {
-            'user': {'read_only': True},  # user is set in view
-        }
+    seat_ids = serializers.ListField(child=serializers.IntegerField(), write_only=True)
 
+    class Meta:
+        model  = Booking
+        fields = ['id','showtime','seat_ids','seats','cost','created_at']
+        read_only_fields = ['seats','cost']
+
+    def create(self, validated_data):
+        ids   = validated_data.pop('seat_ids')
+        seats = list(Seat.objects.filter(id__in=ids))
+        total = sum(s.price for s in seats)
+        # create the booking with both count and cost
+        booking = Booking.objects.create(
+            **validated_data,
+            seats=len(seats),
+            cost=total
+        )
+        # mark them booked
+        Seat.objects.filter(id__in=ids).update(is_booked=True)
+        return booking
 
 class NotificationSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)

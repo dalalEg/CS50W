@@ -17,6 +17,7 @@ import { api }     from './api/axios';
 import  ShowtimeList from './components/ShowtimeList';
 import ShowtimeDetail from './components/ShowtimeDatail';
 import TheaterListing from './components/TheaterListing';
+import Booking from './components/Booking';
 // Main App component
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -81,6 +82,7 @@ function App() {
           <Route path="/showtimes" element={<ShowtimeList />} />
           <Route path="/showtimes/:id" element={<ShowtimeDetail />} />
           <Route path="/theaters" element={<TheaterListing />} />
+          <Route path="/booking" element={<Booking />} />
         </Routes>
       </main>
     </Router>
