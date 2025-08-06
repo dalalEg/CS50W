@@ -214,12 +214,24 @@ class TheaterViewSet(viewsets.ModelViewSet):
     queryset = Theater.objects.all()
     serializer_class = TheaterSerializer
     permission_classes = [IsAdminOrReadOnly]
+    @action(detail=True, methods=['get'], url_path='auditoriums')
+    def auditoriums(self, request, pk=None):
+        qs = Auditorium.objects.filter(theater_id=pk)
+        serializer = AuditoriumSerializer(qs, many=True)
+        return Response(serializer.data)
 
 class AuditoriumViewSet(viewsets.ModelViewSet):
     """ViewSet for managing auditoriums."""
     queryset = Auditorium.objects.all()
     serializer_class = AuditoriumSerializer
     permission_classes = [IsAdminOrReadOnly]
+    @action(detail=True, methods=['get'], url_path='theater')
+    def get_theater(self, request, pk=None):
+        """Custom action to get the theater for a specific auditorium."""
+        auditorium = get_object_or_404(Auditorium, pk=pk)
+        theater = auditorium.theater
+        serializer = TheaterSerializer(theater)
+        return Response(serializer.data)
 
 class ShowtimeViewSet(viewsets.ModelViewSet):
     """ViewSet for managing showtimes."""

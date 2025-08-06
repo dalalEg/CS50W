@@ -6,8 +6,6 @@ import './ShowtimeList.css';
 
 function ShowtimeList() {
   const [showtimes, setShowtimes] = useState([]);
-  const [theater, setTheater] = useState(null);
-  const params = useParams();
   const [error, setError] = useState(null);
 
   useEffect(() => {

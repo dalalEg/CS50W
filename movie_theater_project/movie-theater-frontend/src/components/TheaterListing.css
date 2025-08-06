@@ -1,0 +1,21 @@
+.theater-listing {
+  padding: 20px;
+  background-color: #91c7d4;
+}
+
+.theater-item {
+  border-bottom: 1px solid #eee;
+  padding: 10px 0;
+}
+
+.theater-item:last-child {
+  border-bottom: none;
+}
+
+.error {
+  color: red;
+}
+
+.loading {
+  color: blue;
+}

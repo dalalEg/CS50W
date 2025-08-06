@@ -3,4 +3,4 @@ import { api } from './axios';
 export const fetchAuditoriums = () => api.get('/api/auditoriums/');
 export const fetchAuditorium = id => api.get(`/api/auditoriums/${id}/`);
 export const fetchAuditoriumByTheater = theaterId =>
-  api.get(`/api/auditoriums/?theater=${theaterId}`);
+  api.get(`/api/theaters/${theaterId}/auditoriums/`);
