@@ -1,19 +1,21 @@
 import React, { useState } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { createBooking } from '../api/booking';
-
-import './Booking.css';
+// Booking component to confirm and finalize a booking
+// This component is responsible for displaying the booking confirmation page
+// and handling the booking creation process.
 
 export default function Booking() {
-  const { state } = useLocation();
-  const navigate  = useNavigate();
-  const { showtimeId, seats } = state || {};   // seats is an array of full seat objects
-
+  const { state }    = useLocation();
+  const navigate     = useNavigate();
   const [error, setError]           = useState(null);
   const [bookingResult, setBooking] = useState(null);
+  const [loading, setLoading]       = useState(false);
 
-  if (!showtimeId || !seats) {
-    // guard: if somebody lands here directly
+  const showtimeId = state?.showtimeId;
+  const seats      = state?.seats      || [];
+
+  if (!showtimeId || !seats.length) {
     return (
       <div className="booking-confirm">
         <p>No booking in progress.</p>
@@ -22,20 +24,28 @@ export default function Booking() {
     );
   }
 
-  const totalCost = seats
-  .map(seat => seat.price)
-  .reduce((sum, price) => sum + Number(price), 0);
+  const totalCost = seats.reduce((sum, seat) => sum + Number(seat.price), 0);
 
-  const handleConfirm = () => {
-    const seatIds = seats.map(s => s.id);
-    createBooking(showtimeId, seatIds)
-      .then(resp => {
-        setBooking(resp.data);
-      })
-      .catch(() => setError("Failed to place booking"));
-  };
+const handleConfirm = () => {
+  if (loading) return;
+  setLoading(true);
 
-  const handleCancel = () => navigate(-1);
+  const seatIds = seats.map(s => s.id);
+  createBooking(showtimeId, seatIds)
+    .then(resp => setBooking(resp.data))
+    .catch(err => {
+  const data = err.response?.data || {};
+  const fieldErrors = [];
+  if (data.seat_ids)      fieldErrors.push(...data.seat_ids);
+  if (data.showtime_id)   fieldErrors.push(...data.showtime_id);
+  if (data.detail)        fieldErrors.push(data.detail);
+  setError(fieldErrors.length
+    ? fieldErrors.join(', ')
+    : 'Failed to place booking.'
+  );
+})
+    .finally(() => setLoading(false));
+};
 
   return (
     <div className="booking-confirm container mt-4">
@@ -53,35 +63,48 @@ export default function Booking() {
             </tr>
           ))}
           <tr className="table-active">
-           
-  <strong>
-                <td>Total Cost: </td>
-                <td>
-                  ${totalCost.toFixed(2)}
-                </td>
-              </strong>
-            </tr>
-
+            <td><strong>Total Cost:</strong></td>
+            <td><strong>${totalCost}</strong></td>
+          </tr>
         </tbody>
       </table>
 
       {error && <p className="text-danger">{error}</p>}
-      {bookingResult ? (
-        <div className="alert alert-success">
-          Booking #{bookingResult.id} confirmed! Total paid: ${bookingResult.cost}.
-          <br/>
-          <Link to="/showtimes">← Back to Showtimes</Link>
-        </div>
-      ) : (
+
+      {!bookingResult && (
         <div className="d-flex gap-2">
-          <button className="btn btn-primary" onClick={handleConfirm}>
-            Confirm Booking
+          <button
+            type="button"               
+            className="btn btn-primary"
+            onClick={handleConfirm}
+            disabled={loading}
+          >
+            {loading ? 'Booking…' : 'Confirm Booking'}
           </button>
-          <button className="btn btn-secondary" onClick={handleCancel}>
+
+          <button
+            type="button"              
+            className="btn btn-secondary"
+            onClick={() => navigate(-1)}
+            disabled={loading}
+          >
             Cancel
           </button>
         </div>
       )}
+        {bookingResult && ( 
+            <div className="alert alert-success mt-3">
+                <h4>Booking Successful!</h4>
+                <p>Booking ID: <strong>{bookingResult.id}</strong></p>
+                <p>Total Cost: <strong>${bookingResult.cost}</strong></p>
+                <Link to={`/bookings/${bookingResult.id}`}
+                  state={{ booking: bookingResult.id }}
+                >View Booking Details</Link>
+            </div>
+        )}
+      <Link to={`/showtimes/${showtimeId}`} className="btn btn-link mt-3">
+        ← Back to Showtime Details
+      </Link>
     </div>
   );
 }

@@ -22,6 +22,12 @@ from .serializers import( MovieSerializer, ShowtimeSerializer, SeatSerializer,
                          RoleSerializer, TheaterSerializer,UserSerializer,AuditoriumSerializer)
 from rest_framework import serializers
 from django.shortcuts import get_object_or_404
+from rest_framework.validators import UniqueValidator
+from rest_framework import status
+from django.db import transaction
+from django.db.models import F
+from django.contrib.auth.models import User
+from rest_framework import routers  
 from .models import (User, Movie, Genre,Seat,Showtime,Review, 
                      Notification,Booking,Actor,Director,Auditorium,Producer,Payment,watchlist,Role,Theater)
 
@@ -200,7 +206,8 @@ class MovieViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
     @action(detail=True, methods=['get'], url_path='showtimes')
     def showtimes(self, request, pk=None):
-        shows = Showtime.objects.filter(movie_id=pk)
+        shows = Showtime.objects.filter(movie_id=pk, start_time__gte=timezone.now(),
+            auditorium__available_seats__gt=0)
         serializer = ShowtimeSerializer(shows, many=True)
         return Response(serializer.data)
 
@@ -241,9 +248,15 @@ class ShowtimeViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
+        base_qs = Showtime.objects.filter(
+            start_time__gte=timezone.now(),
+            auditorium__available_seats__gt=0
+        )
         if user.is_staff:
+            # staff still see everything
             return Showtime.objects.all()
-        return Showtime.objects.all()
+        # everyone else only sees future, non‐sold‐out showtimes
+        return base_qs
     @action(detail=True, methods=['get'], url_path='seats')
     def get_seats(self, request, pk=None):
         """Custom action to get seats for a specific showtime."""
@@ -280,3 +293,38 @@ class BookingViewSet(viewsets.ModelViewSet):
         return Booking.objects.filter(user=user)
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+    @action(detail=False, methods=['get'], url_path='user')
+    def user(self, request):
+        """
+        GET /api/bookings/user/
+        Returns only the bookings for the authenticated user.
+        """
+        qs = self.get_queryset().filter(user=request.user)
+        serializer = self.get_serializer(qs, many=True)
+        return Response(serializer.data)
+    def destroy(self, request, *args, **kwargs):
+        booking = self.get_object()
+        if booking.user != request.user and not request.user.is_staff:
+            return Response({'error': 'You do not have permission to delete this booking.'}, status=status.HTTP_403_FORBIDDEN)
+        # Ensure the booking is not in the past
+        if booking.showtime.start_time < timezone.now():
+            return Response({'error': 'Cannot cancel a booking for a past showtime.'}, status=status.HTTP_400_BAD_REQUEST)
+        # Ensure the booking has seats
+        if not booking.seats.exists():
+            return Response({'error': 'No seats booked for this booking.'}, status=status.HTTP_400_BAD_REQUEST)
+        num_seats = booking.seats.count()
+        # Ensure the booking is not already cancelled
+        if booking.status == 'Cancelled':
+            return Response({'error': 'This booking has already been cancelled.'}, status=status.HTTP_400_BAD_REQUEST)
+        booking.status = 'Cancelled'
+        booking.save()
+        # Use a transaction to ensure atomicity
+        with transaction.atomic():
+            # free the seats
+            booking.seats.update(is_booked=False)
+            # increment available_seats
+            Showtime.objects.filter(pk=booking.showtime_id).update(
+                available_seats=F('available_seats') + num_seats
+            )
+            booking.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

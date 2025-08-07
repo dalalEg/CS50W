@@ -1,3 +1,4 @@
+from django import forms
 from django.contrib import admin
 from .models import (
     User, Movie, Genre, Seat, Review, Showtime, Booking, Notification,
@@ -27,11 +28,26 @@ class SeatAdmin(admin.ModelAdmin):
     list_filter = ('is_booked', 'showtime')
     search_fields = ('seat_number',)
 
+class SeatInline(admin.TabularInline):
+    model       = Seat
+    fields      = ('seat_number','is_booked','price',)
+    readonly_fields = ('seat_number','is_booked','price',)
+    extra       = 0
+    show_change_link = True
+
 @admin.register(Showtime)
 class ShowtimeAdmin(admin.ModelAdmin):
-    list_display = ('movie', 'start_time', 'end_time', 'is_VIP', 'thD_available', 'parking_available', 'language', 'auditorium')
-    list_filter = ('is_VIP', 'thD_available', 'parking_available', 'language', 'auditorium')
+    list_display = (
+        'movie','start_time','end_time',
+        'is_VIP','thD_available','parking_available',
+        'language','auditorium','available_seats',
+    )
+    list_filter  = (
+        'is_VIP','thD_available','parking_available',
+        'language','auditorium',
+    )
     search_fields = ('movie__title',)
+    inlines      = [SeatInline]
 
 @admin.register(Review)
 class ReviewAdmin(admin.ModelAdmin):
@@ -39,11 +55,34 @@ class ReviewAdmin(admin.ModelAdmin):
     search_fields = ('user__username', 'movie__title')
     list_filter = ('rating', 'created_at')
 
+class BookingForm(forms.ModelForm):
+    class Meta:
+        model  = Booking
+        fields = '__all__'
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        st = None
+        # when adding, showtime may come via GET (?showtime=…)
+        if 'showtime' in self.initial:
+            st = self.initial['showtime']
+        # when editing, use instance
+        elif self.instance and self.instance.pk:
+            st = self.instance.showtime_id
+        if st:
+            self.fields['seats'].queryset = Seat.objects.filter(showtime_id=st)
+
 @admin.register(Booking)
 class BookingAdmin(admin.ModelAdmin):
-    list_display = ('user', 'showtime', 'booking_date', 'seats', 'cost')
-    search_fields = ('user__username', 'showtime__movie__title')
-    list_filter = ('booking_date',)
+    form         = BookingForm
+    list_display = ('user','showtime','booking_date','seat_list','cost',)
+    search_fields = ('user__username','showtime__movie__title')
+    list_filter   = ('booking_date',)
+
+    def seat_list(self, obj):
+        # join each seat_number into a comma‐separated string
+        return ", ".join(s.seat_number for s in obj.seats.all())
+    seat_list.short_description = 'Seats'  # set a short description for the column
 
 @admin.register(Notification)
 class NotificationAdmin(admin.ModelAdmin):

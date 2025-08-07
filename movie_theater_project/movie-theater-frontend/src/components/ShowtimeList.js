@@ -31,7 +31,7 @@ function ShowtimeList() {
             <p><strong>Start Time:</strong> {new Date(st.start_time).toLocaleString()}</p>
             <p><strong>Auditorium:</strong> {st.auditorium?.name || 'Unknown auditorium'}</p>
             <p><strong>Theater:</strong> {st.auditorium?.theater?.name || 'Unknown theater'}</p>
-            <p><strong>Available Seats:</strong> {st.auditorium?.available_seats??0} seats available</p>
+            <p><strong>Available Seats:</strong> {st.available_seats??0} seats available</p>
             <p><strong>Click To More Details:</strong></p>
             <Link to={`/showtimes/${st.id}`} className="showtime-link">
               View Details

@@ -62,7 +62,7 @@ function ShowtimeDetail() {
         <p><strong>Language:</strong> {showtime.language}</p>
         <p><strong>Auditorium:</strong> {showtime.auditorium?.name}</p>
         <p><strong>Theater:</strong> {showtime.auditorium?.theater?.name}</p>
-        <p><strong>Available Seats:</strong> {showtime.auditorium?.available_seats ?? 0}</p>
+        <p><strong>Available Seats:</strong> {showtime.available_seats ?? 0}</p>
         <p><strong>3D:</strong> {showtime.thD_available ? 'Yes' : 'No'} | <strong>Parking:</strong> {showtime.parking_available ? 'Yes' : 'No'}</p>
       </div>
 

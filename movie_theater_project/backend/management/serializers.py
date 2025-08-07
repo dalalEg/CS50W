@@ -6,6 +6,11 @@ from .models import (
 )
 from rest_framework.validators import UniqueValidator
 from django.db import transaction
+from django.db.models import F
+from rest_framework.exceptions import ValidationError
+
+# … your other serializers/imports …
+
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
@@ -68,21 +73,31 @@ class AuditoriumSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'theater', 'total_seats', 'available_seats']
 
 class ShowtimeSerializer(serializers.ModelSerializer):
-    movie = MovieSerializer(read_only=True)
-    auditorium = AuditoriumSerializer(read_only=True)  # for reading
-
-    # To allow POST/PUT, use a writable field as well:
-    auditorium_id = serializers.PrimaryKeyRelatedField(
-        source='auditorium', queryset=Auditorium.objects.all(), write_only=True
-    )
+    movie           = MovieSerializer(read_only=True)
+    auditorium      = AuditoriumSerializer(read_only=True)
+    available_seats = serializers.IntegerField(read_only=True)
+    auditorium_id   = serializers.PrimaryKeyRelatedField(
+                         source='auditorium',
+                         queryset=Auditorium.objects.all(),
+                         write_only=True
+                      )
 
     class Meta:
-        model = Showtime
+        model  = Showtime
         fields = [
-            'id', 'movie', 'start_time', 'end_time',
-            'parking_available', 'thD_available', 'language',
-            'is_VIP', 'auditorium', 'auditorium_id'
+            'id',
+            'movie',
+            'start_time',
+            'end_time',
+            'available_seats',    # ← add this
+            'parking_available',
+            'thD_available',
+            'language',
+            'is_VIP',
+            'auditorium',
+            'auditorium_id'
         ]
+   
 
 class SeatSerializer(serializers.ModelSerializer):
     showtime = serializers.PrimaryKeyRelatedField(queryset=Showtime.objects.all())
@@ -99,28 +114,69 @@ class ReviewSerializer(serializers.ModelSerializer):
         model = Review
         fields = ['id', 'user', 'movie', 'rating', 'content', 'created_at']
 
+
+
 class BookingSerializer(serializers.ModelSerializer):
-    seat_ids = serializers.ListField(child=serializers.IntegerField(), write_only=True)
+    # output fields
+    showtime    = ShowtimeSerializer(read_only=True)
+    seats       = SeatSerializer(many=True, read_only=True)
+
+    # input‐only fields
+    showtime_id = serializers.PrimaryKeyRelatedField(
+        queryset=Showtime.objects.all(),
+        source='showtime',
+        write_only=True
+    )
+    seat_ids    = serializers.ListField(
+        child=serializers.IntegerField(),
+        write_only=True
+    )
 
     class Meta:
         model  = Booking
-        fields = ['id','showtime','seat_ids','seats','cost','created_at']
-        read_only_fields = ['seats','cost']
+        fields = [
+            'id',
+            'showtime',     # nested read‐only
+            'showtime_id',  # write‐only
+            'seats',        # read‐only
+            'seat_ids',     # write‐only
+            'cost',
+            'created_at',
+            'status',
+        ]
+        read_only_fields = ['cost',  'status']
 
     def create(self, validated_data):
-        ids   = validated_data.pop('seat_ids')
-        seats = list(Seat.objects.filter(id__in=ids))
-        total = sum(s.price for s in seats)
-        # create the booking with both count and cost
-        booking = Booking.objects.create(
-            **validated_data,
-            seats=len(seats),
-            cost=total
-        )
-        # mark them booked
-        Seat.objects.filter(id__in=ids).update(is_booked=True)
-        return booking
+        user     = validated_data.pop('user')
+        showtime = validated_data.pop('showtime')    # now present thanks to source='showtime'
+        seat_ids = validated_data.pop('seat_ids')
+        seats_qs = Seat.objects.filter(id__in=seat_ids, is_booked=False)
+        seats    = list(seats_qs)
+        if len(seats) != len(seat_ids):
+            raise ValidationError("One or more seats are already booked.")
 
+        total = sum(s.price for s in seats)
+
+        with transaction.atomic():
+            updated = Showtime.objects.filter(
+                id=showtime.id,
+                available_seats__gte=len(seats)
+            ).update(
+                available_seats=F('available_seats') - len(seats)
+            )
+            if not updated:
+                raise ValidationError("Not enough seats available.")
+
+            booking = Booking.objects.create(
+                user=     user,
+                showtime= showtime,
+                cost=     total
+            )
+            booking.seats.set(seats)
+            seats_qs.update(is_booked=True)
+
+        return booking
+    
 class NotificationSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
 

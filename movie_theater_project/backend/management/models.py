@@ -1,3 +1,4 @@
+from turtle import st
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
@@ -55,6 +56,12 @@ class Showtime(models.Model):
     parking_available = models.BooleanField(default=False)  # Add parking_available field
     language = models.CharField(max_length=50, default='English')  # Add language field
     auditorium = models.ForeignKey('Auditorium', on_delete=models.CASCADE, related_name='showtimes', blank=True, null=True)  # Add auditorium field
+    available_seats = models.PositiveIntegerField(default=0)  # Add available_seats field
+    def save(self, *args, **kwargs):
+        # only seed available_seats on first create
+        if self._state.adding and self.auditorium:
+            self.available_seats = self.auditorium.total_seats
+        super().save(*args, **kwargs)
     def __str__(self):
         start = self.start_time.strftime("%Y-%m-%d %H:%M:%S")
         end = self.end_time.strftime("%Y-%m-%d %H:%M:%S")
@@ -75,9 +82,10 @@ class Booking(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="bookings")
     showtime = models.ForeignKey('Showtime', on_delete=models.CASCADE, related_name="bookings")
     booking_date = models.DateTimeField(auto_now_add=True)
-    seats = models.PositiveIntegerField(default=1)  # Add seats field
+    seats = models.ManyToManyField('Seat', related_name="bookings")
     created_at = models.DateTimeField(auto_now_add=True)
     cost = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)  # Add cost field
+    status = models.CharField(max_length=20, choices=[('Pending', 'Pending'), ('Confirmed', 'Confirmed'), ('Cancelled', 'Cancelled')], default='Pending')  # Add status field
     def __str__(self):
         return f"{self.user.username} booked {self.showtime.movie.title} on {self.booking_date}"
     

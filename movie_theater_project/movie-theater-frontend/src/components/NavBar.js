@@ -2,7 +2,7 @@ import React from 'react'
 import { Link } from 'react-router-dom'
 import './NavBar.css';
 
-export default function NavBar({ isAuthenticated, username, onLogout }) {
+export default function NavBar({ isAuthenticated, username, onLogout , userId }) {
     return (
         <nav className="navbar">
             <Link to="/" className="navbar-link">All Movies</Link>
@@ -13,6 +13,7 @@ export default function NavBar({ isAuthenticated, username, onLogout }) {
                     <>
                         <Link to="/profile" className="nav-link">
                             {username}
+                            { userId ? ` (ID: ${userId})` : ''}
                         </Link>
                         <button className="btn btn-link" onClick={onLogout}>
                             Logout

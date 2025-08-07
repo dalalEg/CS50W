@@ -18,10 +18,13 @@ import  ShowtimeList from './components/ShowtimeList';
 import ShowtimeDetail from './components/ShowtimeDatail';
 import TheaterListing from './components/TheaterListing';
 import Booking from './components/Booking';
+import BookingDetail from './components/BookingDetail';
 // Main App component
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [username, setUsername]               = useState('');
+  const [user, setUser] = useState(null);
+
 
   // on mount, you might ping /api/auth/user or read a cookie/token
   useEffect(() => {
@@ -39,7 +42,10 @@ function App() {
     if(isAuthenticated){
       // fetch user details if authenticated
       api.get('/api/auth/user/')
-        .then(r => setUsername(r.data.username))
+        .then(r => {
+          setUsername(r.data.username);
+          setUser(r.data);
+        })
         .catch(() => setIsAuthenticated(false));
     }
   }, [isAuthenticated]);
@@ -48,6 +54,9 @@ function App() {
     api.post('/api/auth/logout/').finally(() => {
       setIsAuthenticated(false);
       setUsername('');
+      setUser(null);
+      // redirect to home page after logout
+      window.location.href = '/';
     });
   };
 
@@ -61,6 +70,7 @@ function App() {
       <NavBar
         isAuthenticated={isAuthenticated}
         username={username}
+        userId={user?.id}
         onLogout={handleLogout}
       />
          
@@ -83,6 +93,7 @@ function App() {
           <Route path="/showtimes/:id" element={<ShowtimeDetail />} />
           <Route path="/theaters" element={<TheaterListing />} />
           <Route path="/booking" element={<Booking />} />
+          <Route path="/bookings/:bookingId" element={<BookingDetail />} />
         </Routes>
       </main>
     </Router>
