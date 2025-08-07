@@ -54,6 +54,9 @@ A full-stack web application for booking movie tickets — featuring dynamic sea
 - 💻 Mobile-responsive layout (Bootstrap)
 - 🧹 Cleaned up Theater ↔ Auditorium relationship
 - 🎥 Movie Detail Page (trailer, actors, reviews, showtimes)
+- 🪑 **Showtime detail page with visual seat selection**
+- 🏛️ **“Our Theaters” page with list of theaters and auditoriums**
+- 🧾 **Booking logic + confirmation page**
 
 ---
 
@@ -112,3 +115,5 @@ A full-stack web application for booking movie tickets — featuring dynamic sea
 <img width="1910" height="896" alt="image" src="https://github.com/user-attachments/assets/def53204-ce69-4559-ad9b-61db2bc449bd" />
 
 <img width="667" height="799" alt="image" src="https://github.com/user-attachments/assets/ba31af31-77b2-4136-b579-e821280c711f" />
+
+
