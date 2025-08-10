@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate, Link, useParams } from 'react-router-dom';
 import { fetchDirectorById } from '../api/director';
 import { fetchMovieByDirector } from '../api/movies';
-
+import './Director.css';
 export default function DirectorDetails() {
     const { directorId } = useParams();
     const navigate = useNavigate();

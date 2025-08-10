@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate, Link, useParams } from 'react-router-dom';
 import { fetchProducerById } from '../api/producer';
 import { fetchMovieByProducer } from '../api/movies';
+import './Producer.css';
 export default function ProducerDetails() {
     const { producerId } = useParams();
     const navigate = useNavigate();
