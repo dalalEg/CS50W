@@ -54,17 +54,19 @@ A full-stack web application for booking movie tickets — featuring dynamic sea
 - 💻 Mobile-responsive layout (Bootstrap)
 - 🧹 Cleaned up Theater ↔ Auditorium relationship
 - 🎥 Movie Detail Page (trailer, actors, reviews, showtimes)
-- 🪑 **Showtime detail page with visual seat selection**
-- 🏛️ **“Our Theaters” page with list of theaters and auditoriums**
-- 🧾 **Booking logic + confirmation page**
+- 🪑 Showtime detail page with visual seat selection
+- 🏛️ Our Theaters” page with list of theaters and auditoriums
+- 🧾 Booking logic + confirmation page
+- ⭐ Review system 
+- 🧾 Booking confirmation UI
+- 🛒 Booking flow (showtime → seats → confirmation)
+- ➕ Added pages for viewing Directors, Actors, Producers, and Theater details
+
 
 ---
 
 ### 🏗️ In Progress
 
-- 🛒 Booking flow (showtime → seats → confirmation)
-- 🧾 Booking confirmation UI
-- ⭐ Review system (backend done, UI in progress)
 - 👤 Profile page UI
 - 🐳 Docker setup
 - 🔧 GitHub Actions for CI
