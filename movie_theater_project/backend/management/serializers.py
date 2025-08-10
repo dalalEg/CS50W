@@ -201,8 +201,8 @@ class WatchlistSerializer(serializers.ModelSerializer):
         fields = ['id', 'user', 'movie', 'added_at']
 
 class RoleSerializer(serializers.ModelSerializer):
-    actor = serializers.PrimaryKeyRelatedField(queryset=Actor.objects.all())
-    movie = serializers.PrimaryKeyRelatedField(queryset=Movie.objects.all())
+    actor = ActorSerializer(read_only=True)
+    movie = MovieSerializer(read_only=True)
     class Meta:
         model = Role
         fields = ['id', 'character_name', 'actor', 'movie']

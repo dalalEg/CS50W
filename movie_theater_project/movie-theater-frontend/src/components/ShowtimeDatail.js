@@ -55,7 +55,12 @@ function ShowtimeDetail() {
   return (
     <div className="showtime-detail container mt-4">
       <Link to="/showtimes" className="btn btn-secondary mb-3">← Back to Showtimes</Link>
-      <h2 className="mb-3">{showtime.movie?.title}</h2>
+
+      <h2 className="mb-3">
+       <Link to={`/movies/${showtime.movie.id}`} className="showtime-link">
+          {showtime.movie.title}
+        </Link> - Showtime Details
+        </h2>
       <div className="mb-3">
         <p><strong>Start Time:</strong> {new Date(showtime.start_time).toLocaleString()}</p>
         <p><strong>End Time:</strong> {new Date(showtime.end_time).toLocaleString()}</p>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate, Link, useParams } from 'react-router-dom';
-import { fetchMoviesByProducer,fetchProducerById } from '../api/producer';
-
+import { fetchProducerById } from '../api/producer';
+import { fetchMovieByProducer } from '../api/movies';
 export default function ProducerDetails() {
     const { producerId } = useParams();
     const navigate = useNavigate();
@@ -25,7 +25,7 @@ export default function ProducerDetails() {
 
     useEffect(() => {
         if (producerId) {
-            fetchMoviesByProducer(producerId)
+            fetchMovieByProducer(producerId)
                 .then(resp => {
                     setMovies(resp.data);
                 })

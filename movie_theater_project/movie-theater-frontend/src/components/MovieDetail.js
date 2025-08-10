@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { fetchMovieById }   from '../api/movies';
 import { fetchShowtimesByMovie } from '../api/showtimes';
+import { fetchRolesByMovie } from '../api/roles';
+import { fetchRole } from '../api/roles';
 import './MovieDetail.css';
 
 function MovieDetail() {
@@ -9,7 +11,7 @@ function MovieDetail() {
   const [movie, setMovie] = useState(null);
   const [error, setError] = useState(null);
   const [showtimes, setShowtimes] = useState([]);
-
+  const [roles, setRoles] = useState([]);
   useEffect(() => {
     fetchMovieById(id)
       .then(resp => setMovie(resp.data))
@@ -22,6 +24,15 @@ function MovieDetail() {
         .catch(() => setError("Failed to load showtimes"));
     }
   }, [id]);
+  useEffect(() => {
+    {
+      fetchRolesByMovie(id)
+        .then(resp => setRoles(resp.data))
+        .catch(() => setError("Failed to load roles"));
+    }
+  }, [id]);
+ 
+  // If there's an error, display it
   if (error)   return <p className="error">{error}</p>;
   if (!movie) return <p className="loading">Loading…</p>;
 
@@ -54,24 +65,33 @@ function MovieDetail() {
         )}
 
         <p><strong>Genres:</strong> {movie.genre_list}</p>
-        
-        <Link to={`/directors/${movie.director?.id}`} className="director-link">
-        <p>
-          <strong>Director:</strong>{' '}
-          {movie.director?.name }
+        <p><strong>Director:</strong>{' '}
+          <Link to={`/directors/${movie.director?.id}`} className="director-link">
+            {movie.director?.name}
+          </Link>
         </p>
-      </Link>
-       <strong>Producer:</strong>{' '}
-      <Link to={`/producers/${movie.producer?.id}`} className="producer-link">
-        <p>
-
-          {movie.producer?.name}
+        <p><strong>Producer:</strong>{' '}
+          <Link to={`/producers/${movie.producer?.id}`} className="producer-link">
+            {movie.producer?.name}
+          </Link>
         </p>
-      </Link>
-      <p>
-        <strong>Actors:</strong>{' '}
-        {movie.actors.map(a => a.name).join(', ')}
-      </p>
+        <strong> Main Cast : </strong>
+        <ul>
+          {roles.length === 0 ? ( 
+            <li>No roles available</li>
+          ) : (
+            roles.map(role => (
+              <li key={role.id}>
+                <Link to={`/actors/${role.actor?.id}`} className="actor-link">
+                  {role.actor?.name}
+                </Link>{' '}
+                  as {role.character_name}
+              </li>
+            ))
+          )}
+        </ul>
+          
+     
 
         <p><strong>Available Showtimes:</strong></p>
         <ul>

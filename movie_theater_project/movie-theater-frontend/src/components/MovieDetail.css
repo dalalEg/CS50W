@@ -52,7 +52,14 @@ body {
   margin-bottom: 1rem;
   align-self: center;
 }
-
+.producer-link {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 600;
+}
+.producer-link:hover {
+  text-decoration: underline;
+}
 @media (min-width: 768px) {
   .detail-poster {
     margin-bottom: 0;
@@ -102,7 +109,7 @@ body {
   font-style: italic;
 }
 .showtime-link {
-  color: var(--accent);
+  color: var(--card-bg);
   text-decoration: none;
   font-weight: 600;
   margin-left: 8px;

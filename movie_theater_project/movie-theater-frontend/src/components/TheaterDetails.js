@@ -33,7 +33,7 @@ function TheaterDetails() {
     return (
         <div className="theater-details">
             <h1>{theater.name}</h1>
-            <p>{theater.location}</p>
+            <p><strong>Location:</strong> {theater.location}</p>
             <h2>Showtimes</h2>
             <ul>
                 {showtimes.map(st => (

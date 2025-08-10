@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate, Link, useParams } from 'react-router-dom';
-import { fetchDirectorById,fetchMoviesByDirector } from '../api/director';
+import { fetchDirectorById } from '../api/director';
+import { fetchMovieByDirector } from '../api/movies';
 
 export default function DirectorDetails() {
     const { directorId } = useParams();
@@ -25,7 +26,7 @@ export default function DirectorDetails() {
 
     useEffect(() => {
         if (directorId) {
-            fetchMoviesByDirector(directorId)
+            fetchMovieByDirector(directorId)
                 .then(resp => {
                     setMovies(resp.data);
                 })

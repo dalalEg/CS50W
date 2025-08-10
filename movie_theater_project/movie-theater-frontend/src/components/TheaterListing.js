@@ -42,8 +42,8 @@ const TheaterListing = () => {
           <div key={theater.id} onClick={()=>navigate(`/theaters/${theater.id}`)} className="theater-card">
             <div className="theater-info">
               <h3>{theater.name}</h3>
-              <p>{theater.location}</p>
-            
+              <p><strong>Location:</strong> {theater.location}</p>
+
             <p><strong>Auditoriums:</strong></p>
             <ul>
               {theater.auditoriums?.length > 0 ? (

@@ -174,6 +174,15 @@ class ActorViewSet(viewsets.ModelViewSet):
     queryset = Actor.objects.all()
     serializer_class = ActorSerializer
     permission_classes = [IsAdminOrReadOnly]
+    @action(detail=True, methods=['get'], url_path='movies')
+    def movies(self, request, pk=None):
+        """Custom action to get movies featuring a specific actor."""
+        actor = get_object_or_404(Actor, pk=pk)
+        roles = Role.objects.filter(actor=actor)
+        movies = Movie.objects.filter(roles__in=roles)
+        serializer = MovieSerializer(movies, many=True)
+        return Response(serializer.data)
+    
 
 class DirectorViewSet(viewsets.ModelViewSet):
     """ViewSet for managing directors."""
@@ -207,6 +216,8 @@ class RoleViewSet(viewsets.ModelViewSet):
     serializer_class = RoleSerializer
     permission_classes = [IsAdminOrReadOnly]
 
+       
+
 class MovieViewSet(viewsets.ModelViewSet):
     """ViewSet for managing movies."""
     queryset = Movie.objects.all()
@@ -224,13 +235,21 @@ class MovieViewSet(viewsets.ModelViewSet):
             auditorium__available_seats__gt=0)
         serializer = ShowtimeSerializer(shows, many=True)
         return Response(serializer.data)
-   
+    @action(detail=True, methods=['get'], url_path='roles')
+    def roles(self, request, pk=None):
+        """Custom action to get roles for a specific movie."""
+        movie = get_object_or_404(Movie, pk=pk)
+        roles = Role.objects.filter(movie=movie)
+        serializer = RoleSerializer(roles, many=True)
+        return Response(serializer.data)
 
 class SeatViewSet(viewsets.ModelViewSet):
     """ViewSet for managing seats."""
     queryset = Seat.objects.all()
     serializer_class = SeatSerializer
     permission_classes = [IsAdminOrReadOnly]
+
+
 class TheaterViewSet(viewsets.ModelViewSet):
     """ViewSet for managing theaters."""
     queryset = Theater.objects.all()
