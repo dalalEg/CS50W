@@ -1,6 +1,6 @@
 .theater-listing {
   padding: 20px;
-  background-color: #91c7d4;
+  background-color: #c0e7ed;
 }
 
 .theater-item {
@@ -18,4 +18,22 @@
 
 .loading {
   color: blue;
+}
+.theater-card {
+  cursor: pointer;
+  display: inline-flexbox;
+  width: 100%;
+  margin: 10px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.theater-card:hover {
+  transform: scale(1.05);
+}
+
+.theater-info {
+  padding: 1rem;
+  flex: 1;
 }

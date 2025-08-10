@@ -241,6 +241,14 @@ class TheaterViewSet(viewsets.ModelViewSet):
         qs = Auditorium.objects.filter(theater_id=pk)
         serializer = AuditoriumSerializer(qs, many=True)
         return Response(serializer.data)
+    @action(detail=True, methods=['get'], url_path='showtimes') 
+    def showtimes(self, request, pk=None):
+        """Custom action to get showtimes for a specific theater."""
+        theater = get_object_or_404(Theater, pk=pk)
+        showtimes = Showtime.objects.filter(auditorium__theater=theater, start_time__gte=timezone.now(),
+            auditorium__available_seats__gt=0)
+        serializer = ShowtimeSerializer(showtimes, many=True)
+        return Response(serializer.data)
 
 class AuditoriumViewSet(viewsets.ModelViewSet):
     """ViewSet for managing auditoriums."""

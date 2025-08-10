@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from 'react';  // remove the invalid `use` import
-import { Link } from 'react-router-dom';
+import { Link,useNavigate } from 'react-router-dom';
 import { fetchTheaters }          from '../api/theater';
 import { fetchAuditoriumByTheater } from '../api/auditorium';
 import './TheaterListing.css';
 
 const TheaterListing = () => {
+  const navigate = useNavigate();
   const [theaters, setTheaters] = useState([]);
   const [error, setError]       = useState(null);
-
+  
   useEffect(() => {
     let isMounted = true;
     fetchTheaters()
@@ -38,14 +39,16 @@ const TheaterListing = () => {
       <h2>Theater Listings</h2>
       <ul>
         {theaters.map(theater => (
-          <li key={theater.id} className="theater-item">
-            <p><strong>Name:</strong> {theater.name}</p>
-            <p><strong>Location:</strong> {theater.location}</p>
+          <div key={theater.id} onClick={()=>navigate(`/theaters/${theater.id}`)} className="theater-card">
+            <div className="theater-info">
+              <h3>{theater.name}</h3>
+              <p>{theater.location}</p>
+            
             <p><strong>Auditoriums:</strong></p>
             <ul>
               {theater.auditoriums?.length > 0 ? (
                 theater.auditoriums.map(aud => (
-                  <li key={aud.id}>
+                  <li key={aud.id}> 
                     <p><strong>Auditorium Name:</strong> {aud.name}</p>
                     <p><strong>Capacity:</strong> {aud.total_seats}</p>
                   </li>
@@ -54,7 +57,8 @@ const TheaterListing = () => {
                 <li>No auditoriums available</li>
               )}
             </ul>
-          </li>
+            </div>
+          </div>
         ))}
       </ul>
     </div>
