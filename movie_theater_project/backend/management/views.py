@@ -193,6 +193,13 @@ class ProducerViewSet(viewsets.ModelViewSet):
     queryset = Producer.objects.all()
     serializer_class = ProducerSerializer
     permission_classes = [IsAdminOrReadOnly]
+    @action(detail=True, methods=['get'], url_path='movies')
+    def movies(self, request, pk=None):
+        """Custom action to get movies produced by a specific producer."""  
+        producer = get_object_or_404(Producer, pk=pk)
+        movies = Movie.objects.filter(producer=producer)
+        serializer = MovieSerializer(movies, many=True)
+        return Response(serializer.data)
 
 class RoleViewSet(viewsets.ModelViewSet):
     """ViewSet for managing roles."""

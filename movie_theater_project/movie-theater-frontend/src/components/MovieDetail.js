@@ -58,7 +58,14 @@ function MovieDetail() {
         <Link to={`/directors/${movie.director?.id}`} className="director-link">
         <p>
           <strong>Director:</strong>{' '}
-          {movie.director?.name || 'Unknown'}
+          {movie.director?.name }
+        </p>
+      </Link>
+       <strong>Producer:</strong>{' '}
+      <Link to={`/producers/${movie.producer?.id}`} className="producer-link">
+        <p>
+
+          {movie.producer?.name}
         </p>
       </Link>
       <p>
