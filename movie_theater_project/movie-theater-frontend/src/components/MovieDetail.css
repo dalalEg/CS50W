@@ -35,7 +35,14 @@ body {
 }
 
 
-
+.director-link {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 600;
+}
+.director-link:hover {
+  text-decoration: underline;
+}
 .detail-poster {
   width: 100%;
   max-width: 300px;
@@ -93,4 +100,10 @@ body {
 .loading {
   color: var(--accent);
   font-style: italic;
+}
+.showtime-link {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 600;
+  margin-left: 8px;
 }

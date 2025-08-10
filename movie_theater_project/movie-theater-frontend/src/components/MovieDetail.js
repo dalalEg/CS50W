@@ -54,14 +54,17 @@ function MovieDetail() {
         )}
 
         <p><strong>Genres:</strong> {movie.genre_list}</p>
+        
+        <Link to={`/directors/${movie.director?.id}`} className="director-link">
         <p>
           <strong>Director:</strong>{' '}
           {movie.director?.name || 'Unknown'}
         </p>
-        <p>
-          <strong>Actors:</strong>{' '}
-          {movie.actors.map(a => a.name).join(', ')}
-        </p>
+      </Link>
+      <p>
+        <strong>Actors:</strong>{' '}
+        {movie.actors.map(a => a.name).join(', ')}
+      </p>
 
         <p><strong>Available Showtimes:</strong></p>
         <ul>

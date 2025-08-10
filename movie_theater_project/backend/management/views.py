@@ -180,6 +180,13 @@ class DirectorViewSet(viewsets.ModelViewSet):
     queryset = Director.objects.all()
     serializer_class = DirectorSerializer
     permission_classes = [IsAdminOrReadOnly]
+    @action(detail=True, methods=['get'], url_path='movies')
+    def movies(self, request, pk=None):
+        """Custom action to get movies directed by a specific director."""
+        director = get_object_or_404(Director, pk=pk)
+        movies = Movie.objects.filter(director=director)
+        serializer = MovieSerializer(movies, many=True)
+        return Response(serializer.data)
 
 class ProducerViewSet(viewsets.ModelViewSet):
     """ViewSet for managing producers."""
@@ -210,6 +217,7 @@ class MovieViewSet(viewsets.ModelViewSet):
             auditorium__available_seats__gt=0)
         serializer = ShowtimeSerializer(shows, many=True)
         return Response(serializer.data)
+   
 
 class SeatViewSet(viewsets.ModelViewSet):
     """ViewSet for managing seats."""

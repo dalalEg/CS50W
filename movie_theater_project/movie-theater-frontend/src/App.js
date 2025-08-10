@@ -19,6 +19,7 @@ import ShowtimeDetail from './components/ShowtimeDatail';
 import TheaterListing from './components/TheaterListing';
 import Booking from './components/Booking';
 import BookingDetail from './components/BookingDetail';
+import DirectorDetails from './components/DirectorDetails'; // Import the new component
 // Main App component
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -94,6 +95,7 @@ function App() {
           <Route path="/theaters" element={<TheaterListing />} />
           <Route path="/booking" element={<Booking />} />
           <Route path="/bookings/:bookingId" element={<BookingDetail />} />
+          <Route path="/directors/:directorId" element={<DirectorDetails />} />
         </Routes>
       </main>
     </Router>
