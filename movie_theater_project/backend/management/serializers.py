@@ -1,3 +1,4 @@
+import re
 from rest_framework import serializers
 from .models import (
     User, Movie, Booking, Showtime, Seat,
@@ -109,10 +110,19 @@ class SeatSerializer(serializers.ModelSerializer):
 class ReviewSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
     movie = MovieSerializer(read_only=True)
-
+    content= serializers.CharField(
+        max_length=1000,
+        allow_blank=False
+    )
+    rating = serializers.IntegerField(
+        required=True,
+        min_value=1,
+        max_value=5
+    )
     class Meta:
         model = Review
-        fields = ['id', 'user', 'movie', 'rating', 'content', 'created_at']
+        fields = ['id', 'user', 'movie', 'content','rating',  'created_at']
+        read_only_fields = ['id', 'user', 'movie', 'created_at']
 
 
 

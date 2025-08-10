@@ -90,8 +90,10 @@ function MovieDetail() {
             ))
           )}
         </ul>
-          
-     
+
+        <Link to={`/movies/${id}/reviews`} state={{ movieId: id }} className="review-link">
+          Click here to reviews
+        </Link>
 
         <p><strong>Available Showtimes:</strong></p>
         <ul>

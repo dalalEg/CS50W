@@ -6,6 +6,8 @@ export const api = axios.create({
   withCredentials: true,   // send session cookie
 });
 
+api.defaults.xsrfCookieName = 'csrftoken';
+api.defaults.xsrfHeaderName = 'X-CSRFTOKEN';
 // before each request, add the CSRF token header
 api.interceptors.request.use(config => {
   const token = Cookies.get('csrftoken');

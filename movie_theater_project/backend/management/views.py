@@ -216,13 +216,17 @@ class RoleViewSet(viewsets.ModelViewSet):
     serializer_class = RoleSerializer
     permission_classes = [IsAdminOrReadOnly]
 
-       
 
 class MovieViewSet(viewsets.ModelViewSet):
     """ViewSet for managing movies."""
     queryset = Movie.objects.all()
     serializer_class = MovieSerializer
-    permission_classes = [IsAdminOrReadOnly]
+    def get_permissions(self):
+        if self.action in ('create', 'update', 'partial_update', 'destroy'):
+            permission_classes = [IsAdminOrReadOnly]
+        else:
+            permission_classes = [AllowAny]
+        return [perm() for perm in permission_classes]
     @action(detail=False, methods=['get'], url_path='popular')
     def get_popular_movies(self, request):
         """Custom action to get popular movies."""
@@ -242,7 +246,22 @@ class MovieViewSet(viewsets.ModelViewSet):
         roles = Role.objects.filter(movie=movie)
         serializer = RoleSerializer(roles, many=True)
         return Response(serializer.data)
+# GET /api/movies/{pk}/reviews/ → list (open to all)
+    @action(detail=True, methods=['get'], url_path='reviews',
+            permission_classes=[AllowAny])
+    def reviews(self, request, pk=None):
+        qs = Review.objects.filter(movie_id=pk)
+        serializer = ReviewSerializer(qs, many=True, context={'request': request})
+        return Response(serializer.data)
 
+    # POST /api/movies/{pk}/reviews/ → create (only auth’d)
+    @reviews.mapping.post
+    @permission_classes([IsAuthenticated])
+    def add_review(self, request, pk=None):
+        serializer = ReviewSerializer(data=request.data, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        serializer.save(user=request.user, movie_id=pk)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 class SeatViewSet(viewsets.ModelViewSet):
     """ViewSet for managing seats."""
     queryset = Seat.objects.all()
@@ -268,6 +287,7 @@ class TheaterViewSet(viewsets.ModelViewSet):
             auditorium__available_seats__gt=0)
         serializer = ShowtimeSerializer(showtimes, many=True)
         return Response(serializer.data)
+    
 
 class AuditoriumViewSet(viewsets.ModelViewSet):
     """ViewSet for managing auditoriums."""
@@ -313,6 +333,22 @@ class ReviewViewSet(viewsets.ModelViewSet):
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
     permission_classes = [IsReviewOwnerOrReadOnly]
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+        # Create a notification for the user
+        Notification.objects.create(
+            user=self.request.user,
+            message=f"Your review for {serializer.validated_data['movie'].title} has been created."
+        )
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    @action(detail=True, methods=['get'], url_path='notifications')
+    def get_notifications(self, request, pk=None):
+        """Custom action to get notifications for a specific review."""
+        review = get_object_or_404(Review, pk=pk)
+        notifications = Notification.objects.filter(review=review)
+        serializer = NotificationSerializer(notifications, many=True)
+        return Response(serializer.data)
+    
 
 class NotificationViewSet(viewsets.ModelViewSet):
     """ViewSet for managing notifications."""

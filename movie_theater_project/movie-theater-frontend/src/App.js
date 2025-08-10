@@ -23,6 +23,7 @@ import DirectorDetails from './components/DirectorDetails';
 import ProducerDetails from './components/Producer'; 
 import TheaterDetails from './components/TheaterDetails'; 
 import ActorDetails from './components/Actor'; // Import ActorDetails component
+import Review from './components/Review';
 // Main App component
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -102,6 +103,7 @@ function App() {
           <Route path="/producers/:producerId" element={<ProducerDetails />} />
           <Route path="/theaters/:theaterId" element={<TheaterDetails />} />
           <Route path="/actors/:actorId" element={<ActorDetails />} />
+          <Route path="/movies/:id/reviews" element={<Review />} />
         </Routes>
       </main>
     </Router>
