@@ -3,8 +3,23 @@
 This repository contains completed projects from **CS50’s Web Programming with Python and JavaScript**, offered by Harvard University. The course focuses on full-stack web development, including frontend and backend technologies such as HTML, CSS, JavaScript, Python, Django, SQL, and Git.
 
 ---
+## 🎬 Movie Theater Web App (in progress)
+A full-stack movie ticket booking platform built with Django REST Framework and React, featuring dynamic seat selection, showtime filtering, and a review system.
 
-## 📱 Social Network 
+### Features
+- Browse movies with posters, trailers, and actor/director details.
+- Search and filter by genre or upcoming showtimes.
+- Visual seat picker for showtime bookings.
+- User authentication with booking history in profile.
+- Leave ratings and reviews for movies.
+- Admin panel to manage movies, actors, directors, theaters, and showtimes.
+- Prevents booking cancellations for ended showtimes.
+
+### Skills:
+Django REST Framework, React, Axios, React Router, Bootstrap, PostgreSQL, User Auth, API Integration, Responsive UI, Admin Customization
+
+---
+## 📱 Social Network (project4)
 A full-stack social media web application built using Django, JavaScript, HTML, and CSS, allowing users to interact through posts, follows, likes, and comments.
 
 ### Features
@@ -73,13 +88,7 @@ Django, Markdown, HTML Templates, Form Handling, Search Logic
 
 ---
 
-## 🧠 Coming Soon: More Projects
 
-More projects from CS50W such as:
-- Network (Twitter clone with followers, likes, and JavaScript-based SPA interface)
-- Capstone project (optional final independent full-stack project)
-
----
 
 ## 🛠️ Technologies Used
 
