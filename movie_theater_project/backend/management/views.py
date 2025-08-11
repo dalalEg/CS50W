@@ -348,7 +348,15 @@ class ReviewViewSet(viewsets.ModelViewSet):
         notifications = Notification.objects.filter(review=review)
         serializer = NotificationSerializer(notifications, many=True)
         return Response(serializer.data)
-    
+    def perform_update(self, serializer):
+        return super().perform_update(serializer)
+    def perform_destroy(self, instance):
+        # Create a notification for the user
+        Notification.objects.create(
+            user=self.request.user,
+            message=f"Your review for {instance.movie.title} has been deleted."
+        )
+        return super().perform_destroy(instance)
 
 class NotificationViewSet(viewsets.ModelViewSet):
     """ViewSet for managing notifications."""

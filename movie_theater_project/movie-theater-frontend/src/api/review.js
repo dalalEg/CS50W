@@ -1,10 +1,11 @@
 import { api } from './axios';
 
 // src/api/booking.js
-export function createReview(movieId, { content, rating }) {
+export function createReview(movieId, { content, rating, anonymous }) {
   return api.post(`/api/movies/${movieId}/reviews/`, {
     content,
-    rating
+    rating,
+    anonymous
   });
 }
 export function fetchReviewsByMovie(movieId) {

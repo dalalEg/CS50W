@@ -1,25 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { fetchReviewsByMovie, createReview } from '../api/review';
+import { fetchReviewsByMovie, createReview,makeReviewAnonymous } from '../api/review';
+import RatingReview from "./RatingReview" // add you floder path properly
 
 export default function Review() {
   const { id: movieId } = useParams();
   const [reviews, setReviews] = useState([]);
   const [content, setContent] = useState('');
   const [rating, setRating] = useState(5);
-  const [error, setError]     = useState(null);
-
+  const [error, setError] = useState(null);
+  const [anonymous, setAnonymous] = useState(false);
+  
   useEffect(() => {
     fetchReviewsByMovie(movieId)
       .then(resp => setReviews(resp.data))
       .catch(() => setError('Failed to load reviews.'));
   }, [movieId]);
 
+   
   const handleSubmit = async e => {
     e.preventDefault();
     setError(null);
     try {
-      await createReview(movieId, { content, rating });
+      await createReview(movieId, { content, rating ,anonymous});
       setContent('');
       setRating(5);
       const resp = await fetchReviewsByMovie(movieId);
@@ -40,7 +43,7 @@ export default function Review() {
       <ul>
         {reviews.map(r => (
           <li key={r.id}>
-            <strong>{r.user.username}</strong> rated {r.rating}/5
+            <strong>{r.anonymous ? 'Anonymous' : r.user.username}</strong> rated {r.rating}/5
             <p>{r.content}</p>
           </li>
         ))}
@@ -51,15 +54,8 @@ export default function Review() {
       <form onSubmit={handleSubmit}>
         <div className="mb-3">
           <label>Rating</label>
-          <select
-            className="form-control"
-            value={rating}
-            onChange={e => setRating(+e.target.value)}
-          >
-            {[1,2,3,4,5].map(n => (
-              <option key={n} value={n}>{n}</option>
-            ))}
-          </select>
+          <RatingReview rating={rating} setRating={setRating} />
+
         </div>
         <div className="mb-3">
           <label>Content</label>
@@ -68,6 +64,14 @@ export default function Review() {
             value={content}
             onChange={e => setContent(e.target.value)}
             required
+          />
+        </div>
+        <div className="mb-3">
+          <label>Anonymous</label>
+          <input
+            type="checkbox"
+            checked={anonymous}
+            onChange={e => setAnonymous(e.target.checked)}
           />
         </div>
         <button type="submit" className="btn btn-primary">
