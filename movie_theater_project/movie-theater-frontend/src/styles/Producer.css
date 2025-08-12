@@ -1,0 +1,30 @@
+.producer-details {
+ background: var(--clr-card-bg);
+  color: var(--clr-text);
+  padding: var(--gap-lg);
+  margin: var(--gap-md);
+  border-radius: var(--radius-md);
+
+}
+
+.producer-details h2 {
+  font-size: 1.75rem;
+  color: var(--clr-primary);
+  margin-bottom: var(--gap-sm);
+}
+
+.producer-details p {
+  font-size: 1rem;
+  text-align: flex-start;
+}
+
+.producer-details .producer-movie {
+  color: var(--clr-accent);
+  text-decoration: none;
+  font-weight: 600;
+  font-style: italic;
+}
+
+.producer-details .producer-movie:hover {
+  text-decoration: underline;
+}

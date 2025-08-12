@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate, Link, useParams } from 'react-router-dom';
 import { fetchProducerById } from '../api/producer';
 import { fetchMovieByProducer } from '../api/movies';
-import './Producer.css';
+import '../styles/Producer.css';
 export default function ProducerDetails() {
     const { producerId } = useParams();
     const navigate = useNavigate();
@@ -49,7 +49,7 @@ export default function ProducerDetails() {
                     <ul>
                         {movies.map(movie => (
                             <li key={movie.id}>
-                                <Link to={`/movies/${movie.id}`}>{movie.title}</Link>
+                                <Link to={`/movies/${movie.id}`} className='producer-movie'>{movie.title}</Link>
                             </li>
                         ))}
                     </ul>

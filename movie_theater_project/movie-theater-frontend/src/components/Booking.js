@@ -4,7 +4,7 @@ import { createBooking } from '../api/booking';
 // Booking component to confirm and finalize a booking
 // This component is responsible for displaying the booking confirmation page
 // and handling the booking creation process.
-
+import '../styles/Booking.css';
 export default function Booking() {
   const { state }    = useLocation();
   const navigate     = useNavigate();
@@ -34,16 +34,21 @@ const handleConfirm = () => {
   createBooking(showtimeId, seatIds)
     .then(resp => setBooking(resp.data))
     .catch(err => {
-  const data = err.response?.data || {};
-  const fieldErrors = [];
-  if (data.seat_ids)      fieldErrors.push(...data.seat_ids);
-  if (data.showtime_id)   fieldErrors.push(...data.showtime_id);
-  if (data.detail)        fieldErrors.push(data.detail);
-  setError(fieldErrors.length
-    ? fieldErrors.join(', ')
-    : 'Failed to place booking.'
-  );
-})
+      const status = err.response?.status;
+      if (status === 401 || status === 403) {
+        setError('Please log in to place a booking.');
+        return;
+      }
+      const data = err.response?.data || {};
+      const fieldErrors = [];
+      if (data.seat_ids)      fieldErrors.push(...data.seat_ids);
+      if (data.showtime_id)   fieldErrors.push(...data.showtime_id);
+      if (data.detail)        fieldErrors.push(data.detail);
+      setError(fieldErrors.length
+        ? fieldErrors.join(', ')
+        : 'Failed to place booking.'
+      );
+    })
     .finally(() => setLoading(false));
 };
 

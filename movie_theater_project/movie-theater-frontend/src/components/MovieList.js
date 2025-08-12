@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { fetchMovies } from '../api/movies';
 import { useNavigate }  from 'react-router-dom';
-import './MovieList.css';
+import '../styles/MovieList.css';
 
 function MovieList() {
   const [movies, setMovies]   = useState([]);

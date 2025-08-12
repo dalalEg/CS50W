@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate, Link, useParams } from 'react-router-dom';
 import { fetchBookingById, cancelBooking } from '../api/booking';
-
+import '../styles/BookingDetail.css';
 export default function BookingDetail() {
   const { bookingId }    = useParams();
   const navigate         = useNavigate();
@@ -54,8 +54,8 @@ export default function BookingDetail() {
       {!canCancel && <p className="text-muted">Cannot cancel past bookings.</p>}
       <p>Created At: {new Date(booking.created_at).toLocaleString()}</p>
       <p>Updated At: {new Date(booking.updated_at).toLocaleString()}</p>
-      <button onClick={() => navigate(-1)}>Back to Bookings</button>
-      <Link to={`/bookings/${booking.id}/edit`}>Edit Booking</Link>
+      <button onClick={() => navigate(-1)} className='btn btn-secondary'>Back to Bookings</button>
+      <Link to={`/bookings/${booking.id}/edit`} className='btn btn-secondary'>Edit Booking</Link>
     </div>
   );
 }

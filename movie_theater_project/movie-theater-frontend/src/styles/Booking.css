@@ -1,0 +1,22 @@
+.booking-confirm {
+  max-width: 600px;
+  margin: var(--gap-lg) auto;
+  composes: card;        /* if using CSS modules */
+  /* or <div className="card booking-confirm"> */
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-md);
+}
+
+.booking-confirm table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: var(--gap-md);
+}
+
+.booking-confirm th,
+.booking-confirm td {
+  padding: var(--gap-sm);
+  border: 1px solid var(--clr-border);
+  text-align: left;
+}

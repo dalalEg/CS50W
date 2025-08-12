@@ -1,32 +1,30 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
-import './NavBar.css';
+import '../styles/NavBar.css';
 
-export default function NavBar({ isAuthenticated, username, onLogout , userId }) {
+export default function NavBar({ currentUser, setCurrentUser, onLogout  }) {
     return (
         <nav className="navbar">
             <Link to="/" className="navbar-link">All Movies</Link>
             <Link to="/showtimes" className="navbar-link">Available Showtimes</Link>
             <Link to="/theaters" className="navbar-link">Our Theaters</Link>
-            <div className="navbar-links">
-                {isAuthenticated ? (
-                    <>
-                        <Link to="/profile" className="nav-link">
-                            {username}
-                            { userId ? ` (ID: ${userId})` : ''}
-                        </Link>
-                        <button className="btn btn-link" onClick={onLogout}>
-                            Logout
-                        </button>
-                    </>
-                ) : (
-                    <>
-                        <Link className="nav-link" to="/login">Login</Link>
-                        <Link className="nav-link" to="/register">Register</Link>
-                    </>
-                )}
-            </div>
-        </nav>
+
+        {!currentUser && (
+            <>
+            <Link to="/login"    className="navbar-link">Login</Link>
+            <Link to="/register" className="navbar-link">Register</Link>
+            </>
+        )}
+
+        {currentUser && (
+            <>
+            <Link to="/profile" className="navbar-link">Profile</Link>
+            <button onClick={onLogout} className="navbar-link">
+                Logout
+            </button>
+            </>
+        )}
+    </nav>
     )
 }
 

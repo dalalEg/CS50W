@@ -4,7 +4,7 @@ import { fetchMovieById }   from '../api/movies';
 import { fetchShowtimesByMovie } from '../api/showtimes';
 import { fetchRolesByMovie } from '../api/roles';
 import { fetchRole } from '../api/roles';
-import './MovieDetail.css';
+import '../styles/MovieDetail.css';
 
 function MovieDetail() {
   const { id } = useParams();
@@ -45,6 +45,9 @@ function MovieDetail() {
         src={movie.poster || '/placeholder.jpg'}
         alt={`${movie.title} poster`}
       />
+       <Link to={`/movies/${id}/reviews`} state={{ movieId: id }}>
+         <p className="review-link"><strong>Click here to see our clients reviews about {movie.title}</strong></p>
+        </Link>
       <div className="info">
         <p><strong>Release Date:</strong> {movie.release_date}</p>
         <p><strong>Rating:</strong> {movie.rating}/10</p>
@@ -91,9 +94,7 @@ function MovieDetail() {
           )}
         </ul>
 
-        <Link to={`/movies/${id}/reviews`} state={{ movieId: id }} className="review-link">
-          Click here to reviews
-        </Link>
+       
 
         <p><strong>Available Showtimes:</strong></p>
         <ul>
@@ -104,7 +105,7 @@ function MovieDetail() {
               <li key={st.id}>
                 {new Date(st.start_time).toLocaleString()} –{' '}
                 {st.auditorium?.name || 'Unknown auditorium'} –{' '}
-                {st.auditorium.available_seats} seats available
+                {st.available_seats} seats available
                 <Link to={`/showtimes/${st.id}`} className="showtime-link">
                   Click For More Details
                 </Link>

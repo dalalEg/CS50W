@@ -1,17 +1,16 @@
 .navbar {
   display: flex;
   align-items: center;
-  padding: .75rem 1.5rem;
-  background-color: #333;
-  color: #fff;
+  padding: var(--gap-md) var(--gap-lg);
+  background: var(--clr-primary);
 }
 
 /* brand link on the left */
 .navbar .navbar-link {
-  font-size: 1.25rem;
+  font-size: var(--fs-md);
   text-decoration: none;
-  color: #fff;
-  margin-right: 2rem;
+  color: var(--clr-text-light);
+  margin-right: var(--gap-md);
   margin-left: 2rem;
 }
 
@@ -19,8 +18,12 @@
 .navbar .navbar-links {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: var (--gap-md);
   /* if you want them pushed to the right: */
   margin-left: auto;
+}
+
+.navbar a:hover {
+  text-decoration: underline;
 }
 

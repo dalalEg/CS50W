@@ -1,7 +1,7 @@
 import React, { use, useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { fetchShowtimes }   from '../api/showtimes';
-import './ShowtimeList.css';
+import '../styles/ShowtimeList.css';
 
 function ShowtimeList() {
   const [showtimes, setShowtimes] = useState([]);

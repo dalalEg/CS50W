@@ -1,0 +1,27 @@
+.profile {
+  background: var(--clr-card-bg);
+  color: var(--clr-text);
+  padding: var(--gap-md);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow);
+  max-width: 400px;
+  margin: var(--gap-lg) auto;
+}
+
+.profile h1 {
+  font-size: var(--fs-lg);
+  margin-bottom: var(--gap-sm);
+}
+
+.profile .info {
+  font-size: var(--fs-md);
+  line-height: 1.5;
+}
+
+.error {
+  color: var(--clr-error, #d93025);
+}
+
+.loading {
+  color: var(--clr-secondary);
+}

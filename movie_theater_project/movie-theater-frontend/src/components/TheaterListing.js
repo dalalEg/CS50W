@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';  // remove the invalid `use`
 import { Link,useNavigate } from 'react-router-dom';
 import { fetchTheaters }          from '../api/theater';
 import { fetchAuditoriumByTheater } from '../api/auditorium';
-import './TheaterListing.css';
+import '../styles/TheaterListing.css';
 
 const TheaterListing = () => {
   const navigate = useNavigate();

@@ -1,0 +1,31 @@
+.actor-details {
+  background: var(--clr-card-bg);
+  color: var(--clr-text);
+  padding: var(--gap-lg);
+  margin: var(--gap-md);
+  border-radius: var(--radius-md);
+}
+
+
+.actor-details h2 {
+    font-size: 1.75rem;
+  color: var(--clr-primary);
+  margin-bottom: var(--gap-sm);
+}
+
+.actor-details p {
+  font-size: 1rem;
+  text-align: flex-start;
+}
+ .actor-movie {
+  margin: var(--gap-sm) 0;
+  font-size: 1rem;
+  color: var(--clr-text);
+  text-decoration: none;
+  font-weight: 600;
+  font-style: italic;
+}
+
+.actor-details .actor-movie:hover {
+  text-decoration: underline;
+}

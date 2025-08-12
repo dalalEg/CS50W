@@ -38,7 +38,7 @@
 }
 
 .seat.selected {
-  background: #80deea;
+  background: #919797;
 }
 
 .seat.booked {
@@ -50,4 +50,36 @@
   display: block;
   font-size: 0.75rem;
   color: #555;
+}
+
+.showtime-detail {
+  background: var(--clr-secondary);
+    background-color: #c0e7ed;
+  padding: var(--gap-md);
+  border-radius: var(--radius-md);
+  font-family: var(--font-base);
+}
+
+.seat-section {
+  background: var(--clr-card-bg);
+  border: 1px solid var(--clr-muted);
+  border-radius: var(--radius-sm);
+  padding: var(--gap-md);
+  margin: var(--gap-lg) 0;
+}
+
+.seat {
+  aspect-ratio: 1;
+  background: var(--clr-card-bg);
+  border: 1px solid var(--clr-muted);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.seat.available:hover {
+  background: var(--clr-primary);
+}
+
+.seat.selected {
+  background: var(--clr-accent);
 }

@@ -5,7 +5,8 @@ import {
   Routes,
   Route,
   Link,
-  Navigate          // ← import Navigate
+  Navigate,
+  useNavigate
 } from 'react-router-dom';
 import NavBar   from './components/NavBar';
 import MovieList   from './components/MovieList';
@@ -30,39 +31,33 @@ function App() {
   const [username, setUsername]               = useState('');
   const [user, setUser] = useState(null);
 
-
   // on mount, you might ping /api/auth/user or read a cookie/token
-  useEffect(() => {
-    api.get('/api/auth/user/')
-      .then(r => {
+useEffect(() => {
+  api.get('/api/auth/user/')
+    .then(res => {
+      // If the backend returned null, that means "no user"
+      if (res.data && res.data.username) {
         setIsAuthenticated(true);
-        setUsername(r.data.username);
-      })
-      .catch(() => {
+        setUsername(res.data.username);
+        setUser(res.data);
+      } else {
         setIsAuthenticated(false);
         setUsername('');
-      });
-  }, []);
-  useEffect(() => {
-    if(isAuthenticated){
-      // fetch user details if authenticated
-      api.get('/api/auth/user/')
-        .then(r => {
-          setUsername(r.data.username);
-          setUser(r.data);
-        })
-        .catch(() => setIsAuthenticated(false));
-    }
-  }, [isAuthenticated]);
-  const handleLogout = () => {
-    // in App.js or wherever
-    api.post('/api/auth/logout/').finally(() => {
+        setUser(null);
+      }
+    })
+    .catch(() => {
       setIsAuthenticated(false);
       setUsername('');
       setUser(null);
-      // redirect to home page after logout
-      window.location.href = '/';
     });
+}, []);
+ const handleLogout = async () => {
+    try {
+      await api.post('/api/auth/logout/');
+    } catch { /* ignore */ }
+    setUser(null);
+    setIsAuthenticated(false);
   };
 
   return (
@@ -73,9 +68,8 @@ function App() {
 
       {/* now NavBar owns the profile link */}
       <NavBar
-        isAuthenticated={isAuthenticated}
-        username={username}
-        userId={user?.id}
+        currentUser={user}
+        setCurrentUser={setUser}
         onLogout={handleLogout}
       />
          
@@ -83,7 +77,7 @@ function App() {
         <Routes className="Routes">
           <Route path="/"            element={<MovieList />} />
           <Route path="/movies/:id"  element={<MovieDetail />} />
-          <Route path="/login"       element={<Login onLogin={() => setIsAuthenticated(true)} />} />
+          <Route path="/login"       element={<Login onLogin={(userData) => { setIsAuthenticated(true); setUser(userData); }} />} />
           <Route path="/register"    element={<Register onRegister={() => setIsAuthenticated(true)} />} />
           <Route
             path="/profile"

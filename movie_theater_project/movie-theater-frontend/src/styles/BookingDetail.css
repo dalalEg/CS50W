@@ -1,0 +1,30 @@
+.booking-detail {
+  background: var(--clr-card-bg);
+  color: var(--clr-text);
+  padding: var(--gap-md);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow);
+  max-width: 600px;
+  margin: var(--gap-lg) auto;
+}
+
+.booking-detail h2 {
+  font-size: var(--fs-lg);
+  margin-bottom: var(--gap-sm);
+}
+
+.booking-detail p {
+  margin: var(--gap-xs) 0;
+}
+
+.booking-detail .btn {
+  margin-top: var(--gap-md);
+}
+
+.text-danger {
+  color: var(--clr-error, #d93025);
+}
+
+.text-muted {
+  color: var(--clr-muted, #666);
+}

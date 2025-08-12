@@ -114,3 +114,16 @@ body {
   font-weight: 600;
   margin-left: 8px;
 }
+.actor-link {
+ color: var(--accent);
+  text-decoration: none;
+  font-weight: 600;
+  
+}
+.review-link {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: large;
+  margin-top: 1rem;
+}

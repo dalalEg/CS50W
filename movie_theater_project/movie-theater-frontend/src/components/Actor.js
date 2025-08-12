@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate, Link, useParams } from 'react-router-dom';
 import { fetchActorById } from '../api/actor';
 import { fetchMovieByActor } from '../api/movies';
-import './Actor.css';
+import '../styles/Actor.css';
 
 export default function ActorDetails() {
     const { actorId } = useParams();
@@ -50,8 +50,8 @@ export default function ActorDetails() {
                     <p><strong>Movies:</strong></p>
                     <ul>
                         {movies.map(movie => (
-                            <li key={movie.id}>
-                                <Link to={`/movies/${movie.id}`}>{movie.title}</Link>
+                            <li key={movie.id} >
+                                <Link to={`/movies/${movie.id}`} className="actor-movie">{movie.title}</Link>
                             </li>
                         ))}
                     </ul>

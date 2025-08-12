@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate, Link, useParams } from 'react-router-dom';
 import { fetchDirectorById } from '../api/director';
 import { fetchMovieByDirector } from '../api/movies';
-import './Director.css';
+import '../styles/Director.css';
+import '../index.css';
 export default function DirectorDetails() {
     const { directorId } = useParams();
     const navigate = useNavigate();
@@ -49,7 +50,7 @@ export default function DirectorDetails() {
                     <ul>
                         {movies.map(movie => (
                             <li key={movie.id}>
-                                <Link to={`/movies/${movie.id}`}>{movie.title}</Link>
+                                <Link to={`/movies/${movie.id}`} className='director-movie'>{movie.title}</Link>
                             </li>
                         ))}
                     </ul>

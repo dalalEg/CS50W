@@ -4,8 +4,8 @@ import { fetchShowtimeById } from '../api/showtimes';
 import { fetchSeats } from '../api/seats';
 import { useNavigate } from 'react-router-dom';
 import { createBooking } from '../api/booking';
-import './ShowtimeDetail.css';
-
+import '../styles/ShowtimeDetail.css';
+import '../index.css';
 function ShowtimeDetail() {
   const { id } = useParams();
   const [seats, setSeats]               = useState([]);

@@ -6,8 +6,8 @@ from rest_framework import viewsets
 from django_filters.rest_framework import DjangoFilterBackend
 from django.utils import timezone
 from datetime import datetime
-from rest_framework.decorators import api_view, action,permission_classes
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.decorators import api_view,action,permission_classes
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from django.views.decorators.csrf import csrf_exempt
 from .permissions import IsAdminOrReadOnly, IsReviewOwnerOrReadOnly,IsAuthenticated, IsBookingOwnerOrStaff, IsNotificationOwnerOrStaff
@@ -30,7 +30,7 @@ from django.contrib.auth.models import User
 from rest_framework import routers  
 from .models import (User, Movie, Genre,Seat,Showtime,Review, 
                      Notification,Booking,Actor,Director,Auditorium,Producer,Payment,watchlist,Role,Theater)
-
+from django.contrib.auth.models import AnonymousUser
 def index(request):
     return render(request, 'management/index.html')
    
@@ -148,19 +148,21 @@ def api_register(request):
     return Response({'message': 'Registration successful.'})
 
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
+@permission_classes([AllowAny])
+@csrf_exempt
 def api_logout(request):
     """API endpoint for user logout."""
     logout(request)
     return Response({'message': 'Logout successful.'}, status=204)
-
+ 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
+@permission_classes([AllowAny])
 def api_user_profile(request):
     """API endpoint to get the authenticated user's profile."""
     user = request.user
-    serializer = UserSerializer(user)
-    return Response(serializer.data)
+    if not user.is_authenticated:
+        return Response(None, status=200)
+    return Response(UserSerializer(user).data, status=200)
 
  #API views (generic class-based or viewsets).
 class GenreViewSet(viewsets.ModelViewSet):

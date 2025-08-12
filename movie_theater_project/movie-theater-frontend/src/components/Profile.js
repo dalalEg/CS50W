@@ -4,7 +4,7 @@ import {fetchUsers} from '../api/user';
 import { fetchBookingsByUser } from "../api/booking";
 // Profile component to display user profile information
 // This component fetches and displays the user's profile details such as name, email, and points.
-import './Profile.css';
+import '../styles/Profile.css';
 
 function Profile() {
   const { userId } = useParams();

@@ -13,8 +13,8 @@ function Login({ onLogin }) {
     e.preventDefault();
     setError('');
     try {
-      await api.post('/api/auth/login/', { username, password });
-      onLogin();            
+      const res = await api.post('/api/auth/login/', { username, password });
+      onLogin(res.data);  // Call the onLogin prop with user data   
       navigate('/');         // back to home
     } catch (err) {
       setError(err.response?.data?.detail || 'Login failed');
@@ -41,6 +41,7 @@ function Login({ onLogin }) {
                 placeholder="Username"
                 value={username}
                 onChange={e => setUsername(e.target.value)}
+                autoComplete='username'
               />
             </div>
             <div className="form-group mb-3">
@@ -50,6 +51,7 @@ function Login({ onLogin }) {
                 placeholder="Password"
                 value={password}
                 onChange={e => setPassword(e.target.value)}
+                autoComplete='current-password'
               />
             </div>
             <button className="btn btn-primary w-100" type="submit">
