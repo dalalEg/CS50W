@@ -24,7 +24,7 @@ class Movie(models.Model):
     director = models.ForeignKey('Director', on_delete=models.CASCADE, related_name='movies', blank=True, null=True)  # Add director field
     producer = models.ForeignKey('Producer', on_delete=models.CASCADE, related_name='movies', blank=True, null=True)
     actors = models.ManyToManyField('Actor', related_name='movies', blank=True)  # Add actors field
-    
+    duration = models.DurationField(blank=True, null=True)  # Add duration field
     def get_genres(self):
         return ", ".join([genre.name for genre in self.genre.all()]) if self.genre.exists() else "No genres"
     

@@ -156,3 +156,8 @@
     margin-bottom: 0.75rem;
   }
 }
+.movie-duration {
+  margin: .75rem 0;
+  font-size: .95rem;
+  color: #333;
+}

@@ -9,3 +9,5 @@ export const fetchShowtimesByTheater = theaterId =>
   api.get(`/api/theaters/${theaterId}/showtimes/`);
 export const fetchShowtimesByDate = date =>
   api.get(`/api/showtimes/?date=${date}`);  
+export const searchShowtimes = query =>
+  api.get(`/api/showtimes/?search=${query}`);

@@ -13,7 +13,7 @@ class UserAdmin(admin.ModelAdmin):
 
 @admin.register(Movie)
 class MovieAdmin(admin.ModelAdmin):
-    list_display = ('title', 'release_date', 'rating')
+    list_display = ('title', 'release_date', 'rating', 'duration'   )
     search_fields = ('title',)
     list_filter = ('release_date', 'rating', 'genre')
 

@@ -14,6 +14,8 @@ function MovieList() {
   const navigate              = useNavigate();
   const [selectedRating, setSelectedRating] = useState(0);
   const [sortBy, setSortBy]   = useState('alpha.desc');
+  const [selectedDuration, setSelectedDuration] = useState(180); // Default to 180 minutes
+  const [selectedYear, setSelectedYear] = useState(2000);
 
   useEffect(() => {
     fetchGenres()
@@ -37,29 +39,41 @@ function MovieList() {
     };
     load();
   }, [query]);
-    const displayedMovies = movies.filter(m =>
-    (!selectedGenre || m.genres.some(g => g.id === +selectedGenre)) &&
-    m.rating >= selectedRating
-  ).sort((a, b) => {
-      if (sortBy === 'popularity.desc') {
-        return b.rating - a.rating;
-      } else if (sortBy === 'popularity.asc') {
-        return a.rating - b.rating;
-      } else if (sortBy === 'release_date.desc') {
-        return new Date(b.release_date) - new Date(a.release_date);
-      } else if (sortBy === 'release_date.asc') {
-        return new Date(a.release_date) - new Date(b.release_date);
-      } else if (sortBy === 'alpha.desc') {
-        return a.title.localeCompare(b.title);
-      } else if (sortBy === 'alpha.asc') {
-        return b.title.localeCompare(a.title);
-      }
+
+  const parseDuration = (duration) => {
+    if (!duration) return 0;
+    const [hours, minutes, seconds] = duration.split(':').map(Number);
+    return (hours * 60) + minutes; // duration in minutes
+  };
+
+  const displayedMovies = movies
+    .filter(m => {
+      const releaseYear = new Date(m.release_date).getFullYear();
+      return (
+        (!selectedGenre || m.genres.some(g => g.id === +selectedGenre)) &&
+        m.rating >= selectedRating &&
+        parseDuration(m.duration) <= selectedDuration && // LESS than selected minutes
+        releaseYear >= selectedYear &&
+        releaseYear <= new Date().getFullYear()
+      );
+    })
+    .sort((a, b) => {
+      if (sortBy === 'popularity.desc') return b.rating - a.rating;
+      if (sortBy === 'popularity.asc') return a.rating - b.rating;
+      if (sortBy === 'release_date.desc') return new Date(b.release_date) - new Date(a.release_date);
+      if (sortBy === 'release_date.asc') return new Date(a.release_date) - new Date(b.release_date);
+      if (sortBy === 'alpha.desc') return a.title.localeCompare(b.title);
+      if (sortBy === 'alpha.asc') return b.title.localeCompare(a.title);
+      if (sortBy === 'duration.desc') return parseDuration(b.duration) - parseDuration(a.duration);
+      if (sortBy === 'duration.asc') return parseDuration(a.duration) - parseDuration(b.duration);
       return 0;
   });
   return (
     <div className="movie-list-container">
       <div className="filters">
-        <p><strong>Want to search about a specific movie?</strong></p>
+        <p><strong>Find your perfect movie</strong></p>
+
+        {/* Search Bar */}
         <input
           type="text"
           placeholder="Search by title or keyword..."
@@ -67,8 +81,9 @@ function MovieList() {
           onChange={e => setQuery(e.target.value)}
         />
 
+        {/* Genre */}
         <select
-          className='Genre-selector'
+          className="Genre-selector"
           value={selectedGenre}
           onChange={e => setSelectedGenre(e.target.value)}
         >
@@ -78,32 +93,59 @@ function MovieList() {
           ))}
         </select>
 
-        <label style={{ marginLeft: 16 }}>
+        {/* Rating */}
+        <label>
           Min Rating: {selectedRating.toFixed(1)}
+          <input
+            className="Rating-selector"
+            type="range"
+            min="0"
+            max="10"
+            step="0.1"
+            value={selectedRating}
+            onChange={e => setSelectedRating(parseFloat(e.target.value))}
+          />
         </label>
-        <input
-          className='Rating-selector'
-          type="range"
-          min="0"
-          max="10"
-          step="0.1"
-          value={selectedRating}
-          onChange={e => setSelectedRating(parseFloat(e.target.value))}
-        />
+
+        {/* Duration */}
+        <label>
+          Max Duration (minutes):
+          <input
+            type="number"
+            min="0"
+            value={selectedDuration}
+            onChange={e => setSelectedDuration(Number(e.target.value))}
+          />
+        </label>
+
+        {/* Release Year */}
+        <label>
+          Release Year (min):
+          <input
+            type="number"
+            min="1900"
+            max={new Date().getFullYear()}
+            value={selectedYear}
+            onChange={e => setSelectedYear(Number(e.target.value))}
+          />
+        </label>
+
+        {/* Sort */}
         <label className="sort-label">
-          Sort by:  <select value={sortBy} onChange={e => setSortBy(e.target.value)}>
+          Sort by:
+          <select value={sortBy} onChange={e => setSortBy(e.target.value)}>
             <option value="alpha.desc">Alphabetical (A-Z)</option>
             <option value="alpha.asc">Alphabetical (Z-A)</option>
             <option value="popularity.desc">Popularity (High to Low)</option>
             <option value="popularity.asc">Popularity (Low to High)</option>
             <option value="release_date.desc">Release Date (Newest First)</option>
             <option value="release_date.asc">Release Date (Oldest First)</option>
+            <option value="duration.desc">Duration (Longest First)</option>
+            <option value="duration.asc">Duration (Shortest First)</option>
           </select>
         </label>
-        <label className='release-label'>
-          Release Date:
-        </label>
       </div>
+
     
 
       {!loading && !error && displayedMovies.length === 0 && (
@@ -129,10 +171,10 @@ function MovieList() {
             <h2 className="movie-title">{movie.title}</h2>
             <p className="movie-date">{movie.release_date}</p>
             <p className="movie-rating">
-              Rating: {movie.rating ? `${movie.rating}/10` : 'TBD'}
+              IMDb RATING: {movie.rating ? `${movie.rating}/10` : 'TBD'}
             </p>
             <p className="movie-description">{movie.description}</p>
-
+            <p className="movie-duration">Duration: {movie.duration ? `${movie.duration} ` : 'TBD'}</p>
             {movie.trailer
               ? (
                 <a

@@ -53,7 +53,7 @@ class MovieSerializer(serializers.ModelSerializer):
     actors     = ActorSerializer(many=True, read_only=True)
     producer   = ProducerSerializer(read_only=True)
     poster     = serializers.ImageField(use_url=True, required=False)
-
+    duration   = serializers.DurationField()
     class Meta:
         model  = Movie
         fields = [
@@ -70,6 +70,7 @@ class MovieSerializer(serializers.ModelSerializer):
             'director',
             'actors',
             'producer',
+            'duration',
         ]
 
     def get_genre_list(self, obj):

@@ -326,11 +326,28 @@ class AuditoriumViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
 class ShowtimeViewSet(viewsets.ModelViewSet):
-    """ViewSet for managing showtimes."""
-    queryset = Showtime.objects.all()
+    queryset         = Showtime.objects.all()
     serializer_class = ShowtimeSerializer
-    permission_classes = [IsAdminOrReadOnly]
+    filter_backends  = [DjangoFilterBackend, SearchFilter, OrderingFilter]
 
+    # keep searching by movie title / theater name
+    search_fields    = ['movie__title', 'auditorium__theater__name']
+
+    # allow URL ?start_time__date=2025-08-15&language=French&is_VIP=true
+    filterset_fields = {
+      'start_time':    ['date', 'gte', 'lte'],
+      'language':      ['exact', 'icontains'],
+      'is_VIP':        ['exact'],
+      'thD_available': ['exact'],      # 3D
+      'parking_available':['exact'],
+      'auditorium__name': ['exact','icontains'],
+      'auditorium__theater__location': ['exact','icontains'],
+      'available_seats': ['gte','lte'],
+    }
+
+    # allow ?ordering=start_time or ?ordering=-available_seats
+    ordering_fields  = ['start_time','available_seats','movie__rating']
+    ordering         = ['start_time']
     def get_queryset(self):
         user = self.request.user
         base_qs = Showtime.objects.filter(
