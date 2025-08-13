@@ -47,19 +47,31 @@ class ProducerSerializer(serializers.ModelSerializer):
         fields = ['id','name','date_of_birth','biography']
 
 class MovieSerializer(serializers.ModelSerializer):
+    genres     = GenreSerializer(source='genre', many=True, read_only=True)
     genre_list = serializers.SerializerMethodField()
-    director = DirectorSerializer(read_only=True)
-    actors = ActorSerializer(many=True, read_only=True)
-    producer = ProducerSerializer(read_only=True)
-    poster = serializers.ImageField(use_url=True, required=False)
+    director   = DirectorSerializer(read_only=True)
+    actors     = ActorSerializer(many=True, read_only=True)
+    producer   = ProducerSerializer(read_only=True)
+    poster     = serializers.ImageField(use_url=True, required=False)
 
     class Meta:
-        model = Movie
+        model  = Movie
         fields = [
-            'id', 'title', 'description', 'release_date',
-            'genre_list', 'rating', 'created_at', 'poster',
-            'trailer', 'director', 'actors','producer'
+            'id',
+            'title',
+            'description',
+            'release_date',
+            'genre_list',
+            'genres',        # ← now included in JSON
+            'rating',
+            'created_at',
+            'poster',
+            'trailer',
+            'director',
+            'actors',
+            'producer',
         ]
+
     def get_genre_list(self, obj):
         return obj.get_genres()
 class TheaterSerializer(serializers.ModelSerializer):

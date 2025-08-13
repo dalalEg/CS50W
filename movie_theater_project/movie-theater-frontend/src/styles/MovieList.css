@@ -18,16 +18,22 @@
   transform: translateY(-4px);
 }
 
-.movie-poster {
-  display: block;
+.movie-poster-container {
   width: 100%;
-  height: fit-content;
-  max-height: 360px;
-  object-fit: cover;
-  object-position: center, center;
-  background-size: cover;        /* fill and crop */
-  background-position: center;   /* center crop */
-  background-repeat: no-repeat;
+  aspect-ratio: 2 / 3;       /* adjust to your poster’s width/height ratio */
+  background-color: var(--clr-border);
+  position: relative;
+  overflow: hidden;
+  margin: 0;
+}
+.movie-poster {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;      /* show the entire image */
+  object-position: center;
+  background: none;         /* remove any background cropping hacks */
 }
 
 .movie-details {
@@ -81,4 +87,72 @@
   padding: 2rem;
   text-align: center;
   color: #666;
+}
+.filters {
+  background: #ffffff;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.filters p {
+  flex-basis: 100%;
+  font-size: 1rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.filters input[type="text"],
+.filters select {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.filters input[type="text"]:focus,
+.filters select:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
+}
+
+.Genre-selector {
+  min-width: 150px;
+}
+
+.Rating-selector {
+  width: 150px;
+}
+
+.sort-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 500;
+}
+
+.sort-label select {
+  min-width: 180px;
+}
+
+.filters label {
+  font-size: 0.9rem;
+}
+
+@media (max-width: 768px) {
+  .filters {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .filters p {
+    margin-bottom: 0.75rem;
+  }
 }

@@ -1,9 +1,12 @@
+from encodings import search_function
+from re import search
 from django.http import HttpResponse
 from django.db import IntegrityError
 from django.shortcuts import render, redirect
 # Create your views here.
-from rest_framework import viewsets
+from rest_framework import viewsets,filters,generics
 from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.filters import SearchFilter, OrderingFilter
 from django.utils import timezone
 from datetime import datetime
 from rest_framework.decorators import api_view,action,permission_classes
@@ -223,6 +226,24 @@ class MovieViewSet(viewsets.ModelViewSet):
     """ViewSet for managing movies."""
     queryset = Movie.objects.all()
     serializer_class = MovieSerializer
+
+    filter_backends = [SearchFilter, DjangoFilterBackend, OrderingFilter]
+    search_fields = [
+        'title',
+        'description',
+        'genre__name',
+        'actors__name',
+        'producer__name',
+        'director__name'
+    ]
+    filterset_fields = {
+        'rating': ['exact', 'gte', 'lte'],  # filter by exact rating or ranges
+        'release_date': ['exact', 'year__gte', 'year__lte'],
+        'genre__name': ['exact'],
+    }
+    ordering_fields = ['rating', 'release_date', 'title']
+    ordering = ['title']
+
     def get_permissions(self):
         if self.action in ('create', 'update', 'partial_update', 'destroy'):
             permission_classes = [IsAdminOrReadOnly]
