@@ -66,7 +66,7 @@ function MovieDetail() {
             </a>
           </p>
         )}
-
+        <p><strong>Duration:</strong> {movie.duration} minutes</p>
         <p><strong>Genres:</strong> {movie.genre_list}</p>
         <p><strong>Director:</strong>{' '}
           <Link to={`/directors/${movie.director?.id}`} className="director-link">

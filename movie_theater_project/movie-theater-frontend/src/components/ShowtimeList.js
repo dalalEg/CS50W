@@ -20,7 +20,6 @@ function ShowtimeList() {
   const [filter3D,       setFilter3D]       = useState(false);
   const [filterParking,  setFilterParking]  = useState(false);
   const [location,       setLocation]       = useState('');
-
   useEffect(() => {
     fetchGenres()
       .then(resp => setGenres(resp.data))
@@ -116,8 +115,21 @@ function ShowtimeList() {
           <option>Hebrew</option>
           <option>French</option>
         </select>
+        <label>
+          <input type="checkbox" checked={filterVIP}
+                  onChange={_=>setFilterVIP(f=>!f)} /> VIP
+        </label>
+        <label>
+          <input type="checkbox" checked={filter3D}
+                  onChange={_=>setFilter3D(f=>!f)} /> 3D
+        </label>
+        <label>
+          <input type="checkbox" checked={filterParking}
+                  onChange={_=>setFilterParking(f=>!f)} /> Parking
+        </label>
+
       </div>
-      <h1 className="showtime-list-title">Available Showtimes</h1>
+      <h1 className="showtime-list-title">Available Showtimes ({displayShowtimes.length})</h1>
       <ul>
         
         {displayShowtimes.length === 0 ? (
