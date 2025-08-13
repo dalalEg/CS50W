@@ -62,15 +62,13 @@ A full-stack web application for booking movie tickets — featuring dynamic sea
 - 🛒 Booking flow (showtime → seats → confirmation)
 - ➕ Added pages for viewing Directors, Actors, Producers, and Theater details
 - 🎟️ Implement visual seat picker
+- Improve review & rating UI (star ratings)
+- - Add search filters for movies/showtimes
 
 ---
 
 ### 🏗️ What is coming next 
 - Polish user profile UI (show bookings ✅ , reviews, etc.)
-
-- Improve review & rating UI (star ratings)
-
-- Add search filters for movies/showtimes
 
 - Build booking cancellation/editing features  ✅ (testing in progress)
 
@@ -86,7 +84,6 @@ A full-stack web application for booking movie tickets — featuring dynamic sea
 
 #### Features
 
-- Add star-based rating system  
 - VIP showtime logic  
 - Multi-language support  
 - Dark mode toggle  
@@ -123,9 +120,10 @@ A full-stack web application for booking movie tickets — featuring dynamic sea
 ---
 
 ## 📸 Screenshots
-<img width="1910" height="896" alt="image" src="https://github.com/user-attachments/assets/def53204-ce69-4559-ad9b-61db2bc449bd" />
+<img width="1886" height="875" alt="image" src="https://github.com/user-attachments/assets/f21aa082-7397-4319-af30-df42a495530d" />
 
 <img width="667" height="799" alt="image" src="https://github.com/user-attachments/assets/ba31af31-77b2-4136-b579-e821280c711f" />
-<img width="1588" height="945" alt="image" src="https://github.com/user-attachments/assets/dc81b042-698f-4a62-8bf8-649bec96844d" />
+
+<img width="1914" height="885" alt="image" src="https://github.com/user-attachments/assets/41150828-909d-4c21-a8b4-1712b4463ec2" />
 
 
