@@ -45,7 +45,7 @@ export default function Review() {
   return (
     <div className="review-container">
       <div className='reviews'>
-        <h3>Reviews</h3>
+        <h3>Reviews ({reviews.length})</h3>
         {reviews.length === 0 && <p>No reviews yet.</p>}
         <ul>
           {reviews.map(r => (

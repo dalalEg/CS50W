@@ -25,3 +25,16 @@
 .loading {
   color: var(--clr-secondary);
 }
+.link{
+  color: var(--clr-primary);
+  margin: 0.5rem;
+  padding: 0.5rem;
+  border: 1px solid var(--clr-primary);
+  border-radius: var(--radius-md);
+  transition: background 0.3s;
+  display: block;
+}
+
+.link:hover {
+  background: var(--clr-primary-light);
+}

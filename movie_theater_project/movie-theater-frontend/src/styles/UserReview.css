@@ -1,0 +1,55 @@
+.user-review {
+  background: var(--clr-card-bg);
+  color: var(--clr-text);
+  padding: var(--gap-md);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow);
+  max-width: 500px;
+  margin: var(--gap-lg) auto;
+}
+
+.user-review h2 {
+  font-size: var(--fs-lg);
+  margin-bottom: var(--gap-sm);
+}
+.user-review ul {
+  list-style: none;
+  padding: 0;
+}
+.user-review li {
+  margin-bottom: var(--gap-sm);
+  padding: var(--gap-sm);
+  border-bottom: 1px solid var(--clr-border);
+}
+.user-review li:last-child {
+  border-bottom: none;
+}
+.user-review .link{
+    color: var(--clr-primary);
+    margin: 0.5rem;
+    padding: 0.5rem;
+    transition: background 0.3s;
+}
+
+.user-review .link:hover {
+    background: var(--clr-hover-bg);
+}
+.user-review button {
+    background: var(--clr-primary);
+    color: #fff;
+    border: none;
+    padding: 0.5rem 1rem;
+    margin: 0.5rem ;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.user-review button:hover {
+    background: var(--clr-primary-dark);
+}
+
+.user-review form {
+    display: flex;
+    flex-direction: column;
+}

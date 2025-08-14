@@ -1,0 +1,34 @@
+@import 'theme.css';
+
+.user-booking {
+  background: var(--clr-card-bg);
+  color: var(--clr-text);
+  padding: var(--gap-md);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow);
+  max-width: 500px;
+  margin: var(--gap-lg) auto;
+}
+
+.user-booking h2 {
+  font-size: var(--fs-lg);
+  margin-bottom: var(--gap-sm);
+}
+.user-booking ul {
+  list-style: none;
+  padding: 0;
+}
+.user-booking li {
+  margin-bottom: var(--gap-sm);
+  padding: var(--gap-sm);
+  border-bottom: 1px solid var(--clr-border);
+}
+.user-booking li:last-child {
+  border-bottom: none;
+}
+.user-booking link{
+    color: var(--clr-primary);
+    margin: 0.5rem;
+    padding: 0.5rem;
+    transition: background 0.3s;
+}

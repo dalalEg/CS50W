@@ -25,6 +25,8 @@ import ProducerDetails from './components/Producer';
 import TheaterDetails from './components/TheaterDetails'; 
 import ActorDetails from './components/Actor'; // Import ActorDetails component
 import Review from './components/Review';
+import UserBooking from './components/UserBooking'; // Import UserBooking component
+import UserReview from './components/UserReview'; // Import UserReview component
 // Main App component
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -98,6 +100,8 @@ useEffect(() => {
           <Route path="/theaters/:theaterId" element={<TheaterDetails />} />
           <Route path="/actors/:actorId" element={<ActorDetails />} />
           <Route path="/movies/:id/reviews" element={<Review />} />
+          <Route path="/user/bookings/:id" element={<UserBooking />} />
+          <Route path="/reviews/:userId" element={<UserReview />} />
         </Routes>
       </main>
     </Router>

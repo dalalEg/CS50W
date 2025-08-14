@@ -34,25 +34,11 @@ function Profile() {
   return (  
     <div className="profile">
       <h1>User Profile</h1>
-      <p><strong>Name:</strong> {user.name}</p>
+      <p><strong>Name:</strong> {user.username}</p>
       <p><strong>Email:</strong> {user.email}</p>
       <p><strong>Points:</strong> {user.points}</p>
-      <h2>Bookings</h2>
-      {bookings.length === 0 ? (
-        <p>No bookings found for this user.</p>
-      ) : (
-        <ul>
-          {bookings.map(booking => (
-            <li key={booking.id}>
-              <p><strong>Booking ID:</strong> {booking.id}</p>
-              <p><strong>Movie:</strong> {booking.showtime?.movie?.title || 'Unknown Movie'}</p>
-              <p><strong>Start Time:</strong> {new Date(booking.showtime?.start_time).toLocaleString()}</p>
-              <p><strong>Seats:</strong> {booking.seats.map(seat => seat.seat_number).join(', ')}</p>
-              <Link to={`/bookings/${booking.id}`} className="booking-link">View Booking Details</Link>
-            </li>
-          ))}
-        </ul>
-      )}
+      <Link to={`/user/bookings/${user.id}`} className="link">Click To View Your Bookings</Link>
+      <Link to={`/reviews/${user.id}`} className="link">Click To View Your Reviews</Link>
     </div>
   );
 }

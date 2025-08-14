@@ -378,6 +378,9 @@ class ReviewViewSet(viewsets.ModelViewSet):
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
     permission_classes = [IsReviewOwnerOrReadOnly]
+    filter_backends  = [DjangoFilterBackend, filters.SearchFilter]
+    filterset_fields = ['user','movie']
+    search_fields    = ['content']
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
         # Create a notification for the user
