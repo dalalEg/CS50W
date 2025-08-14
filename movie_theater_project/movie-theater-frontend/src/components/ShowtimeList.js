@@ -20,6 +20,8 @@ function ShowtimeList() {
   const [filter3D,       setFilter3D]       = useState(false);
   const [filterParking,  setFilterParking]  = useState(false);
   const [location,       setLocation]       = useState('');
+  const [sortBy, setSortBy]   = useState('alpha.desc');
+  
   useEffect(() => {
     fetchGenres()
       .then(resp => setGenres(resp.data))
@@ -46,6 +48,11 @@ function ShowtimeList() {
 
   if (error)   return <p className="error">{error}</p>;
   if (!showtimes) return <p className="loading">Loading…</p>;
+  function parseDuration(durStr='') {
+    const [h=0, m=0, s=0] = durStr.split(':').map(n => parseInt(n,10));
+    return h*3600 + m*60 + s;
+  }
+
  const displayShowtimes = showtimes
   .filter(st => {
     const start = new Date(st.start_time);
@@ -61,7 +68,13 @@ function ShowtimeList() {
     if (st.available_seats < availableSeats) return false;
     return true;
   })
-  .sort((a,b) => new Date(a.start_time) - new Date(b.start_time));  // soonest first
+  .sort((a,b) =>{
+    if (sortBy === 'showtime_date.desc') return new Date(b.start_time) - new Date(a.start_time);
+    if (sortBy === 'showtime_date.asc') return new Date(a.start_time) - new Date(b.start_time);
+    if(sortBy === 'duration.desc') return parseDuration(b.movie?.duration) - parseDuration(a.movie?.duration);
+    if (sortBy === 'duration.asc') return parseDuration(a.movie?.duration) - parseDuration(b.movie?.duration);
+    return 0;
+  });  // soonest first
 
   return (
     <div className="showtime-list">
@@ -127,11 +140,15 @@ function ShowtimeList() {
           <input type="checkbox" checked={filterParking}
                   onChange={_=>setFilterParking(f=>!f)} /> Parking
         </label>
-
+        <select value={sortBy} onChange={e => setSortBy(e.target.value)}>
+          <option value="showtime_date.desc">Showtime Date (Closest First)</option>
+          <option value="showtime_date.asc">Showtime Date (Farthest First)</option>
+          <option value="duration.desc">Duration (Longest First)</option>
+          <option value="duration.asc">Duration (Shortest First)</option>
+        </select>
       </div>
       <h1 className="showtime-list-title">Available Showtimes ({displayShowtimes.length})</h1>
-      <ul>
-        
+      <ul className='showtime-container'>
         {displayShowtimes.length === 0 ? (
           <p>No showtimes available</p>
         ) : null}
@@ -139,6 +156,7 @@ function ShowtimeList() {
           <li key={st.id}>
             <p><strong>Movie:</strong> {st.movie?.title || 'Unknown Movie'}</p>
             <p><strong>Start Time:</strong> {new Date(st.start_time).toLocaleString()}</p>
+            <p><strong>Duration:</strong> {st.movie?.duration || 'Unknown Duration'}</p>
             <p><strong>Auditorium:</strong> {st.auditorium?.name || 'Unknown auditorium'}</p>
             <p><strong>Theater:</strong> {st.auditorium?.theater?.name || 'Unknown theater'}</p>
             <p><strong>Available Seats:</strong> {st.available_seats??0} seats available</p>

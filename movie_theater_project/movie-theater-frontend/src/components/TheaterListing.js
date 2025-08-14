@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';  // remove the invalid `use` import
 import { Link,useNavigate } from 'react-router-dom';
-import { fetchTheaters }          from '../api/theater';
+import { fetchTheaters ,searchTheaters}          from '../api/theater';
 import { fetchAuditoriumByTheater } from '../api/auditorium';
 import '../styles/TheaterListing.css';
 
@@ -8,7 +8,7 @@ const TheaterListing = () => {
   const navigate = useNavigate();
   const [theaters, setTheaters] = useState([]);
   const [error, setError]       = useState(null);
-  
+  const [location, setLocation] = useState('');
   useEffect(() => {
     let isMounted = true;
     fetchTheaters()
@@ -30,20 +30,39 @@ const TheaterListing = () => {
       });
     return () => { isMounted = false; };
   }, []);  // only run once
-
+  useEffect(() => {
+    if (location) {
+      const timer = setTimeout(() => {
+        searchTheaters(location)
+          .then(res => setTheaters(res.data))
+          .catch(err => setError(err.message));
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [location]);
   if (error)               return <p className="error">{error}</p>;
-  if (theaters.length === 0) return <p className="loading">Loading…</p>;
-
+  if (!theaters)           return <p className="error">No theaters found</p>;
   return (
+    <div className="theater-listing container mt-4">
+      <div className="search-bar">
+        <input
+          type="text"
+          placeholder="Search by location..."
+          value={location}
+          onChange={e => setLocation(e.target.value)}
+        />
+    </div>
     <div className="theater-listing">
       <h2>Theater Listings</h2>
       <ul>
-        {theaters.map(theater => (
-          <div key={theater.id} onClick={()=>navigate(`/theaters/${theater.id}`)} className="theater-card">
-            <div className="theater-info">
-              <h3>{theater.name}</h3>
-              <p><strong>Location:</strong> {theater.location}</p>
-
+        {theaters.length === 0 ? (
+          <li>No theaters found</li>
+        ) : (
+          theaters.map(theater => (
+            <div key={theater.id} onClick={()=>navigate(`/theaters/${theater.id}`)} className="theater-card">
+              <div className="theater-info">
+                <h3>{theater.name}</h3>
+                <p><strong>Location:</strong> {theater.location}</p>
             <p><strong>Auditoriums:</strong></p>
             <ul>
               {theater.auditoriums?.length > 0 ? (
@@ -59,8 +78,9 @@ const TheaterListing = () => {
             </ul>
             </div>
           </div>
-        ))}
+        )))}
       </ul>
+    </div>
     </div>
   );
 };

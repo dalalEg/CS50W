@@ -6,3 +6,4 @@ export const fetchTheaterById = id => api.get(`/api/theaters/${id}/`);
 export const fetchTheaterByName = name => api.get(`/api/theaters/name/${name}/`);
 export const fetchTheaterByLocation = (city, state) => 
   api.get(`/api/theaters/location/${city}/${state}/`);
+export const searchTheaters = query => api.get(`/api/theaters/?search=${encodeURIComponent(query)}`);

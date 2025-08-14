@@ -51,10 +51,9 @@ function MovieList() {
       const releaseYear = new Date(m.release_date).getFullYear();
       return (
         (!selectedGenre || m.genres.some(g => g.id === +selectedGenre)) &&
-        m.rating >= selectedRating &&
+        (m.rating >= selectedRating || m.rating === 0.0) &&
         parseDuration(m.duration) <= selectedDuration && // LESS than selected minutes
-        releaseYear >= selectedYear &&
-        releaseYear <= new Date().getFullYear()
+        releaseYear >= selectedYear
       );
     })
     .sort((a, b) => {

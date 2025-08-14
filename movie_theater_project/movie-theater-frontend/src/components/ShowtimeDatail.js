@@ -73,6 +73,7 @@ function ShowtimeDetail() {
 
       <h4>Select Your Seats</h4>
       <div className="seat-map">
+        {seats.length === 0 && <p className="loading">Seats will be added later</p>}
         {seats.map(seat => (
           <button
             key={seat.id}

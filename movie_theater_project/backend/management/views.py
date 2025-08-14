@@ -297,6 +297,11 @@ class TheaterViewSet(viewsets.ModelViewSet):
     queryset = Theater.objects.all()
     serializer_class = TheaterSerializer
     permission_classes = [IsAdminOrReadOnly]
+    filter_backends  = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    search_fields    = ['name', 'location']
+    ordering_fields  = ['name', 'location']
+    ordering         = ['name']
+
     @action(detail=True, methods=['get'], url_path='auditoriums')
     def auditoriums(self, request, pk=None):
         qs = Auditorium.objects.filter(theater_id=pk)

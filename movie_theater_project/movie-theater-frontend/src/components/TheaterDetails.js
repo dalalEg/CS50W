@@ -2,7 +2,7 @@ import React, { use, useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { fetchShowtimesByTheater } from '../api/showtimes';
 import { fetchTheaterById } from '../api/theater';
-
+import '../styles/TheaterDetails.css';
 // TheaterDetails component to display showtimes for a specific theater
 function TheaterDetails() {
     const { theaterId } = useParams();
