@@ -32,7 +32,6 @@ function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [username, setUsername]               = useState('');
   const [user, setUser] = useState(null);
-
   // on mount, you might ping /api/auth/user or read a cookie/token
 useEffect(() => {
   api.get('/api/auth/user/')
@@ -60,6 +59,10 @@ useEffect(() => {
     } catch { /* ignore */ }
     setUser(null);
     setIsAuthenticated(false);
+    setUsername('');
+    // redirect to home after logout
+    window.location.href = '/';
+
   };
 
   return (
