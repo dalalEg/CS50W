@@ -1,129 +1,152 @@
-# 🎬 Movie Theater Web App
+🎬 Movie Theater Web App
 
-A full-stack web application for booking movie tickets — featuring dynamic seat selection, user reviews, showtime filtering, and an admin management system. Built with Django REST Framework and React.
+A full-stack web application for booking movie tickets — featuring dynamic seat selection, user reviews, rich search & filtering, and an admin management system. Built with Django REST Framework and React.
 
-> ⚠️ Actively developed – frontend and backend integration in progress.
+⚠️ Actively developed – frontend and backend integration in progress.
 
----
+# 🛠 Features
 
-## 🛠 Features
+- 🎟️ Showtime-based seat selection with a visual seat picker
 
-- 🎟️ Showtime-based seat selection
-- 🔐 User authentication (register/login/logout)
-- 🧾 Booking system with automatic user linking
-- ⭐ User ratings and reviews
-- 🎬 Movie browsing with filtering (genres, showtimes)
-- 👤 User profile with booking history
-- 🛠️ Admin panel for movies, showtimes, actors, etc.
-- 📽️ Trailers and poster support
-- 🔔 Coming soon notifications (planned)
-- 🗳️ Retro request voting system (planned)
+- 🔐 User authentication (register / login / logout)
+
+- 🧾 Booking system with automatic user linking + confirmation view
+
+- ⭐ Reviews & ratings (edit/delete, anonymous option)
+
+- 🔍 Powerful search & filters (title/keyword, genre, rating, year, duration, theater)
+
+- 🎬 Movie browsing with trailers, posters, and credits
+
+- 👤 User profile with booking history & reviews
+
+- 🏛️ Theaters & auditoriums directory
+
+- 🛠️ Admin panel for movies, showtimes, actors, directors, producers, etc.
+
 - 🐳 Dockerized (in progress)
+
 - ⚙️ CI/CD with GitHub Actions (in progress)
 
----
+- 🔔 Coming soon notifications (planned)
 
-## 📦 Tech Stack
+- 🗳️ Retro request voting system (planned)
 
-- **Backend**: Django + Django REST Framework  
-- **Frontend**: React + Axios + React Router + Bootstrap  
-- **Database**: PostgreSQL  
-- **Authentication**: Django sessions  
-- **DevOps**: Docker, GitHub Actions  
-- **Media**: ImageField (poster), URLField (trailer)  
-- **Planned**: Stripe integration for payments
+# 📦 Tech Stack
 
----
+- Backend: Django + Django REST Framework
 
-## 🚧 Roadmap
+- Frontend: React + Axios + React Router + Bootstrap
 
-### ✅ Done
+- Database: PostgreSQL
 
-- 🎯 Defined feature set and roadmap
-- 🧱 Designed DB schema (Movie, Seat, Showtime, Booking, Actor, Director, etc.)
-- 🔧 Implemented Django models + migrations
+- Auth: Django sessions
+
+- DevOps: Docker, GitHub Actions
+
+- Media: ImageField (poster), URLField (trailer)
+
+- Planned: Stripe integration for payments
+
+# 🚧 Roadmap
+## ✅ Done
+
+- 🎯 Feature set & roadmap defined
+
+- 🧱 DB schema (Movie, Seat, Showtime, Booking, Actor, Director, Producer, Theater, Auditorium)
+
+- 🔧 Django models + migrations
+
 - 👩‍💻 Seeded test data (genres, movies, theaters)
-- 🔌 Built REST API with Django REST Framework
-- 🔐 Login/Register/Logout via Django backend + React frontend
-- 🎞️ Display all movies
-- 📅 Display available showtimes (only future ones for users,with more than 0 remaining seats)
-- 👤 Profile API for authenticated user
-- 🎭 Actor/Director/Genre management via API
-- 🏗️ Setup React project with routing and Axios
-- 🔗 Connected React to Django via proxy
-- 💻 Mobile-responsive layout (Bootstrap)
-- 🧹 Cleaned up Theater ↔ Auditorium relationship
-- 🎥 Movie Detail Page (trailer, actors, reviews, showtimes)
-- 🪑 Showtime detail page with visual seat selection
-- 🏛️ Our Theaters page with list of theaters and auditoriums
-- 🧾 Booking logic + confirmation page
-- ⭐ Review system 
-- 🧾 Booking confirmation UI
-- 🛒 Booking flow (showtime → seats → confirmation)
-- ➕ Added pages for viewing Directors, Actors, Producers, and Theater details
-- 🎟️ Implement visual seat picker
-- Improve review & rating UI (star ratings)
-- - Add search filters for movies/showtimes
 
----
+- 🔌 REST API with DRF
 
-### 🏗️ What is coming next 
-- Polish user profile UI (show bookings ✅ , reviews, etc.)
+- 🔐 Auth: login/register/logout (Django backend + React frontend)
 
-- Build booking cancellation/editing features  ✅ (testing in progress)
+- 🎞️ List all movies
 
--  Docker and CI/CD setup
+- 📅 Show available showtimes (future only, with > 0 seats)
 
-- Payment integration (Stripe)
+- 👤 Profile API (authenticated user)
 
-- Work on engagement features (watchlist, notifications)
+- 🎭 Actor/Director/Genre/Producer management via API
 
----
+- 🏗️ React app setup (routing, Axios, proxy)
 
-### 🧩 Backlog / Ideas
+- 🔗 Frontend ↔ Backend integration
 
-#### Features
+- 📱 Mobile-responsive layout (Bootstrap)
 
-- VIP showtime logic  
-- Multi-language support  
-- Dark mode toggle  
+- 🧹 Clean Theater ↔ Auditorium relationship
+
+- 🎥 Movie Detail page (trailer, actors, reviews, showtimes)
+
+- 🪑 Showtime detail with visual seat map
+
+- 🏛️ Our Theaters page (theaters & auditoriums)
+
+- 🧾 Booking logic + confirmation UI (click-through to details)
+
+- ⭐ Review system (with edit/delete and anonymous toggle)
+
+- 🛒 End-to-end booking flow (showtime → seats → confirmation)
+
+- ➕ Detail pages: Directors, Actors, Producers, Theaters
+
+- 🔍 Search & filters for movies/showtimes/theaters
+-  (genre, rating, year, duration, sort, keyword)
+
+- 👤 Polished profile UI (bookings, reviews)
+
+ ## 🏗️ Next Up
+
+- 🗑️ Booking cancellation/editing (tests + UX polish)
+
+- ⭐ Review polish (average rating display, validation states)
+
+- 🧾 Watchlist & Favorites
+
+- - Watchlist: allowed when no available showtime
+
+- - Favorites: allowed after user attended a showtime
+
+- ✉️ Optional email confirmation for registration
+
+- 💳 Stripe payment integration
+
+- 📣 Notifications (watchlist alerts, review replies)
+
+- 🐳 Docker & CI/CD (Compose, build/test/workflow)
+
+- 🎨 Frontend polish (filter panel UX, mobile tweaks, infinite scroll)
+
+## 🧩 Backlog / Ideas
+
+- VIP showtime logic
+
+- Multi-language support
+
+- Dark mode toggle
+
 - Push notifications (new releases)
 
-#### Booking & Payments
+- Retro movie voting system
 
-- Stripe integration  
-- Add payment confirmation  
-- Handle booking cancellation/editing  
+- “Coming Soon” opt-in
 
+- Watchlist / favorites expansions
 
-#### Engagement
+- DevOps: full CI pipeline with tests, linting & formatting rules
 
-- Retro movie voting system  
-- “Coming Soon” notification opt-in  
-- Watchlist / favorites  
+# 🧪 Testing
 
-#### DevOps
+✅ Django unit tests (models, views)
 
-- Docker Compose for full stack  
-- CI pipeline with full tests  
-- Linting + code formatting rules  
+✅ DRF API tests (bookings, movies, auth, etc.)
 
----
+🧪 Jest unit tests for React components (planned)
 
-## 🧪 Testing
+⚙️ GitHub Actions CI (planned)
 
-- ✅ Django unit tests for models and views
-- ✅ DRF API tests (bookings, movies, auth, etc.)
-- 🧪 Jest unit tests for React components (planned)
-- ⚙️ GitHub Actions integration for CI pipeline (planned)
-
----
-
-## 📸 Screenshots
-<img width="1886" height="875" alt="image" src="https://github.com/user-attachments/assets/f21aa082-7397-4319-af30-df42a495530d" />
-
-<img width="667" height="799" alt="image" src="https://github.com/user-attachments/assets/ba31af31-77b2-4136-b579-e821280c711f" />
-
-<img width="1914" height="885" alt="image" src="https://github.com/user-attachments/assets/41150828-909d-4c21-a8b4-1712b4463ec2" />
-
-
+# 📸 Screenshots
+<img width="1886" height="875" alt="image" src="https://github.com/user-attachments/assets/f21aa082-7397-4319-af30-df42a495530d" /> <img width="667" height="799" alt="image" src="https://github.com/user-attachments/assets/ba31af31-77b2-4136-b579-e821280c711f" /> <img width="1914" height="885" alt="image" src="https://github.com/user-attachments/assets/41150828-909d-4c21-a8b4-1712b4463ec2" />
