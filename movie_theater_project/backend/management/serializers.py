@@ -151,7 +151,8 @@ class BookingSerializer(serializers.ModelSerializer):
     )
     seat_ids    = serializers.ListField(
         child=serializers.IntegerField(),
-        write_only=True
+        write_only=True,
+        required=False,
     )
 
     class Meta:
@@ -198,6 +199,24 @@ class BookingSerializer(serializers.ModelSerializer):
             seats_qs.update(is_booked=True)
 
         return booking
+    def update(self, instance, validated_data):
+        seat_ids = validated_data.pop('seat_ids', None)
+        if seat_ids is not None:
+            with transaction.atomic():
+                # release seats the user unchecked
+                to_release = instance.seats.exclude(id__in=seat_ids)
+                released_count = to_release.count()
+                to_release.update(is_booked=False)
+                Showtime.objects.filter(pk=instance.showtime_id).update(
+                    available_seats=F('available_seats') + released_count
+                )
+
+
+                # finally update the M2M and recalc cost
+                instance.seats.set(seat_ids)
+                instance.cost = sum(s.price for s in instance.seats.all())
+                instance.save()
+        return instance
     
 class NotificationSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)

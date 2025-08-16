@@ -8,7 +8,7 @@ export function createBooking(showtimeId, seatIds) {
   });
 }
 
-  export const fetchBookingById = (bookingId) =>
+export const fetchBookingById = (bookingId) =>
   api.get(`/api/bookings/${bookingId}/`);
 export const fetchBookingsByUser = () =>
   api.get('/api/bookings/user/');
@@ -16,3 +16,5 @@ export const cancelBooking = (bookingId) =>
   api.delete(`/api/bookings/${bookingId}/`);
 export const fetchBookingDetails = (bookingId) =>
   api.get(`/api/bookings/${bookingId}/details/`);
+export const updateBooking = (bookingId, seatIds) =>
+  api.patch(`/api/bookings/${bookingId}/`, { seat_ids: seatIds });

@@ -10,3 +10,7 @@ export function fetchUsers() {
 export function fetchUsersList() {
   return api.get('/api/users/');
 }
+
+export function updateUser(data) {
+  return api.put('/api/auth/user/', data);
+}
