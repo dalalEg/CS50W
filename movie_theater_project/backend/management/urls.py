@@ -18,6 +18,7 @@ router.register(r'reviews', views.ReviewViewSet)
 router.register(r'notifications', views.NotificationViewSet)
 router.register(r'seats', views.SeatViewSet)
 router.register(r'bookings', views.BookingViewSet)
+router.register(r'watchlist', views.WatchlistViewSet)  
 # Add other viewsets as needed
 urlpatterns = [
     path('', views.index, name='index'),

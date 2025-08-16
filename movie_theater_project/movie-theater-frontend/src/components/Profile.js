@@ -1,7 +1,6 @@
 import React, {useState, useEffect} from "react";
 import {useParams, Link} from "react-router-dom";
 import {fetchUsers} from '../api/user';
-import { fetchBookingsByUser } from "../api/booking";
 // Profile component to display user profile information
 // This component fetches and displays the user's profile details such as name, email, and points.
 import '../styles/Profile.css';
@@ -9,17 +8,13 @@ import '../styles/Profile.css';
 function Profile() {
   const { userId } = useParams();
   const [user, setUser] = useState(null);
-  const [bookings, setBookings] = useState([]);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
+
   useEffect(() => {
     fetchUsers(userId)
       .then(resp => {
         setUser(resp.data);
-        return fetchBookingsByUser(userId);
-      })
-      .then(resp => {
-        setBookings(resp.data);
         setLoading(false);
       })
       .catch(() => {
@@ -28,7 +23,6 @@ function Profile() {
       });
   }, [userId]);
 
-  if (loading) return <p className="loading">Loading…</p>;
   if (error) return <p className="error">{error}</p>;
   if (!user) return <p className="error">User not found</p>;
   return (  
@@ -39,6 +33,7 @@ function Profile() {
       <p><strong>Points:</strong> {user.points}</p>
       <Link to={`/user/bookings/${user.id}`} className="link">Click To View Your Bookings</Link>
       <Link to={`/reviews/${user.id}`} className="link">Click To View Your Reviews</Link>
+      <Link to={`/watchlist/${user.id}`} className="link">Click To View Your Watchlist</Link>
     </div>
   );
 }

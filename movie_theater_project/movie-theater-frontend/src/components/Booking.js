@@ -11,7 +11,6 @@ export default function Booking() {
   const [error, setError]           = useState(null);
   const [bookingResult, setBooking] = useState(null);
   const [loading, setLoading]       = useState(false);
-
   const showtimeId = state?.showtimeId;
   const seats      = state?.seats      || [];
 
@@ -29,7 +28,6 @@ export default function Booking() {
 const handleConfirm = () => {
   if (loading) return;
   setLoading(true);
-
   const seatIds = seats.map(s => s.id);
   createBooking(showtimeId, seatIds)
     .then(resp => setBooking(resp.data))

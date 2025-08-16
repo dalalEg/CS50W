@@ -55,6 +55,7 @@ function ShowtimeList() {
 
  const displayShowtimes = showtimes
   .filter(st => {
+    if (new Date(st.start_time) < new Date()) return false;
     const start = new Date(st.start_time);
     if (selectedDate && start.toISOString().slice(0,10) !== selectedDate) return false;
     if (timeRange.from && start.getHours() < +timeRange.from) return false;

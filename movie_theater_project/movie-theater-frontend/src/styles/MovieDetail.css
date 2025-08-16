@@ -127,3 +127,16 @@ body {
   font-size: large;
   margin-top: 1rem;
 }
+.no-showtimes {
+  color: #d93025;
+  font-style: italic;
+}
+
+.watchlist-button {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  padding: .5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+}

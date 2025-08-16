@@ -1,0 +1,57 @@
+.user-watchlist{
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 1.5rem;
+    background: var(--card-bg);
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    color: var(--text-dark);
+    display: flex;
+    flex-direction: column;
+}
+
+.user-watchlist h2 {
+    margin-top: 0;
+    color: var(--text-dark);
+    font-size: 2rem;
+}
+
+.user-watchlist ul {
+    list-style: none;
+    padding: 0;
+}
+
+.user-watchlist li {
+    padding: .5rem 0;
+    border-bottom: 1px solid var(--text-muted);
+}
+
+.user-watchlist li:last-child {
+    border-bottom: none;
+}
+
+.user-watchlist a {
+    color: var(--primary);  
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.user-watchlist a:hover {
+    text-decoration: underline;
+}
+
+.user-watchlist button {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    padding: .5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    margin: 0.5rem ;
+}
+
+.user-watchlist button:hover {
+   background-color: bisque;
+    cursor: pointer;
+}

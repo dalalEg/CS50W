@@ -50,3 +50,13 @@ class IsAuthenticated(BasePermission):
     def has_permission(self, request, view):
         # Allow access only if the user is authenticated
         return request.user and request.user.is_authenticated
+    
+
+class IsWatchlistOwnerOrStaff(BasePermission):
+    """
+    Custom permission to only allow owners of a watchlist or staff users to edit it.
+    """
+    def has_object_permission(self, request, view, obj):
+        if request.method in SAFE_METHODS:
+            return (obj.user == request.user or request.user.is_staff ) and request.user.is_authenticated
+        return (obj.user == request.user or request.user.is_staff) and request.user.is_authenticated

@@ -2,8 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { fetchMovieById }   from '../api/movies';
 import { fetchShowtimesByMovie } from '../api/showtimes';
+import { useAuth } from '../contexts/AuthContext';
 import { fetchRolesByMovie } from '../api/roles';
-import { fetchRole } from '../api/roles';
+import { addToWatchlist,fetchWatchlistByUser,removeFromWatchlist } from '../api/watchlist';
 import '../styles/MovieDetail.css';
 
 function MovieDetail() {
@@ -12,6 +13,8 @@ function MovieDetail() {
   const [error, setError] = useState(null);
   const [showtimes, setShowtimes] = useState([]);
   const [roles, setRoles] = useState([]);
+  const [isInWatchlist, setIsInWatchlist] = useState(false);
+  const { user: currentUser, loading: authLoading } = useAuth();
   useEffect(() => {
     fetchMovieById(id)
       .then(resp => setMovie(resp.data))
@@ -24,6 +27,7 @@ function MovieDetail() {
         .catch(() => setError("Failed to load showtimes"));
     }
   }, [id]);
+
   useEffect(() => {
     {
       fetchRolesByMovie(id)
@@ -31,8 +35,47 @@ function MovieDetail() {
         .catch(() => setError("Failed to load roles"));
     }
   }, [id]);
- 
-  // If there's an error, display it
+
+  useEffect(() => {
+    if (currentUser) {
+      fetchWatchlistByUser(currentUser.id)
+        .then(resp => {
+          const isInList = resp.data.some(item => item.movie?.id === parseInt(id, 10));
+          setIsInWatchlist(isInList);
+        })
+        .catch(() => setError("Failed to load watchlist"));
+    }
+  }, [currentUser, id]);
+
+   const handleAddOrRemoveFromWatchlist = () => {
+     if (isInWatchlist) {
+       removeFromWatchlist(id)
+         .then(() => {
+           setIsInWatchlist(false);
+         })
+         .catch(err => {
+           console.error(err.response?.data || err);
+           setError("Failed to remove from watchlist");
+         });
+     } else {
+       // Add to watchlist
+       addToWatchlist(id)
+
+        .then(() => {
+          setIsInWatchlist(true);
+        })
+        .catch(err => {
+          const errs = err.response?.data?.non_field_errors || [];
+          // if already exists, mark as in-watchlist
+          if (errs.some(e => e.includes('already in your watchlist'))) {
+            setIsInWatchlist(true);
+            return;
+          }
+          console.error(err.response?.data || err);
+          setError("Failed to add to watchlist");
+        });
+     }
+   };
   if (error)   return <p className="error">{error}</p>;
   if (!movie) return <p className="loading">Loading…</p>;
 
@@ -53,7 +96,6 @@ function MovieDetail() {
         <p><strong>Rating:</strong> {movie.rating}/10</p>
         <p>{movie.description}</p>
 
-        {/* Instead of a lone block, use parentheses */}
         {movie.trailer && (
           <p>
             <a
@@ -99,7 +141,16 @@ function MovieDetail() {
         <p><strong>Available Showtimes:</strong></p>
         <ul>
           {showtimes.length === 0 ? (
-            <li>No showtimes available</li>
+            <li className='no-showtimes'>No showtimes available you can add this movie to your watchlist:
+              <button
+                disabled={isInWatchlist}
+                onClick={handleAddOrRemoveFromWatchlist}
+                className='watchlist-button'
+              >
+                {isInWatchlist ? 'Already in Watchlist' : 'Add to Watchlist'}
+              </button>
+            </li>
+           
           ) : (
             showtimes.map(st => (
               <li key={st.id}>

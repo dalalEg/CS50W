@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { useLocation, useNavigate, Link, useParams } from 'react-router-dom';
+import {  Link, useParams } from 'react-router-dom';
 import { fetchActorById } from '../api/actor';
 import { fetchMovieByActor } from '../api/movies';
 import '../styles/Actor.css';
 
 export default function ActorDetails() {
     const { actorId } = useParams();
-    const navigate = useNavigate();
     const [error, setError] = useState(null);
     const [actor, setActor] = useState(null);
     const [loading, setLoading] = useState(true);

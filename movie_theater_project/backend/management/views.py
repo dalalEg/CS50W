@@ -14,6 +14,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from django.views.decorators.csrf import csrf_exempt
 from .permissions import IsAdminOrReadOnly, IsReviewOwnerOrReadOnly,IsAuthenticated, IsBookingOwnerOrStaff, IsNotificationOwnerOrStaff
+from .permissions import IsWatchlistOwnerOrStaff
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
 from django.urls import reverse
@@ -32,7 +33,7 @@ from django.db.models import F
 from django.contrib.auth.models import User
 from rest_framework import routers  
 from .models import (User, Movie, Genre,Seat,Showtime,Review, 
-                     Notification,Booking,Actor,Director,Auditorium,Producer,Payment,watchlist,Role,Theater)
+                     Notification,Booking,Actor,Director,Auditorium,Producer,Payment,watchlist as Watchlist,Role,Theater)
 from django.contrib.auth.models import AnonymousUser
 def index(request):
     return render(request, 'management/index.html')
@@ -462,3 +463,16 @@ class BookingViewSet(viewsets.ModelViewSet):
             )
             booking.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class WatchlistViewSet(viewsets.ModelViewSet):
+    """ViewSet for managing watchlists."""
+    queryset = Watchlist.objects.all()
+    serializer_class = WatchlistSerializer
+    permission_classes = [ IsAuthenticated]
+    filter_backends  = [DjangoFilterBackend, filters.SearchFilter]
+    filterset_fields = ['user','movie']
+  
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+    

@@ -1,3 +1,4 @@
+from enum import unique
 import re
 from rest_framework import serializers
 from .models import (
@@ -5,13 +6,11 @@ from .models import (
     Genre, Review, Notification, Actor, Director,Producer, Payment,
     watchlist, Role, Auditorium, Theater
 )
-from rest_framework.validators import UniqueValidator
+from rest_framework.validators import UniqueValidator,UniqueTogetherValidator
 from django.db import transaction
 from django.db.models import F
 from rest_framework.exceptions import ValidationError
-
-# … your other serializers/imports …
-
+from rest_framework.fields import CurrentUserDefault
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
@@ -215,14 +214,31 @@ class PaymentSerializer(serializers.ModelSerializer):
         fields = ['id', 'user', 'amount', 'payment_date']
 
 
+
 class WatchlistSerializer(serializers.ModelSerializer):
-    user = UserSerializer(read_only=True)
-    movie = MovieSerializer(read_only=True) 
+    # Automatically assign the logged-in user; do not expect it in the payload
+    user = serializers.HiddenField(default=CurrentUserDefault())
+
+    # If you still want to return full user data, add a separate read‐only field:
+    user_info = UserSerializer(source='user', read_only=True)
+
+    movie = MovieSerializer(read_only=True)
+    movie_id = serializers.PrimaryKeyRelatedField(
+        source='movie',
+        queryset=Movie.objects.all(),
+        write_only=True
+    )
 
     class Meta:
-        model = watchlist
-        fields = ['id', 'user', 'movie', 'added_at']
-
+        model  = watchlist
+        fields = ['id', 'user', 'user_info', 'movie', 'movie_id', 'added_at']
+        validators = [
+            serializers.UniqueTogetherValidator(
+                queryset=watchlist.objects.all(),
+                fields=['user','movie'],
+                message="This movie is already in your watchlist."
+            )
+        ]
 class RoleSerializer(serializers.ModelSerializer):
     actor = ActorSerializer(read_only=True)
     movie = MovieSerializer(read_only=True)
