@@ -2,7 +2,8 @@ from django import forms
 from django.contrib import admin
 from .models import (
     User, Movie, Genre, Seat, Review, Showtime, Booking, Notification,
-    Actor, Director, Producer, Payment, watchlist, Role, Auditorium, Theater
+    Actor, Director, Producer, Payment, watchlist, Role, Auditorium, Theater,
+    RateService
 )
 
 @admin.register(User)
@@ -130,3 +131,10 @@ class AuditoriumAdmin(admin.ModelAdmin):
 class TheaterAdmin(admin.ModelAdmin):
     list_display = ('name', 'location')
     search_fields = ('name', 'location')
+
+
+@admin.register(RateService)
+class RateServiceAdmin(admin.ModelAdmin):
+    list_display = ('user', 'booking', 'all_rating')
+    search_fields = ('user__username', 'booking__showtime__movie__title')
+    list_filter = ('all_rating', 'show_rating', 'auditorium_rating')

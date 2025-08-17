@@ -4,7 +4,6 @@ from re import search
 from django.http import HttpResponse
 from django.db import IntegrityError
 from django.shortcuts import render, redirect
-# Create your views here.
 from rest_framework import viewsets,filters,generics
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
@@ -24,7 +23,8 @@ from .serializers import( MovieSerializer, ShowtimeSerializer, SeatSerializer,
                          GenreSerializer, ReviewSerializer, NotificationSerializer,
                          BookingSerializer, ActorSerializer, DirectorSerializer,
                          ProducerSerializer, PaymentSerializer, WatchlistSerializer,
-                         RoleSerializer, TheaterSerializer,UserSerializer,AuditoriumSerializer)
+                         RoleSerializer, TheaterSerializer,UserSerializer,AuditoriumSerializer,
+                         RateServiceSerializer)
 from rest_framework import serializers
 from django.shortcuts import get_object_or_404
 from rest_framework.validators import UniqueValidator
@@ -34,7 +34,8 @@ from django.db.models import F
 from django.contrib.auth.models import User
 from rest_framework import routers  
 from .models import (User, Movie, Genre,Seat,Showtime,Review, 
-                     Notification,Booking,Actor,Director,Auditorium,Producer,Payment,watchlist as Watchlist,Role,Theater)
+                     Notification,Booking,Actor,Director,Auditorium,Producer,Payment,watchlist as Watchlist,Role,Theater,
+                     RateService)
 from django.contrib.auth.models import AnonymousUser
 def index(request):
     return render(request, 'management/index.html')
@@ -470,18 +471,80 @@ class BookingViewSet(viewsets.ModelViewSet):
             Showtime.objects.filter(pk=booking.showtime_id).update(
                 available_seats=F('available_seats') + num_seats
             )
-            booking.delete()
+        booking.attended = False
+        booking.status = 'Cancelled'
+        booking.save()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+    def list(self, request, *args, **kwargs):
+        # auto‐mark all past, non‐cancelled bookings as attended
+        now = timezone.now()
+        Booking.objects.filter(
+            showtime__start_time__lt=now,
+            attended=False
+        ).exclude(status='Cancelled').update(attended=True)
+        return super().list(request, *args, **kwargs)
+
+    def retrieve(self, request, *args, **kwargs):
+        # also run it on retrieve so single‐item GETs stay in sync
+        instance = self.get_object()
+        if instance.showtime.start_time < timezone.now() \
+           and instance.status != 'Cancelled' \
+           and not instance.attended:
+            instance.attended = True
+            instance.save(update_fields=['attended'])
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
 
 class WatchlistViewSet(viewsets.ModelViewSet):
     """ViewSet for managing watchlists."""
     queryset = Watchlist.objects.all()
     serializer_class = WatchlistSerializer
-    permission_classes = [ IsAuthenticated]
+    permission_classes = [IsWatchlistOwnerOrStaff]
     filter_backends  = [DjangoFilterBackend, filters.SearchFilter]
-    filterset_fields = ['user','movie']
-  
+    # only allow filtering by movie; user is set from request
+    filterset_fields = ['movie']
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_staff:
+            return Watchlist.objects.all()
+        # non-staff only see their own watchlist entries
+        return Watchlist.objects.filter(user=user)
+
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
     
+
+
+
+class RateServiceViewSet(viewsets.ModelViewSet):
+    """
+    GET  /api/rate-services/            → list (your reviews)
+    POST /api/rate-services/            → create a new service‐review
+    GET  /api/rate-services/{pk}/       → retrieve
+    PUT/PATCH /api/rate-services/{pk}/  → update (if you allow editing)
+    DELETE /api/rate-services/{pk}/     → delete
+    """
+    queryset          = RateService.objects.all()
+    serializer_class   = RateServiceSerializer
+    permission_classes = [IsAuthenticated,IsReviewOwnerOrReadOnly]
+    filter_backends   = [DjangoFilterBackend]
+    filterset_fields = ['booking']
+    def get_queryset(self):
+        user = self.request.user
+        # staff see all, users only their own
+        if user.is_staff:
+            return RateService.objects.all()
+        return RateService.objects.filter(user=user)
+
+    def perform_create(self, serializer):
+        booking = serializer.validated_data['booking']
+        user = self.request.user
+        # enforce only attended bookings can be reviewed
+        if not booking.attended:
+            raise serializers.ValidationError(
+                "Can only review service for bookings you've attended."
+            )
+        # UniqueTogetherValidator will prevent dup on the same booking
+        serializer.save(user=user, booking=booking)

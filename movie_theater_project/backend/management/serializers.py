@@ -4,7 +4,7 @@ from rest_framework import serializers
 from .models import (
     User, Movie, Booking, Showtime, Seat,
     Genre, Review, Notification, Actor, Director,Producer, Payment,
-    watchlist, Role, Auditorium, Theater
+    watchlist, Role, Auditorium, Theater, RateService
 )
 from rest_framework.validators import UniqueValidator,UniqueTogetherValidator
 from django.db import transaction
@@ -142,7 +142,7 @@ class BookingSerializer(serializers.ModelSerializer):
     # output fields
     showtime    = ShowtimeSerializer(read_only=True)
     seats       = SeatSerializer(many=True, read_only=True)
-
+    attended    = serializers.BooleanField(read_only=True)
     # input‐only fields
     showtime_id = serializers.PrimaryKeyRelatedField(
         queryset=Showtime.objects.all(),
@@ -166,8 +166,9 @@ class BookingSerializer(serializers.ModelSerializer):
             'cost',
             'created_at',
             'status',
+            'attended',
         ]
-        read_only_fields = ['cost',  'status']
+        read_only_fields = ['cost',  'status','attended']
 
     def create(self, validated_data):
         user     = validated_data.pop('user')
@@ -265,3 +266,25 @@ class RoleSerializer(serializers.ModelSerializer):
         model = Role
         fields = ['id', 'character_name', 'actor', 'movie']
 
+class RateServiceSerializer(serializers.ModelSerializer):
+
+    user       = serializers.HiddenField(default=CurrentUserDefault())
+    booking    = serializers.PrimaryKeyRelatedField(read_only=True)
+    booking_id = serializers.PrimaryKeyRelatedField(
+                    source='booking',
+                    queryset=Booking.objects.all(),      # allow any booking
+                    write_only=True
+                 )
+
+    class Meta:
+        model  = RateService
+        fields = ['id','user','booking','booking_id',
+                   'all_rating','show_rating','auditorium_rating','comment']
+
+        validators = [
+            UniqueTogetherValidator(
+                queryset=RateService.objects.all(),
+                fields=['user','booking'],
+                message="You've already submitted a service review for this booking."
+            )
+        ]

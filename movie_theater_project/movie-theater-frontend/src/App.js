@@ -30,6 +30,7 @@ import UserReview from './components/UserReview'; // Import UserReview component
 import UserWatchlist from  './components/UserWatchlist'; 
 import AdminPanel from './AdminPanel';
 import EditUser from './components/EditUser'; // Import EditUser component
+import ServiceReview from './components/ServiceReview';
 // Main App component
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -111,6 +112,7 @@ useEffect(() => {
           <Route path="/watchlist/:userId" element={<UserWatchlist />} />
           <Route path="/admin/*" element={<AdminPanel />} />
           <Route path="/user/edit/:id" element={<EditUser />} />
+          <Route path="/serviceReview/:bookingId" element={<ServiceReview />} />
         </Routes>
       </main>
     </Router>

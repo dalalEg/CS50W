@@ -1,4 +1,5 @@
-from turtle import st, update
+from tokenize import Comment
+from turtle import mode, st, update
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
@@ -88,6 +89,7 @@ class Booking(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     cost = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)  # Add cost field
     status = models.CharField(max_length=20, choices=[('Pending', 'Pending'), ('Confirmed', 'Confirmed'), ('Cancelled', 'Cancelled')], default='Pending')  # Add status field
+    attended = models.BooleanField(default=False)
     def __str__(self):
         return f"{self.user.username} booked {self.showtime.movie.title} on {self.booking_date}"
     
@@ -164,3 +166,19 @@ class Theater(models.Model):
     location = models.CharField(max_length=255)
     def __str__(self):
         return f"{self.name} - {self.location}"
+    
+class RateService(models.Model):
+    user    = models.ForeignKey(User, on_delete=models.CASCADE, related_name="rate_services")
+    booking = models.ForeignKey(Booking, on_delete=models.CASCADE, related_name="rate_services", blank=True, null=True)  # Add booking field
+    all_rating        = models.PositiveIntegerField(default=0,choices=[(i, str(i)) for i in range(1, 6)])  # Add all_rating field with choices
+    show_rating       = models.PositiveIntegerField(default=0,choices=[(i, str(i)) for i in range(1, 6)])  # Add show_rating field with choices
+    auditorium_rating = models.PositiveIntegerField(default=0,choices=[(i, str(i)) for i in range(1, 6)])  # Add auditorium_rating field with choices
+    comment           = models.TextField(blank=True, null=True)  # Add comment field
+
+    def __str__(self):
+        movie = (
+            self.booking.showtime.movie.title
+            if self.booking and self.booking.showtime
+            else "Unknown"
+        )
+        return f"Service Review by {self.user.username} for {movie}"
