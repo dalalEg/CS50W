@@ -32,7 +32,7 @@ const   UserWatchlist = () => {
   
 
   return (
-    <div className="user-watchlist">
+    <div className="card user-watchlist">
 
         <h2>Watchlist for {user.username}</h2>
         <ul>

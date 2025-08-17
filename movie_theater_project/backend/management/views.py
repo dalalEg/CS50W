@@ -1,6 +1,7 @@
 from ast import Is
 from encodings import search_function
 from re import search
+from urllib import request
 from django.http import HttpResponse
 from django.db import IntegrityError
 from django.shortcuts import render, redirect
@@ -162,18 +163,19 @@ def api_logout(request):
     return Response({'message': 'Logout successful.'}, status=204)
 
 @api_view(['GET','PUT'])
-@permission_classes([IsAuthenticated])
+@permission_classes([AllowAny])
 def api_user_profile(request):
     """
     GET  /api/auth/user/    → fetch profile
     PUT  /api/auth/user/    → update profile
     """
-    user = request.user
     if request.method == 'GET':
-        return Response(UserSerializer(user).data, status=200)
-
-    # partial_update support
-    serializer = UserSerializer(user, data=request.data, partial=True)
+        if not request.user.is_authenticated:
+           return Response(None, status=200)
+        return Response(UserSerializer(request.user).data, status=200)
+    if not request.user.is_authenticated:
+       return Response({'detail': 'Authentication required.'}, status=403)
+    serializer = UserSerializer(request.user, data=request.data, partial=True)
     serializer.is_valid(raise_exception=True)
     serializer.save()
     return Response(serializer.data, status=200)

@@ -5,7 +5,7 @@ import {
   fetchServiceReviews,
   createServiceReview
 } from '../api/serviceReview';
-
+import '../styles/ServiceReview.css';
  export default function ServiceReview() {
    const { bookingId } = useParams();
    const [reviews, setReviews] = useState([]);
@@ -79,7 +79,7 @@ import {
                onChange={e => setForm(f => ({ ...f, comment: e.target.value }))}
              />
            </div>
-           <button type="submit">Submit Review</button>
+           <button className="submit" type="submit">Submit Review</button>
          </form>
        )}
      </div>

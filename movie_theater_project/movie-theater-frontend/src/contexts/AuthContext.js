@@ -9,7 +9,14 @@ export function AuthProvider({ children }) {
   useEffect(() => {
       fetchUsers()
       .then(res => setUser(res.data))
-      .catch(() => setUser(null))
+      .catch(err => {
+            // 403 means “not authenticated”
+      if (err.response?.status === 403) {
+        setUser(null);
+      } else {
+        console.error(err);
+      }
+    })
       .finally(() => setLoad(false));
   }, []);
 

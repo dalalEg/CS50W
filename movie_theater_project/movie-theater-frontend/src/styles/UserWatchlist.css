@@ -1,57 +1,51 @@
-.user-watchlist{
-    max-width: 800px;
-    margin: 2rem auto;
-    padding: 1.5rem;
-    background: var(--card-bg);
-    border-radius: 8px;
-    box-shadow: var(--shadow);
-    font-family: 'Segoe UI', Tahoma, sans-serif;
-    color: var(--text-dark);
-    display: flex;
-    flex-direction: column;
+/* src/styles/UserWatchlist.css */
+@import './theme.css';
+
+.user-watchlist {
+  max-width: 800px;
+  margin: var(--gap-lg) auto;
+  padding: var(--gap-md);
+  display: flex;
+  flex-direction: column;
+  font-family: var(--font-base);
+  color: var(--clr-text);
 }
 
 .user-watchlist h2 {
-    margin-top: 0;
-    color: var(--text-dark);
-    font-size: 2rem;
+  margin-top: 0;
+  font-size: var(--fs-lg);
 }
 
 .user-watchlist ul {
-    list-style: none;
-    padding: 0;
+  list-style: none;
+  padding: 0;
 }
 
 .user-watchlist li {
-    padding: .5rem 0;
-    border-bottom: 1px solid var(--text-muted);
+  padding: var(--gap-sm) 0;
+  border-bottom: 1px solid var(--clr-border);
 }
 
 .user-watchlist li:last-child {
-    border-bottom: none;
+  border-bottom: none;
 }
 
 .user-watchlist a {
-    color: var(--primary);  
-    text-decoration: none;
-    font-weight: 600;
+  color: var(--clr-primary);
+  font-weight: 600;
+  text-decoration: none;
 }
 
 .user-watchlist a:hover {
-    text-decoration: underline;
+  text-decoration: underline;
 }
 
 .user-watchlist button {
-    background: var(--accent);
-    color: #fff;
-    border: none;
-    padding: .5rem 1rem;
-    border-radius: 4px;
-    cursor: pointer;
-    margin: 0.5rem ;
+  background: var(--clr-accent);
+  color: var(--clr-text-light);
+  border-radius: var(--radius-sm);
+  margin-top: var(--gap-sm);
 }
-
 .user-watchlist button:hover {
-   background-color: bisque;
-    cursor: pointer;
+  background: bisque;
 }

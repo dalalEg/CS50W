@@ -1,3 +1,5 @@
+@import './theme.css';
+
 .navbar {
   display: flex;
   align-items: center;
@@ -5,7 +7,6 @@
   background: var(--clr-primary);
 }
 
-/* brand link on the left */
 .navbar .navbar-link {
   font-size: var(--fs-md);
   text-decoration: none;
@@ -14,12 +15,10 @@
   margin-left: 2rem;
 }
 
-/* wrapper for all the other links */
 .navbar .navbar-links {
   display: flex;
   align-items: center;
   gap: var (--gap-md);
-  /* if you want them pushed to the right: */
   margin-left: auto;
 }
 

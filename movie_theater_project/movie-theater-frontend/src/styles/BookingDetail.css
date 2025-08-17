@@ -19,6 +19,17 @@
 
 .booking-detail .btn {
   margin-top: var(--gap-md);
+  padding: var(--gap-sm) var(--gap-md);
+  border: none;
+  border-radius: var(--radius-md);
+  background: var(--clr-primary);
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.booking-detail .btn:hover {
+  background: var(--clr-primary-dark);
 }
 
 .text-danger {

@@ -1,3 +1,5 @@
+@import './theme.css';
+
 .user-review {
   background: var(--clr-card-bg);
   color: var(--clr-text);
@@ -36,7 +38,7 @@
 }
 .user-review button {
     background: var(--clr-primary);
-    color: #fff;
+    color: var(--clr-text-light);
     border: none;
     padding: 0.5rem 1rem;
     margin: 0.5rem ;

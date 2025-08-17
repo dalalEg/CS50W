@@ -1,0 +1,64 @@
+.service-review{
+   padding: 20px;
+   border: 1px solid #ccc;
+   border-radius: 5px;
+   background-color: #f9f9f9;
+   margin-bottom: 20px;
+}
+
+.service-review h3{
+   margin-top: 0;
+}
+
+.service-review .error{
+   color: red;
+}
+
+.service-review form{
+   display: flex;
+   flex-direction: column;
+}
+
+.service-review form div{
+   margin-bottom: 10px;
+}
+
+.service-review form label{
+   margin-bottom: 5px;
+}
+
+.service-review form input[type="range"]{
+   width: 100%;
+}
+
+.service-review form textarea{
+   width: 100%;
+   height: 100px;
+}
+
+.service-review form button{
+   align-self: flex-start;
+}
+.service-review .review-list{
+   margin-top: 20px;
+}
+.existing-review{
+   padding: 10px;
+   border: 1px solid #eee;
+   border-radius: 5px;
+   background-color: #fafafa;
+   margin-top: 10px;
+}
+
+.submit{
+   background-color: #28a745;
+   color: white;
+   border: none;
+   border-radius: 5px;
+   padding: 10px 15px;
+   cursor: pointer;
+}
+
+.submit:hover{
+   background-color: #218838;
+}
