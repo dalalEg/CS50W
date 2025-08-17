@@ -96,19 +96,15 @@ A full-stack web application for booking movie tickets — featuring dynamic sea
 - 🔍 Search & filters for movies/showtimes/theaters
 -  (genre, rating, year, duration, sort, keyword)
 
-- 👤 Polished profile UI (bookings, reviews)
-
+- 👤 Polished profile UI (bookings, reviews,watchlist)
+- 🗑️ Booking cancellation/editing (tests + UX polish)
+- ⭐ Review polish (average rating display, validation states)
+- 🧾 Watchlist & Favorites
+-  Watchlist: allowed when no available showtime 
+- Favorites: allowed after user attended a showtime (in progress)
+- ⭐ Service review (post-showtime only)
  ## 🏗️ Next Up
 
-- 🗑️ Booking cancellation/editing (tests + UX polish)
-
-- ⭐ Review polish (average rating display, validation states)
-
-- 🧾 Watchlist & Favorites
-
-- - Watchlist: allowed when no available showtime
-
-- - Favorites: allowed after user attended a showtime
 
 - ✉️ Optional email confirmation for registration
 
