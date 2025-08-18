@@ -14,3 +14,10 @@ export function fetchUsersList() {
 export function updateUser(data) {
   return api.put('/api/auth/user/', data);
 }
+export function generateToken() {
+  return api.get('/api/auth/generate_token/');
+}
+
+export function confirmEmail(uid, token) {
+  return api.get(`/api/confirm/${uid}/${token}/`);
+}

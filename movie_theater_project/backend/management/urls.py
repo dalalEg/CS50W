@@ -21,6 +21,7 @@ router.register(r'bookings', views.BookingViewSet)
 router.register(r'watchlist', views.WatchlistViewSet)  
 router.register(r'rate-services', views.RateServiceViewSet)
 router.register(r'payments', views.PaymentViewSet)
+
 # Add other viewsets as needed
 urlpatterns = [
     path('', views.index, name='index'),
@@ -28,6 +29,8 @@ urlpatterns = [
     path ('login/', views.login_view, name='login'),
     path('logout/', views.logout_view, name='logout'),
     path('register/', views.register, name='register'),
+    path('api/confirm/<int:uid>/<str:token>/', views.confirm_email, name='confirm-email'),
+    path('api/auth/generate_token/', views.generate_token, name='generate-confirmation-token'),
     path('api/auth/login/',   views.api_login,        name='api-login'),
     path('api/auth/logout/',  views.api_logout,       name='api-logout'),
     path('api/auth/user/',    views.api_user_profile, name='api-current-user'),

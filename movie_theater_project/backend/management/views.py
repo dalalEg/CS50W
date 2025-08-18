@@ -1,9 +1,7 @@
 from ast import Is
 from encodings import search_function
 from re import search
-import re
-from urllib import request
-from django.http import HttpResponse
+from rest_framework.response       import Response
 from django.db import IntegrityError
 from django.shortcuts import render, redirect
 from rest_framework import viewsets,filters,generics
@@ -29,7 +27,6 @@ from .serializers import( MovieSerializer, ShowtimeSerializer, SeatSerializer,
                          RateServiceSerializer, FavouriteSerializer)
 from rest_framework import serializers
 from django.shortcuts import get_object_or_404
-from rest_framework.validators import UniqueValidator
 from rest_framework import status
 from django.db import transaction
 from django.db.models import F
@@ -38,7 +35,9 @@ from rest_framework import routers
 from .models import (User, Movie, Genre,Seat,Showtime,Review, 
                      Notification,Booking,Actor,Director,Auditorium,Producer,Payment,watchlist as Watchlist,Role,Theater,
                      RateService, Favourite)
-from django.contrib.auth.models import AnonymousUser
+from django.contrib.auth.tokens import default_token_generator
+from django.core.mail import send_mail
+from django.conf import settings
 def index(request):
     return render(request, 'management/index.html')
    
@@ -119,6 +118,40 @@ def register(request):
         return HttpResponseRedirect(reverse("index", args=(user.username,)))
     else:
         return render(request, "management/register.html")
+@api_view(['GET'])
+def generate_token(request):
+    # generate token
+    user = request.user
+    token = default_token_generator.make_token(user)
+    confirm_url = request.build_absolute_uri(
+        reverse('confirm-email', kwargs={'uid': user.pk, 'token': token})
+    )
+
+    # send email
+    send_mail(
+        subject="Confirm your account",
+        message=f"Hi {user.username}, confirm your email: {confirm_url}",
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        recipient_list=[user.email],
+    )
+    return Response(
+        {"detail": "Confirmation email sent."},
+        status=status.HTTP_200_OK
+    )
+
+@api_view(['GET'])
+def confirm_email(request, uid, token):
+    try:
+        user = User.objects.get(pk=uid)
+    except User.DoesNotExist:
+        return Response({"error": "Invalid link"}, status=400)
+
+    if default_token_generator.check_token(user, token):
+        user.is_active = True
+        user.email_verified = True
+        user.save()
+        return Response({"message": "Email confirmed successfully!"})
+    return Response({"error": "Invalid or expired token"}, status=400)
     
 
 #API views (login and register).

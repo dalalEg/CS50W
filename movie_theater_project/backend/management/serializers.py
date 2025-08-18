@@ -1,4 +1,6 @@
+import email
 from enum import unique
+from os import read
 import re
 from rest_framework import serializers
 from .models import (
@@ -11,7 +13,9 @@ from django.db import transaction
 from django.db.models import F
 from rest_framework.exceptions import ValidationError
 from rest_framework.fields import CurrentUserDefault
+
 class UserSerializer(serializers.ModelSerializer):
+    email_verified = serializers.BooleanField(read_only=True)
     class Meta:
         model = User
         fields = '__all__'  # Corrected from 'all'
