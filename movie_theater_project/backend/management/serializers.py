@@ -4,7 +4,7 @@ from rest_framework import serializers
 from .models import (
     User, Movie, Booking, Showtime, Seat,
     Genre, Review, Notification, Actor, Director,Producer, Payment,
-    watchlist, Role, Auditorium, Theater, RateService
+    watchlist, Role, Auditorium, Theater, RateService, Favourite
 )
 from rest_framework.validators import UniqueValidator,UniqueTogetherValidator
 from django.db import transaction
@@ -227,11 +227,12 @@ class NotificationSerializer(serializers.ModelSerializer):
         fields = ['id', 'user', 'message', 'created_at', 'is_read']
 
 
+
 class PaymentSerializer(serializers.ModelSerializer):
-    user = UserSerializer(read_only=True)
     class Meta:
-        model = Payment
-        fields = ['id', 'user', 'amount', 'payment_date']
+        model  = Payment
+        fields = ['id', 'booking', 'amount', 'status', 'created_at']
+        read_only_fields = ['id','status','created_at']
 
 
 
@@ -288,3 +289,13 @@ class RateServiceSerializer(serializers.ModelSerializer):
                 message="You've already submitted a service review for this booking."
             )
         ]
+
+
+
+class FavouriteSerializer(serializers.ModelSerializer):
+    user = UserSerializer(read_only=True)
+
+    class Meta:
+        model = Favourite
+        fields = ['id', 'user', 'movie', 'added_at']
+        read_only_fields = ['id', 'user', 'added_at']

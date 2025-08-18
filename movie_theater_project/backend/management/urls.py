@@ -20,6 +20,7 @@ router.register(r'seats', views.SeatViewSet)
 router.register(r'bookings', views.BookingViewSet)
 router.register(r'watchlist', views.WatchlistViewSet)  
 router.register(r'rate-services', views.RateServiceViewSet)
+router.register(r'payments', views.PaymentViewSet)
 # Add other viewsets as needed
 urlpatterns = [
     path('', views.index, name='index'),

@@ -49,3 +49,29 @@
   padding: var(--gap-md);
   box-shadow: var(--shadow);
 }
+.notification {
+  position: fixed;
+  top: var(--gap-md);
+  right: var(--gap-md);
+  padding: var(--gap-sm) var(--gap-md);
+  border-radius: var(--radius-sm);
+  color: var(--clr-text-light);
+  font-size: var(--fs-md);
+  box-shadow: var(--shadow);
+  z-index: 1000;
+}
+.notification.info    { background: var(--clr-primary); }
+.notification.success { background: var(--clr-secondary); }
+.notification.error   { background: var(--clr-error); }
+.notification.warning { background: var(--clr-accent); }
+.confirm-backdrop {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.4);
+  display: flex; align-items: center; justify-content: center;
+}
+.confirm-box {
+  background: var(--clr-card-bg);
+  padding: var(--gap-lg);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow);
+}

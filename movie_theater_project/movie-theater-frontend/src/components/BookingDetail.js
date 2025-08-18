@@ -2,22 +2,25 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, Link, useParams } from 'react-router-dom';
 import { fetchBookingById, cancelBooking, updateBooking } from '../api/booking';
 import { fetchAvailableSeats } from '../api/seats';
-import { fetchServiceReviews } from '../api/serviceReview';
-import {ServiceReview} from './ServiceReview';
+import ConfirmDialog from './ConfirmDialog';
+import { useNotification } from '../contexts/NotificationContext';
+
+import {processPayment} from '../api/payment';
 import '../styles/BookingDetail.css';
 
 export default function BookingDetail() {
+  const { show } = useNotification();
+  const [confirmCancel, setConfirmCancel] = useState(false);
   const { bookingId } = useParams();
   const navigate = useNavigate();
-
   const [booking, setBooking] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [editing, setEditing] = useState(false);
   const [selectedSeatIds, setSelectedSeatIds] = useState([]);
   const [availableSeats, setAvailableSeats] = useState([]);
-  const [serviceReviews, setServiceReviews] = useState([]);
   // Load booking
+  const [payment, setPaying] = useState(null);
   useEffect(() => {
     if (!bookingId) { setLoading(false); return; }
     (async () => {
@@ -43,14 +46,19 @@ export default function BookingDetail() {
         .catch(() => setError('Error fetching available seats.'));
     }
   }, [editing, booking]);
-  // Load service reviews
-  useEffect(() => {
-    if (bookingId) {
-      fetchServiceReviews(bookingId)
-        .then(resp => setServiceReviews(resp.data))
-        .catch(() => setError('Error fetching service reviews.'));
+    const handlePayNow = async () => {
+    setLoading(true);
+    try {
+      await processPayment(booking.id);
+      show('Payment successful', 'success');
+      const updated = await fetchBookingById(booking.id);
+      setBooking(updated.data);
+    } catch {
+      show('Payment failed', 'error');
+    } finally {
+      setLoading(false);
     }
-  }, [bookingId]);
+  };
   if (loading) return <div>Loading…</div>;
   if (error) return <div className="text-danger">{error}</div>;
   if (!booking) return <div>No booking found.</div>;
@@ -65,15 +73,18 @@ export default function BookingDetail() {
       ]
     : [];
 
-  const handleCancel = async () => {
-    if (!window.confirm('Are you sure you want to cancel this booking?')) return;
+   const handleCancel = async () => {
+    setConfirmCancel(false);
     try {
       await cancelBooking(booking.id);
-      navigate('/bookings');
+      show('Booking cancelled', 'warning');
+      const updated = await fetchBookingById(booking.id);
+      setBooking(updated.data);
     } catch {
-      setError('Failed to cancel booking.');
+      show('Failed to cancel', 'error');
     }
   };
+
 
   const handleEdit = async () => {
     if (selectedSeatIds.length === 0) {
@@ -128,19 +139,39 @@ export default function BookingDetail() {
           )}
         </div>
       ) : (
-        canCancel && (
+        canCancel && booking.status !== 'Cancelled' && booking.status !== 'Confirmed' && (
           <button className="btn btn-secondary" onClick={() => setEditing(true)}>
             Edit Booking
           </button>
         )
       )}
-
-      {canCancel && (
-        <button className="btn btn-danger mt-3" onClick={handleCancel}>
-          Cancel Booking
-        </button>
+{booking.status === 'Pending' && (
+        <>
+          <button
+            onClick={handlePayNow}
+            disabled={loading}
+            className="btn btn-primary me-2"
+          >
+            {loading ? 'Processing…' : 'Pay Now'}
+          </button>
+          <button
+            onClick={() => setConfirmCancel(true)}
+            className="btn btn-danger"
+          >
+            Cancel Booking
+          </button>
+        </>
       )}
-
+{confirmCancel && (
+        <ConfirmDialog
+          message="Are you sure you want to cancel this booking?"
+          onYes={handleCancel}
+          onNo={() => setConfirmCancel(false)}
+        />
+      )}
+       {booking.status === 'Confirmed' && (
+         <p className="text-success">✅ Paid</p>
+       )}
       {booking.status === 'Cancelled' && (
         <p className="text-muted mt-3">
           This booking has  been cancelled.

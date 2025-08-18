@@ -1,6 +1,7 @@
 from ast import Is
 from encodings import search_function
 from re import search
+import re
 from urllib import request
 from django.http import HttpResponse
 from django.db import IntegrityError
@@ -25,7 +26,7 @@ from .serializers import( MovieSerializer, ShowtimeSerializer, SeatSerializer,
                          BookingSerializer, ActorSerializer, DirectorSerializer,
                          ProducerSerializer, PaymentSerializer, WatchlistSerializer,
                          RoleSerializer, TheaterSerializer,UserSerializer,AuditoriumSerializer,
-                         RateServiceSerializer)
+                         RateServiceSerializer, FavouriteSerializer)
 from rest_framework import serializers
 from django.shortcuts import get_object_or_404
 from rest_framework.validators import UniqueValidator
@@ -36,7 +37,7 @@ from django.contrib.auth.models import User
 from rest_framework import routers  
 from .models import (User, Movie, Genre,Seat,Showtime,Review, 
                      Notification,Booking,Actor,Director,Auditorium,Producer,Payment,watchlist as Watchlist,Role,Theater,
-                     RateService)
+                     RateService, Favourite)
 from django.contrib.auth.models import AnonymousUser
 def index(request):
     return render(request, 'management/index.html')
@@ -550,3 +551,78 @@ class RateServiceViewSet(viewsets.ModelViewSet):
             )
         # UniqueTogetherValidator will prevent dup on the same booking
         serializer.save(user=user, booking=booking)
+
+
+class FavouriteViewSet(viewsets.ModelViewSet):
+    """ViewSet for managing favourites."""
+    queryset = Favourite.objects.all()
+    serializer_class = FavouriteSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['movie']
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_staff:
+            return Favourite.objects.all()
+        return Favourite.objects.filter(user=user)
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+
+
+class PaymentViewSet(viewsets.ModelViewSet):
+    queryset         = Payment.objects.all()
+    serializer_class = PaymentSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends  = [DjangoFilterBackend]
+    filterset_fields = ['booking']
+    @action(detail=False, methods=['post'], url_path='process')
+    def process_payment(self, request):
+        # debug print so you see the payload
+        print("🔔 process_payment called:", request.data)
+        booking_id = request.data.get('booking_id')
+        if not booking_id:
+            return Response(
+                {"detail": "booking_id is required"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        try:
+            booking = get_object_or_404(Booking, pk=booking_id, user=request.user)
+
+            if booking.status != 'Pending':
+                 return Response(
+                     {"detail": "Booking already paid or cancelled"},
+                     status=status.HTTP_400_BAD_REQUEST
+                 )
+
+            if hasattr(booking, 'payment'):
+                 return Response(
+                     {"detail": "Payment already exists for this booking."},
+                     status=status.HTTP_400_BAD_REQUEST
+                 )
+
+            # mock “charge”
+            payment = Payment.objects.create(
+                user=request.user,
+                booking=booking,
+                amount=booking.cost,
+                status="success"
+            )
+
+            booking.status = "Confirmed"
+            booking.save(update_fields=["status"])
+
+            return Response(
+                {"payment_id": payment.id, "status": "success"},
+                status=status.HTTP_200_OK
+            )
+        except Exception as e:
+            # print full traceback to your runserver console
+            import traceback; traceback.print_exc()
+            # return the exception message in JSON so you see it in the browser
+            return Response(
+                {"detail": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )

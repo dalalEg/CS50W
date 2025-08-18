@@ -1,5 +1,6 @@
 from tokenize import Comment
 from turtle import mode, st, update
+from venv import create
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
@@ -129,13 +130,14 @@ class Producer(models.Model):
     
 class Payment(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="payments")
+    booking = models.ForeignKey(Booking, on_delete=models.CASCADE, related_name="payments", blank=True, null=True)  # Add booking field
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     payment_date = models.DateTimeField(auto_now_add=True)
-    payment_method = models.CharField(max_length=50)
+    payment_method = models.CharField(max_length=50, choices=[('Credit Card', 'Credit Card'), ('Debit Card', 'Debit Card'), ('PayPal', 'PayPal')], default='Credit Card')
     status = models.CharField(max_length=20, choices=[('Pending', 'Pending'), ('Completed', 'Completed'), ('Failed', 'Failed')], default='Pending')
-
+    created_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)  # Add created_at field
     def __str__(self):
-        return f"{self.user.username} - {self.amount} on {self.payment_date}"
+        return f"Payment {self.pk} for Booking {self.booking_id}: {self.status}"
     
 class watchlist(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="watchlists")
@@ -182,3 +184,11 @@ class RateService(models.Model):
             else "Unknown"
         )
         return f"Service Review by {self.user.username} for {movie}"
+
+class Favourite(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="favourites")
+    movie = models.ForeignKey(Movie, on_delete=models.CASCADE, related_name="favourites")
+    added_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user.username} - {self.movie.title} Favourite"
