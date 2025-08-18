@@ -103,12 +103,9 @@ A full-stack web application for booking movie tickets — featuring dynamic sea
 -  Watchlist: allowed when no available showtime 
 - Favorites: allowed after user attended a showtime (in progress)
 - ⭐ Service review (post-showtime only)
-  
+- ✉️ Email confirmation 
 - 💳 Simple payment 
  ## 🏗️ Next Up
-
-
-- ✉️ Optional email confirmation for registration
 
 
 - 📣 Notifications (watchlist alerts, review replies)
