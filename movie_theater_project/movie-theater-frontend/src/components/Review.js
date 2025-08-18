@@ -2,6 +2,8 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { fetchReviewsByMovie, createReview } from '../api/review';
 import RatingReview from "./RatingReview";
+import { useAuth } from '../contexts/AuthContext';
+
 import '../styles/Review.css';
 
 export default function Review() {
@@ -11,6 +13,7 @@ export default function Review() {
   const [rating, setRating]       = useState(5);
   const [anonymous, setAnonymous] = useState(false);
   const [error, setError]         = useState(null);
+  const { user } = useAuth();
 
   // load reviews once
   useEffect(() => {
@@ -34,6 +37,10 @@ export default function Review() {
   const handleSubmit = async e => {
     e.preventDefault();
     setError(null);
+    if (!user?.email_verified) {
+      setError('Please confirm your email before placing a booking.');
+      return;
+    }
     try {
       await createReview(movieId, { content, rating, anonymous });
       setContent('');
@@ -45,7 +52,7 @@ export default function Review() {
     } catch (err) {
       const status = err.response?.status;
       if (status === 401 || status === 403) {
-        setError('You are not authorized, please log in.');
+        setError('You are not authorized, please log in or verify your email address.');
         return;
       }
       const data = err.response?.data || {};

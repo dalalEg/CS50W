@@ -58,3 +58,14 @@ class IsWatchlistOwnerOrStaff(BasePermission):
     def has_object_permission(self, request, view, obj):
       
         return (obj.user == request.user or request.user.is_staff) and request.user.is_authenticated
+
+class IsUserEmailVerified(BasePermission):
+    """
+    Custom permission to only allow users with verified email to access the view.
+    """
+    def has_permission(self, request, view):
+        return request.user and request.user.is_authenticated and request.user.email_verified
+
+    def has_object_permission(self, request, view, obj):
+        # same check at the object level
+        return self.has_permission(request, view)

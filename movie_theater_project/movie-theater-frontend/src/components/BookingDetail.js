@@ -186,7 +186,7 @@ export default function BookingDetail() {
                 className="btn btn-primary"
                 onClick={() => navigate(`/serviceReview/${bookingId}`)}
               >
-                Leave a Review
+                Leave us a Review
               </button>
             </div>
           

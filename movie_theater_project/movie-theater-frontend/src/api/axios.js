@@ -2,8 +2,13 @@ import axios from 'axios';
 import Cookies from 'js-cookie';
 
 export const api = axios.create({
-  baseURL: 'http://localhost:8000',
+  baseURL: 'http://localhost:8000/',
   withCredentials: true,   // send session cookie
+  headers: {
+    'Content-Type': 'application/json',
+    'X-CSRFToken': Cookies.get('csrftoken'),  // Django CSRF protection
+  }
+  
 });
 
 api.defaults.xsrfCookieName = 'csrftoken';

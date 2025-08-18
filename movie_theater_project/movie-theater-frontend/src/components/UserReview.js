@@ -1,6 +1,6 @@
 import React, {useState, useEffect} from "react";
 import {useParams, Link} from "react-router-dom";
-import {fetchUsers} from '../api/user';
+import {fetchCurrentUser} from '../api/user';
 import RatingReview from "./RatingReview" 
 import { fetchReviewsByUser,handleDeleteReview ,handleUpdateReview} from "../api/review";
 import '../styles/UserReview.css';
@@ -14,9 +14,15 @@ const UserReview = () => {
   const [isEditing, setIsEditing] = useState(false);
   
   useEffect(() => {
-    fetchUsers(userId)
+    fetchCurrentUser()
       .then(resp => {
         setUser(resp.data);
+        if(!user.email_verified){
+          // If email is not verified, show a message or take action
+          setError("Please verify your email to access your reviews.");
+          setLoading(false);
+          return;
+        }
         return fetchReviewsByUser(userId);
       })
       .then(resp => {

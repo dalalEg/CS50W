@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { createBooking } from '../api/booking';
+import { useAuth } from '../contexts/AuthContext';
 // Booking component to confirm and finalize a booking
 // This component is responsible for displaying the booking confirmation page
 // and handling the booking creation process.
@@ -13,7 +14,7 @@ export default function Booking() {
   const [loading, setLoading]       = useState(false);
   const showtimeId = state?.showtimeId;
   const seats      = state?.seats      || [];
-
+  const { user } = useAuth();
   if (!showtimeId || !seats.length) {
     return (
       <div className="booking-confirm">
@@ -33,8 +34,9 @@ const handleConfirm = () => {
     .then(resp => setBooking(resp.data))
     .catch(err => {
       const status = err.response?.status;
+      
       if (status === 401 || status === 403) {
-        setError('Please log in to place a booking.');
+        setError('Please log in to place a booking. If you\'re already logged in, please verify your email address.');
         return;
       }
       const data = err.response?.data || {};

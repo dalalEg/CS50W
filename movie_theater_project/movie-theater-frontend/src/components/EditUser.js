@@ -1,6 +1,6 @@
 import React, {useState, useEffect} from "react";
 import {useParams, Link} from "react-router-dom";
-import {fetchUsers,updateUser} from '../api/user';
+import {fetchCurrentUser,updateUser} from '../api/user';
 // Profile component to display user profile information
 // This component fetches and displays the user's profile details such as name, email, and points.
 import '../styles/Profile.css';
@@ -12,7 +12,7 @@ function EditUser() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchUsers(userId)
+    fetchCurrentUser()
       .then(resp => {
         setUser(resp.data);
         setLoading(false);

@@ -1,6 +1,6 @@
 import React, {useState, useEffect} from "react";
 import {useParams, Link} from "react-router-dom";
-import {fetchUsers} from '../api/user';
+import {fetchCurrentUser} from '../api/user';
 import {confirmEmail,generateToken} from '../api/user';
 // Profile component to display user profile information
 // This component fetches and displays the user's profile details such as name, email, and points.
@@ -13,7 +13,7 @@ function Profile() {
   const [loading, setLoading] = useState(true);
   const [emailSent, setEmailSent] = useState(false);
   useEffect(() => {
-    fetchUsers(userId)
+    fetchCurrentUser()
       .then(resp => {
         setUser(resp.data);
         setLoading(false);

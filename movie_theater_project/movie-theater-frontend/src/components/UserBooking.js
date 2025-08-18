@@ -1,6 +1,6 @@
 import React, {useState, useEffect} from "react";
 import {useParams, Link} from "react-router-dom";
-import {fetchUsers} from '../api/user';
+import {fetchCurrentUser} from '../api/user';
 import { fetchBookingsByUser } from "../api/booking";
 import '../styles/UserBooking.css'; 
 const UserBooking = () => {
@@ -11,9 +11,14 @@ const UserBooking = () => {
   const [loading, setLoading] = useState(true);
 
  useEffect(() => {
-    fetchUsers(userId)
+    fetchCurrentUser()
       .then(resp => {
         setUser(resp.data);
+        if (!resp.data.email_verified) {
+          setError("Please verify your email to access your bookings.");
+          setLoading(false);
+          return;
+        }
         return fetchBookingsByUser(userId);
       })
       .then(resp => {
@@ -27,6 +32,8 @@ const UserBooking = () => {
   }, [userId]);
 
   if (!user) return <p>Loading user information...</p>;
+  if (loading) return <p>Loading bookings...</p>;
+  if (error) return <p>{error}</p>;
   return (
     <div className="user-booking">
       <h2>Bookings for {user.username}</h2>

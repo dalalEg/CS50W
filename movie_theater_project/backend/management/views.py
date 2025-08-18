@@ -14,7 +14,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from django.views.decorators.csrf import csrf_exempt
 from .permissions import IsAdminOrReadOnly, IsReviewOwnerOrReadOnly,IsAuthenticated, IsBookingOwnerOrStaff, IsNotificationOwnerOrStaff
-from .permissions import IsWatchlistOwnerOrStaff
+from .permissions import IsWatchlistOwnerOrStaff,IsUserEmailVerified
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
 from django.urls import reverse
@@ -171,11 +171,11 @@ def api_login(request):
 
 @api_view(['POST'])
 def api_register(request):
-    """API endpoint for user registration."""
     username = request.data.get('username')
     email = request.data.get('email')
     password = request.data.get('password')
     confirmation = request.data.get('confirmation')
+
     if not username or not email or not password or not confirmation:
         return Response({'error': 'All fields are required.'}, status=400)
     if password != confirmation:
@@ -184,9 +184,20 @@ def api_register(request):
         return Response({'error': 'Username already taken.'}, status=400)
     if User.objects.filter(email=email).exists():
         return Response({'error': 'Email already taken.'}, status=400)
+
     user = User.objects.create_user(username=username, email=email, password=password)
     login(request, user)
-    return Response({'message': 'Registration successful.'})
+
+    # Return logged-in user info (like /api/auth/user/)
+    return Response({
+        'message': 'Registration successful.',
+        'user': {
+            'id': user.id,
+            'username': user.username,
+            'email': user.email
+        }
+    }, status=201)
+
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -424,7 +435,7 @@ class ShowtimeViewSet(viewsets.ModelViewSet):
 class ReviewViewSet(viewsets.ModelViewSet):
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
-    permission_classes = [IsReviewOwnerOrReadOnly]
+    permission_classes = [IsReviewOwnerOrReadOnly,IsUserEmailVerified]
     filter_backends  = [DjangoFilterBackend, filters.SearchFilter]
     filterset_fields = ['user','movie']
     search_fields    = ['content']
@@ -466,7 +477,7 @@ class BookingViewSet(viewsets.ModelViewSet):
     """ViewSet for managing bookings."""
     queryset = Booking.objects.all()
     serializer_class = BookingSerializer
-    permission_classes = [IsBookingOwnerOrStaff, IsAuthenticated]
+    permission_classes = [IsBookingOwnerOrStaff, IsAuthenticated, IsUserEmailVerified]
     def get_queryset(self):
         user = self.request.user
         if user.is_staff:
@@ -536,10 +547,10 @@ class WatchlistViewSet(viewsets.ModelViewSet):
     """ViewSet for managing watchlists."""
     queryset = Watchlist.objects.all()
     serializer_class = WatchlistSerializer
-    permission_classes = [IsWatchlistOwnerOrStaff]
-    filter_backends  = [DjangoFilterBackend, filters.SearchFilter]
+    permission_classes = [IsAuthenticated]
+    filter_backends = [DjangoFilterBackend]
     # only allow filtering by movie; user is set from request
-    filterset_fields = ['movie']
+    filterset_fields = ['user', 'movie']
 
     def get_queryset(self):
         user = self.request.user

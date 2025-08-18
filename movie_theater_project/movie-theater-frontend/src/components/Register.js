@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { api } from '../api/axios';   // use your axios instance with proxy & CSRF
+import { apiRegister,apiLogin } from '../api/user';
 
 function Register({ onRegister }) {
   const [formData, setFormData] = useState({
@@ -11,30 +11,42 @@ function Register({ onRegister }) {
   });
   const [message, setMessage] = useState('');
   const navigate = useNavigate();
-
+  const [user, setUser] = useState(null);
   const handleChange = e => {
     setFormData(f => ({ ...f, [e.target.name]: e.target.value }));
   };
 
-  const handleSubmit = async e => {
-    e.preventDefault();
-    if (formData.password !== formData.confirmation) {
-      setMessage("Passwords don't match");
-      return;
-    }
-    try {
-      await api.post('/api/auth/register/', {
-        username:     formData.username,
-        email:        formData.email,
-        password:     formData.password,
-        confirmation: formData.confirmation
-      });
-      onRegister && onRegister();
-      navigate('/');
-    } catch (err) {
-      setMessage(err.response?.data?.detail || 'Registration failed.');
-    }
-  };
+const handleSubmit = async e => {
+  e.preventDefault();
+
+  if (formData.password !== formData.confirmation) {
+    setMessage("Passwords don't match");
+    return;
+  }
+
+  try {
+    // 1. Register user
+    await apiRegister(formData);
+
+    // 2. Immediately log in with same credentials
+    const loginRes = await apiLogin({
+      username: formData.username,
+      password: formData.password,
+    });
+
+    // 3. Save user (and token if you get one)
+    setUser(loginRes.data.user);
+    localStorage.setItem("token", loginRes.data.token); // only if backend returns token
+
+    // 4. Navigate home
+    navigate('/');
+
+  } catch (err) {
+    console.error(err);
+    setMessage(err.response?.data?.error || 'Registration failed.');
+  }
+};
+
 
   return (
     <div className="container d-flex justify-content-center align-items-center vh-100">

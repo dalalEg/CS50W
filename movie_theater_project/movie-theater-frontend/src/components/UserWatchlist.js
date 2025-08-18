@@ -1,17 +1,17 @@
 import React, {useState, useEffect} from "react";
 import {useParams, Link} from "react-router-dom";
-import {fetchUsers} from '../api/user';
+import {fetchCurrentUser} from '../api/user';
 import { fetchWatchlistByUser ,removeFromWatchlist} from "../api/watchlist";
 import '../styles/UserWatchlist.css';
-const   UserWatchlist = () => {
+const UserWatchlist = () => {
   const { userId } = useParams();
-  const [user, setUser] = useState(null);
   const [watchlist, setWatchlist] = useState([]);
-  const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(true);
-   
-  useEffect(() => {
-    fetchUsers(userId)
+  const [error, setError]           = useState(null);
+  const [loading, setLoading]       = useState(true);
+  const [user, setUser] = useState(null);
+
+ useEffect(() => {
+    fetchCurrentUser()
       .then(resp => {
         setUser(resp.data);
         return fetchWatchlistByUser(userId);
@@ -21,14 +21,13 @@ const   UserWatchlist = () => {
         setLoading(false);
       })
       .catch(() => {
-        setError("Failed to load user watchlist");
+        setError("Failed to load user profile");
         setLoading(false);
       });
   }, [userId]);
 
   if (loading) return <p>Loading user watchlist...</p>;
   if (error) return <p>{error}</p>;
-  if (!user) return <p>User not found</p>;
   
 
   return (
