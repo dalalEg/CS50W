@@ -46,7 +46,7 @@ A full-stack web application for booking movie tickets — featuring dynamic sea
 
 - Media: ImageField (poster), URLField (trailer)
 
-- Planned: Stripe integration for payments
+
 
 # 🚧 Roadmap
 ## ✅ Done
@@ -103,12 +103,13 @@ A full-stack web application for booking movie tickets — featuring dynamic sea
 -  Watchlist: allowed when no available showtime 
 - Favorites: allowed after user attended a showtime (in progress)
 - ⭐ Service review (post-showtime only)
+  
+- 💳 Simple payment 
  ## 🏗️ Next Up
 
 
 - ✉️ Optional email confirmation for registration
 
-- 💳 Stripe payment integration
 
 - 📣 Notifications (watchlist alerts, review replies)
 
@@ -117,6 +118,7 @@ A full-stack web application for booking movie tickets — featuring dynamic sea
 - 🎨 Frontend polish (filter panel UX, mobile tweaks, infinite scroll)
 
 ## 🧩 Backlog / Ideas
+- More advanced payment logic
 
 - VIP showtime logic
 
@@ -129,8 +131,6 @@ A full-stack web application for booking movie tickets — featuring dynamic sea
 - Retro movie voting system
 
 - “Coming Soon” opt-in
-
-- Watchlist / favorites expansions
 
 - DevOps: full CI pipeline with tests, linting & formatting rules
 
@@ -145,4 +145,35 @@ A full-stack web application for booking movie tickets — featuring dynamic sea
 ⚙️ GitHub Actions CI (planned)
 
 # 📸 Screenshots
-<img width="1886" height="875" alt="image" src="https://github.com/user-attachments/assets/f21aa082-7397-4319-af30-df42a495530d" /> <img width="667" height="799" alt="image" src="https://github.com/user-attachments/assets/ba31af31-77b2-4136-b579-e821280c711f" /> <img width="1914" height="885" alt="image" src="https://github.com/user-attachments/assets/41150828-909d-4c21-a8b4-1712b4463ec2" />
+## All Movies List Page
+
+<img width="1886" height="875" alt="image" src="https://github.com/user-attachments/assets/f21aa082-7397-4319-af30-df42a495530d" />
+
+## Movie Datails Page
+
+<img width="667" height="799" alt="image" src="https://github.com/user-attachments/assets/ba31af31-77b2-4136-b579-e821280c711f" />
+
+## Available Showtime List Page 
+
+<img width="1914" height="885" alt="image" src="https://github.com/user-attachments/assets/41150828-909d-4c21-a8b4-1712b4463ec2" />
+
+## User Bookings Page
+
+<img width="651" height="747" alt="image" src="https://github.com/user-attachments/assets/a213987c-c138-4dd7-b1c2-9f0febe99b42" />
+
+## Booking Confirmed (Payed)
+
+<img width="741" height="450" alt="image" src="https://github.com/user-attachments/assets/4fd705df-2716-4fcf-9574-7153dd59a67c" />
+
+## Booking In Progress
+
+<img width="741" height="491" alt="image" src="https://github.com/user-attachments/assets/d9e31bde-0cdf-4f7d-8fc9-46d08dc7ed37" />
+
+## Booking Canceled
+
+
+<img width="745" height="473" alt="image" src="https://github.com/user-attachments/assets/98da251e-ca40-4096-908f-e126df830f61" />
+
+
+
+
