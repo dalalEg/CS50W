@@ -65,6 +65,7 @@ import '../styles/ServiceReview.css';
                  {key.replace('_',' ').toUpperCase()}: {form[key]}
                </label>
                <input
+               className='form-range'
                  type="range"
                  min="1"
                  max="5"

@@ -1,17 +1,19 @@
+@import './theme.css';
+
 .service-review{
-   padding: 20px;
-   border: 1px solid #ccc;
-   border-radius: 5px;
-   background-color: #f9f9f9;
-   margin-bottom: 20px;
+      padding: 20px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      background-color: #f9f9f9;
+      margin-bottom: 20px;
 }
 
 .service-review h3{
-   margin-top: 0;
+  margin-top: 0;
 }
 
 .service-review .error{
-   color: red;
+  color: red;
 }
 
 .service-review form{
@@ -43,11 +45,11 @@
    margin-top: 20px;
 }
 .existing-review{
+   margin-top: 20px;
    padding: 10px;
    border: 1px solid #eee;
    border-radius: 5px;
    background-color: #fafafa;
-   margin-top: 10px;
 }
 
 .submit{
@@ -61,4 +63,12 @@
 
 .submit:hover{
    background-color: #218838;
+}
+.form-range {
+   background-color: #f0f0f0;
+   border: 1px solid #ccc;
+   border-radius: 5px;
+   padding: 5px;
+   max-width: 300px;
+   margin-left: 80px;
 }

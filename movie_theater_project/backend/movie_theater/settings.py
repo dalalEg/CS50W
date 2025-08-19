@@ -13,6 +13,19 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 from pathlib import Path
 import os
 import management
+from celery.schedules import crontab
+
+CELERY_BEAT_SCHEDULE = {
+    'send-showtime-reminders-every-24-hours': {
+        'task': 'management.tasks.send_upcoming_showtime_reminders',
+        'schedule': crontab(hour=0, minute=0),  # every 24 hours
+    },
+}
+
+CELERY_BROKER_URL = 'redis://localhost:6380/0'
+CELERY_RESULT_BACKEND = 'redis://localhost:6380/0'
+
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
