@@ -4,47 +4,62 @@ A full-stack web application for booking movie tickets — featuring dynamic sea
 
 ⚠️ Actively developed – frontend and backend integration in progress.
 
+
+
+
 # 🛠 Features
+- 🔐 User Authentication – Register, login, logout with secure session handling.
 
-- 🎟️ Showtime-based seat selection with a visual seat picker
+- 🔍 Advanced Search & Filters – Search by title, genre, rating, year, duration, or theater.
 
-- 🔐 User authentication (register / login / logout)
+- 🎬 Movie Browsing – View trailers, posters, credits, and details.
 
-- 🧾 Booking system with automatic user linking + confirmation view
+- 🎟️ Seat Selection – Interactive seat picker tied to showtimes.
 
-- ⭐ Reviews & ratings (edit/delete, anonymous option)
+- 🧾 Booking System – Automatic user linking, confirmation, and reservation management.
 
-- 🔍 Powerful search & filters (title/keyword, genre, rating, year, duration, theater)
+- ⭐ Movie Reviews – Public reviews & ratings for each movie.
 
-- 🎬 Movie browsing with trailers, posters, and credits
+- ⭐ Service Reviews – Time-gated reviews available only after attending a booked showtime.
 
-- 👤 User profile with booking history & reviews
+- 📌 Watchlist & Favorites – Save movies and get updates on similar content.
+- 📣 Notifications – Alerts for bookings, favorites, and new showtimes.
 
-- 🏛️ Theaters & auditoriums directory
+- 👤 User Profile – Centralized history of bookings, reviews, and saved lists.
 
-- 🛠️ Admin panel for movies, showtimes, actors, directors, producers, etc.
+- 🏛️ Theaters & Auditoriums – Directory with venue details.
 
-- 🐳 Dockerized (in progress)
+- 🛠️ Admin Panel – Manage movies, showtimes, cast, and production details.
 
-- ⚙️ CI/CD with GitHub Actions (in progress)
+- 🐳 Dockerized Setup – Containerized for easy deployment (in progress).
 
-- 🔔 Coming soon notifications (planned)
+- ⚙️ CI/CD with GitHub Actions – Automated testing & deployment (in progress).
 
-- 🗳️ Retro request voting system (planned)
+- 🔔 Coming Soon Alerts – Get notified about upcoming movies (planned).
 
-# 📦 Tech Stack
+- 🗳️ Feature Voting System – Users can vote on new features or retro requests (planned).
+# 🛠️ Tech Stack
 
-- Backend: Django + Django REST Framework
 
-- Frontend: React + Axios + React Router + Bootstrap
+- Backend: Django + Django REST Framework with PostgreSQL.
+
+- Frontend: React + Axios + React Router + Bootstrap 
 
 - Database: PostgreSQL
 
 - Auth: Django sessions
 
-- DevOps: Docker, GitHub Actions
+- Dockerized: Full stack runs via Docker Compose (backend, frontend, DB).
 
-- Media: ImageField (poster), URLField (trailer)
+- CI/CD Pipeline:
+
+- Django tests (models, API endpoints).
+
+- React tests (Jest + RTL for core components).
+
+- Code linting (flake8/black, eslint/prettier).
+
+- Media Handling: Posters and images served correctly in Docker environment.
 
 
 
@@ -77,8 +92,6 @@ A full-stack web application for booking movie tickets — featuring dynamic sea
 
 - 📱 Mobile-responsive layout (Bootstrap)
 
-- 🧹 Clean Theater ↔ Auditorium relationship
-
 - 🎥 Movie Detail page (trailer, actors, reviews, showtimes)
 
 - 🪑 Showtime detail with visual seat map
@@ -104,17 +117,14 @@ A full-stack web application for booking movie tickets — featuring dynamic sea
 - Favorites: allowed after user attended a showtime (in progress)
 - ⭐ Service review (post-showtime only)
 - ✉️ Email confirmation 
-- 💳 Simple payment 
+- 💳 Simple payment
+- 📣 Notifications – Users receive a notification after every major action (booking, review, payment, etc.).
  ## 🏗️ Next Up
-
-
-- 📣 Notifications (watchlist alerts, review replies)
 
 - 🐳 Docker & CI/CD (Compose, build/test/workflow)
 
 - 🎨 Frontend polish (filter panel UX, mobile tweaks, infinite scroll)
 
-## 🧩 Backlog / Ideas
 - More advanced payment logic
 
 - VIP showtime logic
@@ -129,7 +139,6 @@ A full-stack web application for booking movie tickets — featuring dynamic sea
 
 - “Coming Soon” opt-in
 
-- DevOps: full CI pipeline with tests, linting & formatting rules
 
 # 🧪 Testing
 
