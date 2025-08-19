@@ -1,5 +1,5 @@
 import './App.css';
-import React, { useState, useEffect } from 'react';
+import React, {useEffect } from 'react';
 import {
   BrowserRouter as Router,
   Routes,
@@ -31,43 +31,15 @@ import UserWatchlist from  './components/UserWatchlist';
 import AdminPanel from './AdminPanel';
 import EditUser from './components/EditUser'; // Import EditUser component
 import ServiceReview from './components/ServiceReview';
+import NotificationsList from './components/Notifications';
+import { useAuth } from './contexts/AuthContext';
+
 // Main App component
 function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [username, setUsername]               = useState('');
-  const [user, setUser] = useState(null);
+  const { user, loading, logout } = useAuth();
+  const handleLogout = logout;
   // on mount, you might ping /api/auth/user or read a cookie/token
-useEffect(() => {
-  api.get('/api/auth/user/')
-    .then(res => {
-      // If the backend returned null, that means "no user"
-      if (res.data && res.data.username) {
-        setIsAuthenticated(true);
-        setUsername(res.data.username);
-        setUser(res.data);
-      } else {
-        setIsAuthenticated(false);
-        setUsername('');
-        setUser(null);
-      }
-    })
-    .catch(() => {
-      setIsAuthenticated(false);
-      setUsername('');
-      setUser(null);
-    });
-}, []);
- const handleLogout = async () => {
-    try {
-      await api.post('/api/auth/logout/');
-    } catch { /* ignore */ }
-    setUser(null);
-    setIsAuthenticated(false);
-    setUsername('');
-    // redirect to home after logout
-    window.location.href = '/';
 
-  };
 
   return (
     <Router>
@@ -77,8 +49,6 @@ useEffect(() => {
 
       {/* now NavBar owns the profile link */}
       <NavBar
-        currentUser={user}
-        setCurrentUser={setUser}
         onLogout={handleLogout}
       />
          
@@ -86,16 +56,19 @@ useEffect(() => {
         <Routes className="Routes">
           <Route path="/"            element={<MovieList />} />
           <Route path="/movies/:id"  element={<MovieDetail />} />
-          <Route path="/login"       element={<Login onLogin={(userData) => { setIsAuthenticated(true); setUser(userData); }} />} />
-          <Route path="/register"    element={<Register onRegister={() => setIsAuthenticated(true)} />} />
+          <Route path="/login"       element={<Login   />}  />
+          <Route path="/register"    element={<Register  />} />
           <Route
             path="/profile"
             element={
-              isAuthenticated
-                ? <Profile />
-                : <Navigate to="/login" replace />    // ← redirect if signed out
+              loading
+                ? <p>Loading…</p>
+                : user
+                  ? <Profile/>
+                  : <Navigate to="/login"/>
             }
           />
+
           <Route path="*"            element={<h2>Page not found</h2>} />
           <Route path="/showtimes" element={<ShowtimeList />} />
           <Route path="/showtimes/:id" element={<ShowtimeDetail />} />
@@ -113,6 +86,7 @@ useEffect(() => {
           <Route path="/admin/*" element={<AdminPanel />} />
           <Route path="/user/edit/:id" element={<EditUser />} />
           <Route path="/serviceReview/:bookingId" element={<ServiceReview />} />
+          <Route path="/notifications" element={<NotificationsList />} />
         </Routes>
       </main>
     </Router>

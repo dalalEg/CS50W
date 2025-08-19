@@ -2,6 +2,7 @@ import React, {useState, useEffect} from "react";
 import {useParams, Link} from "react-router-dom";
 import {fetchCurrentUser} from '../api/user';
 import { fetchBookingsByUser } from "../api/booking";
+
 import '../styles/UserBooking.css'; 
 const UserBooking = () => {
   const { userId } = useParams();
@@ -9,6 +10,7 @@ const UserBooking = () => {
   const [bookings, setBookings] = useState([]);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
+
 
  useEffect(() => {
     fetchCurrentUser()

@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { apiRegister,apiLogin } from '../api/user';
+import { useAuth }    from '../contexts/AuthContext';
+import { useNotifications } from '../contexts/NotificationContext';
 
-function Register({ onRegister }) {
+function Register() {
   const [formData, setFormData] = useState({
     username: '',
     email: '',
@@ -11,42 +12,27 @@ function Register({ onRegister }) {
   });
   const [message, setMessage] = useState('');
   const navigate = useNavigate();
-  const [user, setUser] = useState(null);
+  const { register } = useAuth();
+  const { add: addNotif } = useNotifications();
+
   const handleChange = e => {
     setFormData(f => ({ ...f, [e.target.name]: e.target.value }));
   };
 
-const handleSubmit = async e => {
-  e.preventDefault();
-
-  if (formData.password !== formData.confirmation) {
-    setMessage("Passwords don't match");
-    return;
-  }
-
-  try {
-    // 1. Register user
-    await apiRegister(formData);
-
-    // 2. Immediately log in with same credentials
-    const loginRes = await apiLogin({
-      username: formData.username,
-      password: formData.password,
-    });
-
-    // 3. Save user (and token if you get one)
-    setUser(loginRes.data.user);
-    localStorage.setItem("token", loginRes.data.token); // only if backend returns token
-
-    // 4. Navigate home
-    navigate('/');
-
-  } catch (err) {
-    console.error(err);
-    setMessage(err.response?.data?.error || 'Registration failed.');
-  }
-};
-
+  const handleSubmit = async e => {
+      e.preventDefault();
+      if (formData.password !== formData.confirmation) {
+        setMessage("Passwords don't match");
+        return;
+      }
+      try {
+        await register(formData);
+        addNotif('Welcome ' + formData.username +'! Please Confirm Your Email Address To get started.');
+        navigate('/');
+      } catch {
+        setMessage('Registration failed');
+      }
+  };
 
   return (
     <div className="container d-flex justify-content-center align-items-center vh-100">

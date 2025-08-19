@@ -3,13 +3,14 @@ import { useNavigate, Link, useParams } from 'react-router-dom';
 import { fetchBookingById, cancelBooking, updateBooking } from '../api/booking';
 import { fetchAvailableSeats } from '../api/seats';
 import ConfirmDialog from './ConfirmDialog';
-import { useNotification } from '../contexts/NotificationContext';
+import { useToast } from '../contexts/ToastContext';
+import { useNotifications } from '../contexts/NotificationContext';
 
 import {processPayment} from '../api/payment';
 import '../styles/BookingDetail.css';
 
 export default function BookingDetail() {
-  const { show } = useNotification();
+  const { show } = useToast();
   const [confirmCancel, setConfirmCancel] = useState(false);
   const { bookingId } = useParams();
   const navigate = useNavigate();
@@ -19,6 +20,8 @@ export default function BookingDetail() {
   const [editing, setEditing] = useState(false);
   const [selectedSeatIds, setSelectedSeatIds] = useState([]);
   const [availableSeats, setAvailableSeats] = useState([]);
+  const { reload: reloadNotifs } = useNotifications();
+
   // Load booking
   const [payment, setPaying] = useState(null);
   useEffect(() => {
@@ -50,6 +53,7 @@ export default function BookingDetail() {
     setLoading(true);
     try {
       await processPayment(booking.id);
+      await reloadNotifs();
       show('Payment successful', 'success');
       const updated = await fetchBookingById(booking.id);
       setBooking(updated.data);
@@ -77,6 +81,7 @@ export default function BookingDetail() {
     setConfirmCancel(false);
     try {
       await cancelBooking(booking.id);
+      await reloadNotifs();
       show('Booking cancelled', 'warning');
       const updated = await fetchBookingById(booking.id);
       setBooking(updated.data);

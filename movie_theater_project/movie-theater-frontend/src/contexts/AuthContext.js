@@ -1,36 +1,42 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { fetchCurrentUser, apiLogin } from '../api/user';
-import { api } from '../api/axios';    // your axios instance
+import { api } from '../api/axios';
+
 const AuthContext = createContext();
 export const useAuth = () => useContext(AuthContext);
 
 export function AuthProvider({ children }) {
   const [user,    setUser]    = useState(null);
   const [loading, setLoading] = useState(true);
-  
-  // 1) on app mount, fetch current user if any
+
+  // on mount, fetch profile (if session cookie present)
   useEffect(() => {
-    fetchCurrentUser()
-      .then(res => setUser(res.data))
+    api.get('/api/auth/user/')
+      .then(r => setUser(r.data))
       .catch(() => setUser(null))
       .finally(() => setLoading(false));
   }, []);
-  // NEW: register & immediately set user in context
-  const register = async ({ username, email, password, confirmation }) => {
-    await api.post('/api/auth/register/', {
-      username,
-      email,
-      password,
-      confirmation
-    });
-    // fetch the newly-created user profile
-    const resp = await api.get('/api/auth/user/');
-    setUser(resp.data);
+
+  const login = async ({ username, password }) => {
+    await api.post('/api/auth/login/', { username, password });
+    const r = await api.get('/api/auth/user/');
+    setUser(r.data);
   };
 
+  const register = async data => {
+    await api.post('/api/auth/register/', data);
+    const r = await api.get('/api/auth/user/');
+    setUser(r.data);
+  };
+
+  const logout = async () => {
+    await api.post('/api/auth/logout/');
+    // navigate to login page
+    window.location.href = '/';
+    setUser(null);
+  };
 
   return (
-    <AuthContext.Provider value={{ user, loading, register }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
       {children}
     </AuthContext.Provider>
   );

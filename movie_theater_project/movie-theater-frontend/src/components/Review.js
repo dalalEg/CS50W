@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { fetchReviewsByMovie, createReview } from '../api/review';
 import RatingReview from "./RatingReview";
 import { useAuth } from '../contexts/AuthContext';
+import { useNotifications } from '../contexts/NotificationContext';
 
 import '../styles/Review.css';
 
@@ -14,7 +15,7 @@ export default function Review() {
   const [anonymous, setAnonymous] = useState(false);
   const [error, setError]         = useState(null);
   const { user } = useAuth();
-
+  const { reload: reloadNotifs } = useNotifications(); 
   // load reviews once
   useEffect(() => {
     fetchReviewsByMovie(movieId)
@@ -43,6 +44,7 @@ export default function Review() {
     }
     try {
       await createReview(movieId, { content, rating, anonymous });
+      await reloadNotifs();
       setContent('');
       setRating(5);
       setAnonymous(false);

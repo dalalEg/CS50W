@@ -1,39 +1,32 @@
 import React, {useState, useEffect} from "react";
 import {useParams, Link} from "react-router-dom";
-import {fetchCurrentUser} from '../api/user';
+import { useAuth } from '../contexts/AuthContext';
+import { useNotifications } from '../contexts/NotificationContext';
 import RatingReview from "./RatingReview" 
 import { fetchReviewsByUser,handleDeleteReview ,handleUpdateReview} from "../api/review";
+
 import '../styles/UserReview.css';
 const UserReview = () => {
-  const { userId } = useParams();
-  const [user, setUser] = useState(null);
   const [reviews, setReviews] = useState([]);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
   const [editedReview, setEditedReview] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
-  
+  const { reload: reloadNotifs } = useNotifications();
+  const { user } = useAuth();
   useEffect(() => {
-    fetchCurrentUser()
-      .then(resp => {
-        setUser(resp.data);
-        if(!user.email_verified){
-          // If email is not verified, show a message or take action
-          setError("Please verify your email to access your reviews.");
-          setLoading(false);
-          return;
-        }
-        return fetchReviewsByUser(userId);
-      })
+    if (!user) return;
+    fetchReviewsByUser(user.id)
       .then(resp => {
         setReviews(resp.data);
         setLoading(false);
       })
+      
       .catch(() => {
         setError("Failed to load user reviews");
         setLoading(false);
       });
-  }, [userId]);
+  }, [user?.id]);
 
   if (loading) return <p>Loading user reviews...</p>;
   if (error) return <p>{error}</p>;
@@ -42,6 +35,7 @@ const UserReview = () => {
     handleDeleteReview(reviewId)
       .then(() => {
         setReviews(reviews.filter(review => review.id !== reviewId));
+        reloadNotifs();
       })
       .catch(() => {
         setError("Failed to delete review");
@@ -53,6 +47,7 @@ const UserReview = () => {
     if (review) {
       setEditedReview(review);
       setIsEditing(true);
+
     }
   };
     const handleEditSubmit = (e) => {
@@ -64,6 +59,7 @@ const UserReview = () => {
                 setReviews(reviews.map(review => review.id === editedReview.id ? editedReview : review));
                 setIsEditing(false);
                 setEditedReview(null);
+                reloadNotifs();
             })
             .catch(() => {
                 setError("Failed to update review");

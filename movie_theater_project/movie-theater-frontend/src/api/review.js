@@ -19,7 +19,7 @@ export function handleDeleteReview(reviewId) {
   return api.delete(`/api/reviews/${reviewId}/`);
 }
 export function handleUpdateReview(reviewId, { content, rating, anonymous }) {
-  return api.put(`/api/reviews/${reviewId}/`, {
+  return api.patch(`/api/reviews/${reviewId}/`, {
     content,
     rating,
     anonymous

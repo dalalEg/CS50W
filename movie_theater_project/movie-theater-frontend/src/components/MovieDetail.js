@@ -4,7 +4,10 @@ import { fetchMovieById }   from '../api/movies';
 import { fetchShowtimesByMovie } from '../api/showtimes';
 import { useAuth } from '../contexts/AuthContext';
 import { fetchRolesByMovie } from '../api/roles';
+import { useNotifications } from '../contexts/NotificationContext';
+
 import { addToWatchlist,fetchWatchlistByUser,removeFromWatchlist } from '../api/watchlist';
+
 import '../styles/MovieDetail.css';
 
 function MovieDetail() {
@@ -15,6 +18,8 @@ function MovieDetail() {
   const [roles, setRoles] = useState([]);
   const [isInWatchlist, setIsInWatchlist] = useState(false);
   const { user: currentUser, loading: authLoading } = useAuth();
+  const { reload: reloadNotifs }  = useNotifications();
+  const [watchlistEntryId, setWatchlistEntryId] = useState(null);
   useEffect(() => {
     fetchMovieById(id)
       .then(resp => setMovie(resp.data))
@@ -37,32 +42,34 @@ function MovieDetail() {
   }, [id]);
 
   useEffect(() => {
-    if (currentUser) {
-      fetchWatchlistByUser(currentUser.id)
-        .then(resp => {
-          const isInList = resp.data.some(item => item.movie?.id === parseInt(id, 10));
-          setIsInWatchlist(isInList);
-        })
-        .catch(() => setError("Failed to load watchlist"));
-    }
+    if (!currentUser) return;
+    fetchWatchlistByUser(currentUser.id)
+      .then(resp => {
+       const found = resp.data.find(item => item.movie?.id === parseInt(id, 10));
+       setIsInWatchlist(Boolean(found));
+       setWatchlistEntryId(found?.id ?? null);
+      })
+      .catch(() => setError("Failed to load watchlist"));
   }, [currentUser, id]);
 
-   const handleAddOrRemoveFromWatchlist = () => {
-     if (isInWatchlist) {
-       removeFromWatchlist(id)
-         .then(() => {
-           setIsInWatchlist(false);
-         })
-         .catch(err => {
-           console.error(err.response?.data || err);
-           setError("Failed to remove from watchlist");
-         });
-     } else {
-       // Add to watchlist
-       addToWatchlist(id)
-
+  const handleAddOrRemoveFromWatchlist = () => {
+    if (isInWatchlist) {
+      removeFromWatchlist(watchlistEntryId)
         .then(() => {
+          setIsInWatchlist(false);
+          setWatchlistEntryId(null);
+          reloadNotifs();
+        })
+        .catch(err => {
+          console.error(err);
+          setError("Failed to remove from watchlist");
+        });
+    } else {
+      addToWatchlist(id)
+        .then(resp => {
           setIsInWatchlist(true);
+          setWatchlistEntryId(resp.data.id);
+          reloadNotifs();
         })
         .catch(err => {
           const errs = err.response?.data?.non_field_errors || [];
@@ -143,7 +150,6 @@ function MovieDetail() {
           {showtimes.length === 0 ? (
             <li className='no-showtimes'>No showtimes available you can add this movie to your watchlist:
               <button
-                disabled={isInWatchlist}
                 onClick={handleAddOrRemoveFromWatchlist}
                 className='watchlist-button'
               >

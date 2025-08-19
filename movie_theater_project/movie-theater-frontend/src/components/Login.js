@@ -1,23 +1,22 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { api } from '../api/axios';    // your axios instance
+import { useAuth }    from '../contexts/AuthContext';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 function Login({ onLogin }) {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError]       = useState('');
-  const navigate = useNavigate();
+  const { login }         = useAuth();
+  const [username, setUsername]  = useState('');
+  const [password, setPassword]  = useState('');
+  const [error, setError] = useState('');
+  const nav               = useNavigate();
 
   const handleSubmit = async e => {
     e.preventDefault();
-    setError('');
     try {
-      const res = await api.post('/api/auth/login/', { username, password });
-      onLogin(res.data);  // Call the onLogin prop with user data   
-      navigate('/');         // back to home
-    } catch (err) {
-      setError(err.response?.data?.detail || 'Login failed');
+      await login({ username, password });
+      nav('/');
+    } catch {
+      setError('Login failed');
     }
   };
 

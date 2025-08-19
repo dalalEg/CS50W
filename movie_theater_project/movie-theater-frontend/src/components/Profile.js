@@ -1,28 +1,17 @@
 import React, {useState, useEffect} from "react";
-import {useParams, Link} from "react-router-dom";
-import {fetchCurrentUser} from '../api/user';
-import {confirmEmail,generateToken} from '../api/user';
+import { Link} from "react-router-dom";
+import { useAuth }    from '../contexts/AuthContext';
+import {generateToken} from '../api/user';
 // Profile component to display user profile information
 // This component fetches and displays the user's profile details such as name, email, and points.
 import '../styles/Profile.css';
 
 function Profile() {
-  const { userId } = useParams();
-  const [user, setUser] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
   const [emailSent, setEmailSent] = useState(false);
-  useEffect(() => {
-    fetchCurrentUser()
-      .then(resp => {
-        setUser(resp.data);
-        setLoading(false);
-      })
-      .catch(() => {
-        setError("Failed to load user profile");
-        setLoading(false);
-      });
-  }, [userId]);
+  const { user } = useAuth();
+
   const handleConfirmEmail = () => {
     generateToken(user.id, user.email)
       .then(() => {

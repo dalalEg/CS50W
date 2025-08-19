@@ -223,14 +223,12 @@ class BookingSerializer(serializers.ModelSerializer):
                 instance.save()
         return instance
     
-class NotificationSerializer(serializers.ModelSerializer):
-    user = UserSerializer(read_only=True)
 
+class NotificationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Notification
-        fields = ['id', 'user', 'message', 'created_at', 'is_read']
-
-
+        fields = ['id', 'message', 'is_read', 'created_at']
+        read_only_fields = ['id', 'message', 'created_at']
 
 class PaymentSerializer(serializers.ModelSerializer):
     class Meta:

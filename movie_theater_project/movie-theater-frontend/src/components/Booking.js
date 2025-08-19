@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { createBooking } from '../api/booking';
 import { useAuth } from '../contexts/AuthContext';
+import { useNotifications } from '../contexts/NotificationContext';
+
 // Booking component to confirm and finalize a booking
 // This component is responsible for displaying the booking confirmation page
 // and handling the booking creation process.
@@ -12,6 +14,7 @@ export default function Booking() {
   const [error, setError]           = useState(null);
   const [bookingResult, setBooking] = useState(null);
   const [loading, setLoading]       = useState(false);
+  const { reload: reloadNotifs } = useNotifications();
   const showtimeId = state?.showtimeId;
   const seats      = state?.seats      || [];
   const { user } = useAuth();
@@ -32,6 +35,7 @@ const handleConfirm = () => {
   const seatIds = seats.map(s => s.id);
   createBooking(showtimeId, seatIds)
     .then(resp => setBooking(resp.data))
+    .then(() => reloadNotifs())
     .catch(err => {
       const status = err.response?.status;
       

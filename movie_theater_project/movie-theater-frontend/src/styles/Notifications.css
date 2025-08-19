@@ -1,0 +1,85 @@
+@import 'theme.css';
+
+:root {
+  --notif-bg: #ffffff;
+  --notif-border: #e0e0e0;
+  --notif-unread-bg: #f0f8ff;
+  --notif-read-bg: #fafafa;
+  --notif-unread-border: #3a3d3f;
+  --notif-padding: 1rem;
+  --notif-margin: 0.5rem 0;
+  --notif-radius: 0.5rem;
+  --notif-font: 'Segoe UI', sans-serif;
+  --notif-text: #333333;
+  --notif-timestamp: #777777;
+  --notif-button-bg: #757d90;
+  --notif-button-hover: #0056b3;
+  --notif-button-color: #ffffff;
+}
+
+.notifications-container {
+  max-width: 600px;
+  margin: 2rem auto;
+  padding: var(--notif-padding);
+}
+
+.notifications-list{
+    list-style-type: none;
+    text-align: center;
+    padding: 0;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    max-width: fit-content;
+}
+
+.notifications-list li{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--notif-bg);
+    border: 1px solid var(--notif-border);
+    border-radius: var(--notif-radius);
+    padding: var(--notif-padding);
+    margin: var(--notif-margin);
+    font-family: var(--notif-font);
+    color: var(--notif-text);
+    transition: background 0.2s, opacity 0.2s;
+}
+
+.notifications-list li.unread {
+  background: var(--notif-unread-bg);
+  border-left: 4px solid var(--notif-unread-border);
+  font-weight: bold;
+}
+
+.notifications-list li.read {
+  background: var(--notif-read-bg);
+  opacity: 0.7;
+}
+
+.notifications-list .message {
+  flex: 1;
+  margin-right: 1rem;
+}
+
+.notifications-list .timestamp {
+  font-size: 0.85rem;
+  color: var(--notif-timestamp);
+  margin-right: 1rem;
+  white-space: nowrap;
+}
+
+.notifications-list button {
+  background: var(--notif-button-bg);
+  color: var(--notif-button-color);
+  border: none;
+  padding: 0.4rem 0.8rem;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background 0.2s;
+}
+
+.notifications-list button:hover {
+  background: var(--notif-button-hover);
+}

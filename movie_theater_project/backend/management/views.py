@@ -1,4 +1,4 @@
-from ast import Is
+from ast import Is, Not
 from encodings import search_function
 from re import search
 from rest_framework.response       import Response
@@ -223,6 +223,10 @@ def api_user_profile(request):
     serializer = UserSerializer(request.user, data=request.data, partial=True)
     serializer.is_valid(raise_exception=True)
     serializer.save()
+    Notification.objects.create(
+      user=request.user,
+      message="🔧 Your profile was updated"
+    )
     return Response(serializer.data, status=200)
 
  #API views (generic class-based or viewsets).
@@ -342,6 +346,11 @@ class MovieViewSet(viewsets.ModelViewSet):
         serializer = ReviewSerializer(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
         serializer.save(user=request.user, movie_id=pk)
+        # Create a notification for the user
+        Notification.objects.create(
+            user=request.user,
+            message=f"🌟 New review for {serializer.instance.movie.title}"
+        )
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 class SeatViewSet(viewsets.ModelViewSet):
     """ViewSet for managing seats."""
@@ -439,23 +448,23 @@ class ReviewViewSet(viewsets.ModelViewSet):
     filter_backends  = [DjangoFilterBackend, filters.SearchFilter]
     filterset_fields = ['user','movie']
     search_fields    = ['content']
+
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
         # Create a notification for the user
         Notification.objects.create(
             user=self.request.user,
             message=f"Your review for {serializer.validated_data['movie'].title} has been created."
         )
+        serializer.save(user=self.request.user)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
-    @action(detail=True, methods=['get'], url_path='notifications')
-    def get_notifications(self, request, pk=None):
-        """Custom action to get notifications for a specific review."""
-        review = get_object_or_404(Review, pk=pk)
-        notifications = Notification.objects.filter(review=review)
-        serializer = NotificationSerializer(notifications, many=True)
-        return Response(serializer.data)
+
     def perform_update(self, serializer):
-        return super().perform_update(serializer)
+        # only save the provided fields; user already set on create
+        review = serializer.save()
+        Notification.objects.create(
+            user=self.request.user,
+            message=f"✏️ Review updated for {review.movie.title}"
+         )
     def perform_destroy(self, instance):
         # Create a notification for the user
         Notification.objects.create(
@@ -465,12 +474,20 @@ class ReviewViewSet(viewsets.ModelViewSet):
         return super().perform_destroy(instance)
 
 class NotificationViewSet(viewsets.ModelViewSet):
-    """ViewSet for managing notifications."""
-    queryset = Notification.objects.all()
-    serializer_class = NotificationSerializer
-    permission_classes = [IsNotificationOwnerOrStaff, IsAuthenticated]
-    def perform_create(self, serializer):       
-        serializer.save(user=self.request.user)  
+    queryset          = Notification.objects.all()
+    serializer_class   = NotificationSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        # only this user’s notifications
+        return Notification.objects.filter(user=self.request.user).order_by('-created_at')
+
+    def partial_update(self, request, *args, **kwargs):
+        # guard object‐level perms
+        notif = self.get_object()
+        if notif.user != request.user:
+            raise PermissionDenied("Cannot mark another user's notification")
+        return super().partial_update(request, *args, **kwargs)
 
 
 class BookingViewSet(viewsets.ModelViewSet):
@@ -478,13 +495,20 @@ class BookingViewSet(viewsets.ModelViewSet):
     queryset = Booking.objects.all()
     serializer_class = BookingSerializer
     permission_classes = [IsBookingOwnerOrStaff, IsAuthenticated, IsUserEmailVerified]
+    
     def get_queryset(self):
         user = self.request.user
         if user.is_staff:
            return Booking.objects.all()
         return Booking.objects.filter(user=user)
+    
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        booking=serializer.save(user=self.request.user)
+        Notification.objects.create(
+            user=self.request.user,
+            message=f"✅ Booking created for {booking.showtime.movie.title}"
+        )
+   
     @action(detail=False, methods=['get'], url_path='user')
     def user(self, request):
         """
@@ -494,6 +518,7 @@ class BookingViewSet(viewsets.ModelViewSet):
         qs = self.get_queryset().filter(user=request.user)
         serializer = self.get_serializer(qs, many=True)
         return Response(serializer.data)
+   
     def destroy(self, request, *args, **kwargs):
         booking = self.get_object()
         if booking.user != request.user and not request.user.is_staff:
@@ -518,6 +543,10 @@ class BookingViewSet(viewsets.ModelViewSet):
             Showtime.objects.filter(pk=booking.showtime_id).update(
                 available_seats=F('available_seats') + num_seats
             )
+        Notification.objects.create(
+            user=request.user,
+            message=f"❌ Booking cancelled for {booking.showtime.movie.title}"
+        )
         booking.attended = False
         booking.status = 'Cancelled'
         booking.save()
@@ -528,7 +557,8 @@ class BookingViewSet(viewsets.ModelViewSet):
         now = timezone.now()
         Booking.objects.filter(
             showtime__start_time__lt=now,
-            attended=False
+            attended=False,
+            status__in=['Confirmed']
         ).exclude(status='Cancelled').update(attended=True)
         return super().list(request, *args, **kwargs)
 
@@ -542,6 +572,15 @@ class BookingViewSet(viewsets.ModelViewSet):
             instance.save(update_fields=['attended'])
         serializer = self.get_serializer(instance)
         return Response(serializer.data)
+    
+    def perform_update(self, serializer):
+        booking = serializer.save()
+        Notification.objects.create(
+            user=self.request.user,
+            message=f"✏️ Booking updated for {booking.showtime.movie.title}"
+        )
+        return booking
+
 
 class WatchlistViewSet(viewsets.ModelViewSet):
     """ViewSet for managing watchlists."""
@@ -560,9 +599,18 @@ class WatchlistViewSet(viewsets.ModelViewSet):
         return Watchlist.objects.filter(user=user)
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
-    
-
+        new = serializer.save(user=self.request.user)
+        Notification.objects.create(
+            user=self.request.user,
+            message=f"⭐ Added {new.movie.title} to your watchlist"
+        )
+    def perform_destroy(self, instance):
+        title = instance.movie.title
+        instance.delete()
+        Notification.objects.create(
+        user=self.request.user,
+        message=f"🗑 Removed {title} from your watchlist"
+        )
 
 
 class RateServiceViewSet(viewsets.ModelViewSet):
@@ -594,6 +642,10 @@ class RateServiceViewSet(viewsets.ModelViewSet):
                 "Can only review service for bookings you've attended."
             )
         # UniqueTogetherValidator will prevent dup on the same booking
+        Notification.objects.create(
+            user=user,
+            message=f"🌟 New review for {booking.showtime.movie.title}"
+        )   
         serializer.save(user=user, booking=booking)
 
 
@@ -612,8 +664,18 @@ class FavouriteViewSet(viewsets.ModelViewSet):
         return Favourite.objects.filter(user=user)
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
-
+        fav = serializer.save(user=self.request.user)
+        Notification.objects.create(
+            user=self.request.user,
+            message=f"❤️ You favorited {fav.movie.title}"
+        )
+    def perform_destroy(self, instance):
+        title = instance.movie.title
+        super().perform_destroy(instance)
+        Notification.objects.create(
+        user=self.request.user,
+        message=f"💔 You unfavorited {title}"
+        )
 
 
 class PaymentViewSet(viewsets.ModelViewSet):
@@ -657,7 +719,10 @@ class PaymentViewSet(viewsets.ModelViewSet):
 
             booking.status = "Confirmed"
             booking.save(update_fields=["status"])
-
+            Notification.objects.create(
+                user=request.user,
+                message=f"💳 Payment received for booking #{payment.booking.showtime.movie.title}"
+            )
             return Response(
                 {"payment_id": payment.id, "status": "success"},
                 status=status.HTTP_200_OK

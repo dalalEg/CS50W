@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
+import { useNotifications } from '../contexts/NotificationContext';
 
 import {
   fetchServiceReviews,
@@ -16,6 +17,7 @@ import '../styles/ServiceReview.css';
      comment: ''
    });
    const [error, setError]     = useState(null);
+   const { reload: reloadNotifs }  = useNotifications();
 
    useEffect(() => {
     if (!bookingId) return;
@@ -31,6 +33,7 @@ import '../styles/ServiceReview.css';
        await createServiceReview(bookingId, form);
        const res = await fetchServiceReviews(bookingId);
        setReviews(res.data);
+       reloadNotifs();
      } catch (err) {
        setError(
          err.response?.data?.non_field_errors?.[0]
