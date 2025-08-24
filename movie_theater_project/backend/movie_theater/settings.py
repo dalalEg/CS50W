@@ -52,7 +52,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'management',  # Include the management app
+    'management.apps.ManagementConfig',  # Include the management app
     'rest_framework', # Django REST framework for API support
     'corsheaders',  # For handling CORS
 

@@ -13,6 +13,11 @@ from rest_framework.decorators import api_view,action,permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from django.views.decorators.csrf import csrf_exempt
+from .tasks import (
+   send_pending_booking_reminder,
+   delete_unpaid_booking,
+   send_showtime_reminder
+ )
 from .permissions import IsAdminOrReadOnly, IsReviewOwnerOrReadOnly,IsAuthenticated, IsBookingOwnerOrStaff, IsNotificationOwnerOrStaff
 from .permissions import IsWatchlistOwnerOrStaff,IsUserEmailVerified
 from django.contrib.auth.decorators import login_required
@@ -508,7 +513,26 @@ class BookingViewSet(viewsets.ModelViewSet):
             user=self.request.user,
             message=f"✅ Booking created for {booking.showtime.movie.title}"
         )
-   
+         # 1) remind in 24 h if still pending
+        send_pending_booking_reminder.apply_async(
+            args=[booking.id],
+            countdown=86400,  # 24*60*60 seconds
+        )
+
+        # 2) delete in 48 h if still pending
+        delete_unpaid_booking.apply_async(
+            args=[booking.id],
+            countdown=86400 * 2,
+        )
+
+        # 3) 24 h before showtime (only if that time is in the future)
+        eta = booking.showtime.start_time - timedelta(hours=24)
+        if eta > timezone.now():
+            send_showtime_reminder.apply_async(
+                args=[booking.id],
+                eta=eta,
+            )
+
     @action(detail=False, methods=['get'], url_path='user')
     def user(self, request):
         """

@@ -3,6 +3,8 @@ from turtle import mode, st, update
 from venv import create
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from celery import shared_task
+from django.utils import timezone
 
 # Create your models here.
 
