@@ -8,7 +8,7 @@ from rest_framework import viewsets,filters,generics
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
 from django.utils import timezone
-from datetime import datetime
+from datetime import datetime, timedelta
 from rest_framework.decorators import api_view,action,permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
@@ -43,6 +43,7 @@ from .models import (User, Movie, Genre,Seat,Showtime,Review,
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.conf import settings
+
 def index(request):
     return render(request, 'management/index.html')
    

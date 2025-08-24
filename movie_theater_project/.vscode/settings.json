@@ -1,8 +1,0 @@
-{
-    "python-envs.defaultEnvManager": "ms-python.python:system",
-    "python-envs.pythonProjects": [],
-    "python.autoComplete.extraPaths": [],
-    "python.analysis.supportAllPythonDocuments": true,
-    "editor.suggest.matchOnWordStartOnly": true,
-    "python.languageServer": "Pylance"
-}
