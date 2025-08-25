@@ -142,19 +142,20 @@ function MovieDetail() {
             ))
           )}
         </ul>
-
+        
        
 
         <p><strong>Available Showtimes:</strong></p>
-        <ul>
-          {showtimes.length === 0 ? (
-            <li className='no-showtimes'>No showtimes available you can add this movie to your watchlist:
-              <button
+         <button
                 onClick={handleAddOrRemoveFromWatchlist}
                 className='watchlist-button'
               >
                 {isInWatchlist ? 'Already in Watchlist' : 'Add to Watchlist'}
               </button>
+        <ul>
+          {showtimes.length === 0 ? (
+            <li className='no-showtimes'>No showtimes available you can add this movie to your watchlist:
+             
             </li>
            
           ) : (

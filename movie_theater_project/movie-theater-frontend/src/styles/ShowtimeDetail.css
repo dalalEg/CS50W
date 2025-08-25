@@ -83,3 +83,8 @@
 .seat.selected {
   background: var(--clr-accent);
 }
+.info{
+  font: italic 0.875rem/1.5rem var(--font-base);
+  color: var(--clr-muted);
+  font-size: larger;
+}

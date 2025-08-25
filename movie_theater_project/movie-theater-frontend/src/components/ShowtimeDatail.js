@@ -3,7 +3,8 @@ import { useParams, Link } from 'react-router-dom';
 import { fetchShowtimeById } from '../api/showtimes';
 import { fetchSeats } from '../api/seats';
 import { useNavigate } from 'react-router-dom';
-import { createBooking } from '../api/booking';
+import { fetchBookingsByUser } from '../api/booking';
+import {useAuth} from '../contexts/AuthContext';
 import '../styles/ShowtimeDetail.css';
 import '../index.css';
 function ShowtimeDetail() {
@@ -14,13 +15,26 @@ function ShowtimeDetail() {
   const [error, setError]               = useState(null);
   const [showtime, setShowtime]         = useState(null);
   const navigate = useNavigate();            // ← hook at top
-
+  const { user } = useAuth();
+  const [booked, setBooked] = useState(false);
   useEffect(() => {
     fetchShowtimeById(id)
       .then(resp => setShowtime(resp.data))
       .catch(() => setError("Failed to load showtime details"));
   }, [id]);
-
+  /*if the current user has booked seats for this showtime */
+   useEffect(() => {
+    if (user) {
+      fetchBookingsByUser(user.id)
+        .then(res => {
+          const showtimeId = parseInt(id, 10);
+          const userBookings = res.data.filter(booking => booking.showtime.id === showtimeId);
+          console.log(userBookings);
+          setBooked(userBookings.length > 0);
+        })
+        .catch(() => setError("Failed to load bookings"));
+    }
+  }, [user]);
   useEffect(() => {
     fetchSeats(id).then(r => setSeats(r.data));
   }, [id]);
@@ -72,6 +86,7 @@ function ShowtimeDetail() {
       </div>
 
       <h4>Select Your Seats</h4>
+      {booked && <p className="info">You have already booked seats for this showtime.</p>}
       <div className="seat-map">
         {seats.length === 0 && <p className="loading">Seats will be added later</p>}
         {seats.map(seat => (

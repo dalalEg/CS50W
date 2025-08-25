@@ -1,0 +1,53 @@
+.admin-dashboard {
+  padding: 2rem;
+  font-family: var(--font-base);
+  color: var(--clr-text);
+}
+.admin-dashboard h1 {
+  margin-bottom: 1.5rem;
+}
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1rem;
+}
+.card {
+  background: var(--clr-card-bg);
+  border: 1px solid var(--clr-border);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  box-shadow: var(--shadow);
+}
+.card h2 {
+  margin-top: 0;
+}
+.card h3 {
+  margin: 0.75rem 0 0.5rem;
+  font-size: var(--fs-sm);
+  color: var(--clr-text-muted);
+}
+.card p {
+  margin: 0.25rem 0;
+}
+.card ul {
+  list-style: none;
+  margin: 0.5rem 0 1rem;
+  padding: 0;
+}
+.card ul li {
+  margin: 0.25rem 0;
+  font-size: 0.95rem;
+}
+.card ul li::before {
+  content: "• ";
+  color: var(--clr-accent);
+}
+.util-list li::before,
+.trend-list li::before,
+.fail-list li::before {
+  content: "– ";
+  color: var(--clr-text-muted);
+}
+.error {
+  color: var(--clr-error);
+}

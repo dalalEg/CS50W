@@ -1,6 +1,9 @@
 from ast import Is, Not
+from calendar import month
 from encodings import search_function
+from hmac import new
 from re import search
+
 import re
 from tkinter import W
 from rest_framework.response       import Response
@@ -11,8 +14,9 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
 from django.utils import timezone
 from datetime import datetime, timedelta
+from rest_framework.views import APIView
 from rest_framework.decorators import api_view,action,permission_classes
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny,IsAdminUser
 from rest_framework.response import Response
 from django.views.decorators.csrf import csrf_exempt
 from .tasks import (
@@ -36,7 +40,8 @@ from rest_framework import serializers
 from django.shortcuts import get_object_or_404
 from rest_framework import status
 from django.db import transaction
-from django.db.models import F, Count
+from django.db.models import F, Count, Sum, Avg, Q
+from django.db.models.functions import TruncDate, ExtractWeekDay
 from django.contrib.auth.models import User
 from rest_framework import routers  
 from .models import (User, Movie, Genre,Seat,Showtime,Review, 
@@ -756,3 +761,211 @@ class PaymentViewSet(viewsets.ModelViewSet):
                 {"detail": str(e)},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+        
+
+class AdminDashboardView(APIView):
+    permission_classes = [IsAdminUser]
+
+    def get(self, request):
+        now       = timezone.now()
+        week_ago  = now - timezone.timedelta(days=7)
+        month_ago = now - timezone.timedelta(days=30)
+
+        # --- existing users / growth stats ---
+        total_users     = User.objects.count()
+        new_week        = User.objects.filter(date_joined__gte=week_ago).count()
+        new_month       = User.objects.filter(date_joined__gte=month_ago).count()
+        active_users    = User.objects.filter(is_active=True).count()
+        verified_emails = User.objects.filter(is_active=True, email_verified=True).count()
+
+        # --- Conversion funnel ---
+        registered = total_users
+        verified   = verified_emails
+        booked     = Booking.objects.filter(status__in=['Pending','Confirmed']).values('user').distinct().count()
+        paid       = Payment.objects.filter(status='Completed').values('booking__user').distinct().count()
+        funnel = {
+            "registered": registered,
+            "verified": verified,
+            "booked": booked,
+            "paid": paid,
+        }
+
+        # retention vs churn
+        old_users   = User.objects.filter(date_joined__lte=month_ago)
+        booked_old  = old_users.filter(bookings__created_at__gte=month_ago).distinct().count()
+        retention_rate = booked_old / old_users.count() if old_users.exists() else 0
+
+        # top 5 users by points
+        top_users_qs = User.objects.annotate(total_points=Sum('points')).order_by('-total_points')[:5]
+        top_users = [{'id': u.id, 'username': u.username, 'total_points': u.total_points or 0} for u in top_users_qs]
+
+        # daily growth trend (last 30 d)
+        growth = (
+            User.objects.filter(date_joined__gte=month_ago)
+            .annotate(day=TruncDate('date_joined'))
+            .values('day')
+            .annotate(count=Count('id'))
+            .order_by('day')
+        )
+
+        # --- booking stats ---
+        total_bookings  = Booking.objects.count()
+        pending         = Booking.objects.filter(status='Pending').count()
+        confirmed       = Booking.objects.filter(status='Confirmed').count()
+        cancelled       = Booking.objects.filter(status='Cancelled').count()
+        attended        = Booking.objects.filter(attended=True).count()
+
+        # Repeat vs one-time customers
+        repeat_customers = (
+            User.objects.annotate(bcount=Count('bookings'))
+            .filter(bcount__gt=1).count()
+        )
+        one_time_customers = (
+            User.objects.annotate(bcount=Count('bookings'))
+            .filter(bcount=1).count()
+        )
+
+        # average lead‐time (booking → showtime) in hours
+        lead_times = Booking.objects.filter(status='Confirmed')\
+            .annotate(lead=F('showtime__start_time') - F('created_at'))\
+            .aggregate(avg_lead=Avg('lead'))['avg_lead']
+        avg_lead_hours = (lead_times.total_seconds()/3600) if lead_times else 0
+
+        # bookings by day of week
+        dow = (
+            Booking.objects.annotate(dow=ExtractWeekDay('created_at'))
+            .values('dow').annotate(count=Count('id')).order_by('dow')
+        )
+
+      # --- Global occupancy (all showtimes) ---
+        total_seats = Seat.objects.count()  # all seats
+        booked_seats = Seat.objects.filter(is_booked=True).count()  # all booked seats
+        occupancy_rate = booked_seats / total_seats if total_seats else 0
+
+        # --- Auditorium utilization (per hall) ---
+        auditoriums = Auditorium.objects.all()
+        auditorium_utilization = []
+
+        for aud in auditoriums:
+        # All seats belonging to showtimes in this auditorium
+            seats_qs = Seat.objects.filter(showtime__auditorium=aud)
+            total_seats = seats_qs.count()
+            booked_seats = seats_qs.filter(is_booked=True).count()
+
+            occupancy = booked_seats / total_seats if total_seats else 0
+            auditorium_utilization.append({
+                "auditorium_id": aud.id,
+                "auditorium": aud.name,
+                "occupancy_rate": round(occupancy ,2)  # percentage
+            })
+
+        # --- revenue ---
+        total_revenue = Payment.objects.filter(status='Completed').aggregate(sum=Sum('amount'))['sum'] or 0
+        refunds = Payment.objects.filter(status='refunded').aggregate(sum=Sum('amount'))['sum'] or 0
+        failed  = Payment.objects.filter(status__in=['failed','error']).count()
+
+        # revenue by movie
+        rev_by_movie = (
+            Payment.objects.filter(status='Completed')
+            .values('booking__showtime__movie__title')
+            .annotate(revenue=Sum('amount'))
+            .order_by('-revenue')[:10]
+        )
+
+        # Revenue trend (last 30 days)
+        revenue_trend = (
+            Payment.objects.filter(status="Completed", created_at__gte=month_ago)
+            .annotate(day=TruncDate("created_at"))
+            .values("day")
+            .annotate(total=Sum("amount"))
+            .order_by("day")
+        )
+
+        # --- movie analytics ---
+        top_movies = Movie.objects.annotate(booked=Count('showtimes__bookings')).order_by('-booked')[:5]
+        top_movies_data = [{'title': m.title, 'bookings': m.booked} for m in top_movies]
+
+        top_rated = (
+            Review.objects.values('movie__title')
+            .annotate(avg=Avg('rating'), cnt=Count('id'))
+            .filter(cnt__gte=5)
+            .order_by('-avg')[:5]
+        )
+        
+
+        most_reviewed = sorted(
+            [{'title': r['movie__title'], 'reviews': r['cnt']} for r in top_rated],
+            key=lambda x: -x['reviews']
+        )[:5]
+        top_favorited = (
+            Favourite.objects.values('movie__title')
+            .annotate(count=Count('id'))
+            .order_by('-count')[:5]
+        )
+        Favourite_data = [{'title': f['movie__title'], 'favorited': f['count']} for f in top_favorited]
+        top_watchlisted = Movie.objects.annotate(watched=Count('watchlists')).order_by('-watched')[:5]
+        watchlist_data = [{'title': m.title, 'watchlisted': m.watched} for m in top_watchlisted]
+
+        # --- service review analytics ---
+        svc_aud_qs = RateService.objects.values(
+            aud_id=F('booking__showtime__auditorium__id'),
+            aud_name=F('booking__showtime__auditorium__name'),
+        ).annotate(avg_rating=Avg('all_rating')).order_by('-avg_rating')
+        service_by_auditorium = [
+            {"auditorium_id": r['aud_id'], "auditorium": r['aud_name'], "average_rating": float(r['avg_rating'] or 0)}
+            for r in svc_aud_qs
+        ]
+
+        svc_th_qs = RateService.objects.values(
+            th_id=F('booking__showtime__auditorium__theater__id'),
+            th_name=F('booking__showtime__auditorium__theater__name'),
+        ).annotate(avg_rating=Avg('all_rating')).order_by('-avg_rating')
+        service_by_theater = [
+            {"theater_id": r['th_id'], "theater": r['th_name'], "average_rating": float(r['avg_rating'] or 0)}
+            for r in svc_th_qs
+        ]
+
+        return Response({
+            "users": {
+                "total": total_users,
+                "new_7d": new_week,
+                "new_30d": new_month,
+                "active": active_users,
+                "verified_email": verified_emails,
+                "retention_rate": retention_rate,
+                "top_by_points": top_users,
+                "growth_trend_30d": list(growth),
+                "funnel": funnel,
+            },
+            "bookings": {
+                "total": total_bookings,
+                "pending": pending,
+                "confirmed": confirmed,
+                "cancelled": cancelled,
+                "attended": attended,
+                "avg_lead_hours": avg_lead_hours,
+                "by_day_of_week": list(dow),
+                "occupancy_rate": occupancy_rate,
+                "repeat_customers": repeat_customers,
+                "one_time_customers": one_time_customers,
+                "auditorium_utilization": auditorium_utilization,
+            },
+            "revenue": {
+                "total": total_revenue,
+                "refunds": refunds,
+                "failed_count": failed,
+                "by_movie": list(rev_by_movie),
+                "trend_30d": list(revenue_trend),
+            },
+            "movies": {
+                "top_booked": top_movies_data,
+                "top_rated": list(top_rated),
+                "most_reviewed": most_reviewed,
+                "top_watchlisted": watchlist_data,
+                "top_favorited": list(Favourite_data),
+            },
+            "service_reviews": {
+                "by_auditorium": service_by_auditorium,
+                "by_theater": service_by_theater,
+            },
+        })

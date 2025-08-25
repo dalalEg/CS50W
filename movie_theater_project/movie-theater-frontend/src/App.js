@@ -14,7 +14,6 @@ import MovieDetail from './components/MovieDetail';
 import Login       from './components/Login';
 import Register    from './components/Register';
 import Profile     from './components/Profile';
-import { api }     from './api/axios';
 import  ShowtimeList from './components/ShowtimeList';
 import ShowtimeDetail from './components/ShowtimeDatail';
 import TheaterListing from './components/TheaterListing';
@@ -33,6 +32,7 @@ import EditUser from './components/EditUser'; // Import EditUser component
 import ServiceReview from './components/ServiceReview';
 import NotificationsList from './components/Notifications';
 import PrivateRoute from './components/PrivateRoute';
+import AdminDashboard from './components/AdminDashboard';
 import { useAuth } from './contexts/AuthContext';
 
 // Main App component
@@ -85,6 +85,7 @@ function App() {
           <Route path="/user/edit/:id" element={<PrivateRoute><EditUser /></PrivateRoute>} />
           <Route path="/serviceReview/:bookingId" element={<PrivateRoute><ServiceReview /></PrivateRoute>} />
           <Route path="/notifications" element={<PrivateRoute><NotificationsList /></PrivateRoute>} />
+          <Route path="/admin/dashboard" element={<PrivateRoute>{user?.is_staff ? <AdminDashboard /> : <Navigate to="/login" />}</PrivateRoute>} />
         </Routes>
       </main>
     </Router>

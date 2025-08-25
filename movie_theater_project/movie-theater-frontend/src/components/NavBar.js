@@ -23,6 +23,7 @@ export default function NavBar() {
         {user && (
             <>
             <Link to="/profile" className="navbar-link">Profile</Link>
+            
             <div className="notif-icon">
                 
                 <Link to="/notifications" className="navbar-link">🔔
@@ -32,6 +33,9 @@ export default function NavBar() {
                 Logout
             </button>
             </>
+        )}
+        {user && user.is_staff && (
+            <Link to="/admin/dashboard" className="navbar-link">Admin Dashboard</Link>
         )}
     </nav>
     )

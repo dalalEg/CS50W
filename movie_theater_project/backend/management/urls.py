@@ -30,6 +30,7 @@ urlpatterns = [
     path ('login/', views.login_view, name='login'),
     path('logout/', views.logout_view, name='logout'),
     path('register/', views.register, name='register'),
+    path('api/admin/dashboard/', views.AdminDashboardView.as_view(), name='admin-dashboard'),
     path('api/confirm/<int:uid>/<str:token>/', views.confirm_email, name='confirm-email'),
     path('api/auth/generate_token/', views.generate_token, name='generate-confirmation-token'),
     path('api/auth/login/',   views.api_login,        name='api-login'),

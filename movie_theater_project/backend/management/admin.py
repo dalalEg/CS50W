@@ -26,7 +26,7 @@ class GenreAdmin(admin.ModelAdmin):
 @admin.register(Seat)
 class SeatAdmin(admin.ModelAdmin):
     list_display = ('seat_number', 'is_booked', 'showtime', 'price')
-    list_filter = ('is_booked', 'showtime')
+    list_filter = ('is_booked', 'showtime','showtime__auditorium')
     search_fields = ('seat_number',)
 
 class SeatInline(admin.TabularInline):
@@ -76,9 +76,9 @@ class BookingForm(forms.ModelForm):
 @admin.register(Booking)
 class BookingAdmin(admin.ModelAdmin):
     form         = BookingForm
-    list_display = ('user','showtime','booking_date','seat_list','cost',)
-    search_fields = ('user__username','showtime__movie__title')
-    list_filter   = ('booking_date',)
+    list_display = ('user','showtime','seat_list','cost','status')
+    search_fields = ('user__username','showtime__movie__title','status')
+    list_filter   = ('booking_date','status')
 
     def seat_list(self, obj):
         # join each seat_number into a comma‐separated string
@@ -108,7 +108,7 @@ class ProducerAdmin(admin.ModelAdmin):
 
 @admin.register(Payment)
 class PaymentAdmin(admin.ModelAdmin):
-    list_display = ('user', 'amount', 'payment_date', 'payment_method', 'status')
+    list_display = ('user', 'amount', 'payment_date', 'booking__showtime__movie__title', 'status')
     list_filter = ('status', 'payment_method', 'payment_date')
     search_fields = ('user__username',)
 
@@ -135,7 +135,7 @@ class TheaterAdmin(admin.ModelAdmin):
 
 @admin.register(RateService)
 class RateServiceAdmin(admin.ModelAdmin):
-    list_display = ('user', 'booking', 'all_rating')
+    list_display = ('user', 'booking__showtime__auditorium__name','booking__showtime__auditorium__theater__name', 'all_rating')
     search_fields = ('user__username', 'booking__showtime__movie__title')
     list_filter = ('all_rating', 'show_rating', 'auditorium_rating')
 
