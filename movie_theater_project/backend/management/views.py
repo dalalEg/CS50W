@@ -1,6 +1,8 @@
 from ast import Is, Not
 from encodings import search_function
 from re import search
+import re
+from tkinter import W
 from rest_framework.response       import Response
 from django.db import IntegrityError
 from django.shortcuts import render, redirect
@@ -34,7 +36,7 @@ from rest_framework import serializers
 from django.shortcuts import get_object_or_404
 from rest_framework import status
 from django.db import transaction
-from django.db.models import F
+from django.db.models import F, Count
 from django.contrib.auth.models import User
 from rest_framework import routers  
 from .models import (User, Movie, Genre,Seat,Showtime,Review, 
@@ -43,7 +45,6 @@ from .models import (User, Movie, Genre,Seat,Showtime,Review,
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.conf import settings
-
 def index(request):
     return render(request, 'management/index.html')
    
@@ -318,12 +319,7 @@ class MovieViewSet(viewsets.ModelViewSet):
         else:
             permission_classes = [AllowAny]
         return [perm() for perm in permission_classes]
-    @action(detail=False, methods=['get'], url_path='popular')
-    def get_popular_movies(self, request):
-        """Custom action to get popular movies."""
-        popular_movies = Movie.objects.filter(rating__gte=4.0).order_by('-rating')[:10]
-        serializer = self.get_serializer(popular_movies, many=True)
-        return Response(serializer.data)
+
     @action(detail=True, methods=['get'], url_path='showtimes')
     def showtimes(self, request, pk=None):
         shows = Showtime.objects.filter(movie_id=pk, start_time__gte=timezone.now(),
