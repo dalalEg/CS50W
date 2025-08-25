@@ -4,67 +4,44 @@ A full-stack movie theater booking web application built with Django REST Framew
 
 ⚠️ Actively developed – frontend and backend integration in progress.
 
-# 🛠 Features
-- 🔐 User Authentication – Register, login, logout with secure session handling.
+## 🛠 Features
+- 🔐 **User Authentication** – Register, login, logout with secure sessions.  
+- 🔍 **Advanced Search & Filters** – Title, genre, rating, year, duration, theater; sort + keyword.  
+- 🎬 **Movie Browsing** – Trailers, posters, credits, rich details.  
+- 🎟️ **Seat Selection** – Interactive seat map per showtime (seats stored per showtime).  
+- 🧾 **Booking System** – Create/confirm/cancel; seat-level reservation integrity.  
+- ⭐ **Movie Reviews** – Write/edit/delete, average rating display.  
+- ⭐ **Service Reviews** – Post-showtime service ratings.  
+- 📌 **Watchlist & Favorites** –  
+  - Watchlist.  
+  - Favorites after attending a screening.  
+- 📣 **In-App Notifications (Celery)** –  
+  - Pending payment reminder **T+24h**.  
+  - Auto-cancel unpaid bookings **T+48h**.  
+  - Showtime reminder **24h before start**.
+  - **New showtime alert**: if a movie in a user’s **watchlist/favorites** gets a new showtime, notify them.  
+- 👤 **User Profile** – Bookings, reviews, watchlist/favorites.  
+- 🏛️ **Theaters & Auditoriums** – Venue directory.  
+- 🛠️ **Admin Panel + Analytics** – KPI dashboard (users, bookings, revenue, top movies, watchlist), auditorium utilization, growth trend.  
+- ✉️ **Email Confirmations** – Without email confirmation operation are limitted 
+- 💳 **Payments** – Simple checkout flow (mock).  
+- 🐳 **Dockerized Setup** – Compose for backend/frontend/DB (**in progress**).  
+- ⚙️ **CI/CD with GitHub Actions** – Lint, test, build, deploy (**in progress**).  
+- 🔔 **Coming Soon Alerts** (**planned**).  
+- 🗳️ **Feature Voting** (**planned**).
 
-- 🔍 Advanced Search & Filters – Search / Filter by title, genre, rating, year, duration, or theater.
+---
 
-- 🎬 Movie Browsing – View trailers, posters, credits, and details.
+## 🛠️ Tech Stack
+- **Backend:** Django + DRF, Celery + Redis (scheduled tasks), PostgreSQL  
+- **Frontend:** React, Axios, React Router, Bootstrap  
+- **Auth:** Django sessions  
+- **Background jobs:** Celery Beat for reminders & auto-cleanup  
+- **Containerization:** Docker Compose (backend, frontend, db, redis) — *in progress*  
+- **CI/CD:** GitHub Actions (lint/tests/build) — *in progress*  
+- **Media:** Posters/images served in Docker env  
 
-- 🎟️ Seat Selection – Interactive seat picker tied to showtimes.
-
-- 🧾 Booking System – Automatic user linking, confirmation, and reservation management.
-
-- ⭐  Movie Reviews – Write, edit, and delete reviews with average ratings.
-
-- ⭐ Service Reviews – Time-gated reviews available only after attending a booked showtime.
-
-- 📌 Watchlist & Favorites – Save movies and get updates on similar content.
-  
-- Add to Watchlist when no showtime is available.
-
-- Add to Favorites after attending a screening.
-- 📣 In-App Notifications – Booking, payment, reviews, or watchlist updates.
-
-- 👤 User Profile – Centralized history of bookings, reviews, and watchlist.
-
-- 🏛️ Theaters & Auditoriums – Directory with venue details.
-
-- 🛠️ Admin Panel – Manage movies, showtimes, cast, and production details.
-- ✉️ Email Confirmation – Booking and payment receipts.
-- 💳 Payments – Simple payment flow for showtime reservations.
-  
-- 🐳 Dockerized Setup – Containerized for easy deployment (in progress).
-
-- ⚙️ CI/CD with GitHub Actions – Automated testing & deployment (in progress).
-
-- 🔔 Coming Soon Alerts – Get notified about upcoming movies (planned).
-
-- 🗳️ Feature Voting System – Users can vote on new features or retro requests (planned).
-# 🛠️ Tech Stack
-
-
-- Backend: Django + Django REST Framework with PostgreSQL.
-
-- Frontend: React + Axios + React Router + Bootstrap 
-
-- Database: PostgreSQL
-
-- Auth: Django sessions
-
-- Dockerized: Full stack runs via Docker Compose (backend, frontend, DB).
-
-- CI/CD Pipeline:
-
-- Django tests (models, API endpoints).
-
-- React tests (Jest + RTL for core components).
-
-- Code linting (flake8/black, eslint/prettier).
-
-- Media Handling: Posters and images served correctly in Docker environment.
-
-
+---
 
 # 🚧 Roadmap
 ## ✅ Done
@@ -122,41 +99,68 @@ A full-stack movie theater booking web application built with Django REST Framew
 - ✉️ Email confirmation 
 - 💳 Simple payment
 - 📣 Notifications – Users receive a notification after every major action (booking, review, payment, etc.).
- ## 🏗️ Next Up
+-  **Celery tasks**: pending-payment reminder (T+24h), auto-delete unpaid (T+48h), 24h pre-showtime reminder ,  New showtime alert
+ 
+- **Admin Analytics API**: users/bookings/revenue/top movies/watchlist + **auditorium utilization (seat-based)**  
 
+## 🚧 Roadmap → 🏗️ Next Up
+- 🐳 **Dockerization** – Compose services (web, api, db, redis, worker, beat) + `.env`  
+- ⚙️ **CI/CD (GitHub Actions)** – Python/Node job matrix, migrations, fixtures, test reports, Docker build & push  
+- 🎨 **Frontend polish** – Filter UX, mobile refinements, infinite scroll/pagination  
+- 💳 **Payments** – Refunds, promo codes, VIP pricing tiers  
+- 🎟️ **VIP showtime logic** – Per-auditorium/row dynamic pricing & flags  
+- 🌍 **i18n** – Multi-language support  
+- 🌙 **Dark mode** toggle  
+- 🗳️ **Feature voting** for retro/classic screenings  
+- 🎞️ **Coming Soon subscriptions** & announcements  
 
+---
 
+## 🧪 Testing
+- ✅ **Django tests**: models, viewsets, API (bookings, movies, auth, reviews)  
+- ✅ **Seat/booking integrity**: seat reservation & double-booking prevention  
+- 🔄 **Update tests after model changes** (Seat per showtime, pricing)  
+- 🕒 **Celery task tests** (unit): pending-reminder, auto-cancel, showtime-reminder  
+- 🧩 **Celery integration tests** (with Redis broker, time windows) — *planned*  
+- 🧪 **React component tests** (Jest + RTL) — *planned*  
+- ⚙️ **CI (Actions)**: run Python/Node tests, lint, coverage gates — *planned*
 
-- 🐳 Dockerization – Full setup with Compose (frontend, backend, DB).
-- ⚙️ CI/CD – GitHub Actions pipeline:
+## 🏗️ Architecture
+The system follows a **modular service-oriented architecture**:  
 
+```plaintext
+          ┌───────────────┐
+          │   React UI    │
+          │ (Axios + JWT) │
+          └───────▲───────┘
+                  │ REST API calls
+                  ▼
+        ┌────────────────────┐
+        │   Django + DRF     │
+        │  Auth, Movies,     │
+        │  Bookings, Reviews │
+        └───────┬────────────┘
+                │
+                │ Celery tasks (async jobs)
+                ▼
+        ┌────────────────────┐
+        │   Celery Workers   │
+        │ (background jobs)  │
+        └───────┬────────────┘
+                │
+                ▼
+         ┌────────────┐
+         │   Redis     │
+         │   Broker    │
+         └────────────┘
 
-- 🎨 Frontend polish (filter panel UX, mobile tweaks, infinite scroll)
+        ┌────────────┐
+        │PostgreSQL  │
+        │ Relational │
+        │ Database   │
+        └────────────┘
 
-- 💳 Payments – Expand logic (refunds, promos, VIP pricing).
-
-- VIP showtime logic
-
-- 🌍 Multi-language support
-
-- 🌙Dark mode toggle
-
-
-- 🗳️ Feature Voting System – Users vote for retro/classic screenings.
-
-- 🎞️ Coming Soon Alerts – Users subscribe to movie releases.
-
-
-
-# 🧪 Testing
-
-✅ Django unit tests (models, views)
-
-✅ DRF API tests (bookings, movies, auth, etc.)
-
-🧪 Jest unit tests for React components (planned)
-
-⚙️ GitHub Actions CI (planned)
+```
 
 # 📸 Screenshots
 ## All Movies List Page
