@@ -1,16 +1,13 @@
 🎬 Movie Theater Web App
 
-A full-stack web application for booking movie tickets — featuring dynamic seat selection, user reviews, rich search & filtering, and an admin management system. Built with Django REST Framework and React.
+A full-stack movie theater booking web application built with Django REST Framework and React, featuring real-time seat selection, user reviews, watchlists, rich search and filtering, notifications, and an admin management system for movies and showtimes
 
 ⚠️ Actively developed – frontend and backend integration in progress.
-
-
-
 
 # 🛠 Features
 - 🔐 User Authentication – Register, login, logout with secure session handling.
 
-- 🔍 Advanced Search & Filters – Search by title, genre, rating, year, duration, or theater.
+- 🔍 Advanced Search & Filters – Search / Filter by title, genre, rating, year, duration, or theater.
 
 - 🎬 Movie Browsing – View trailers, posters, credits, and details.
 
@@ -18,19 +15,25 @@ A full-stack web application for booking movie tickets — featuring dynamic sea
 
 - 🧾 Booking System – Automatic user linking, confirmation, and reservation management.
 
-- ⭐ Movie Reviews – Public reviews & ratings for each movie.
+- ⭐  Movie Reviews – Write, edit, and delete reviews with average ratings.
 
 - ⭐ Service Reviews – Time-gated reviews available only after attending a booked showtime.
 
 - 📌 Watchlist & Favorites – Save movies and get updates on similar content.
-- 📣 Notifications – Alerts for bookings, favorites, and new showtimes.
+  
+- Add to Watchlist when no showtime is available.
 
-- 👤 User Profile – Centralized history of bookings, reviews, and saved lists.
+- Add to Favorites after attending a screening.
+- 📣 In-App Notifications – Booking, payment, reviews, or watchlist updates.
+
+- 👤 User Profile – Centralized history of bookings, reviews, and watchlist.
 
 - 🏛️ Theaters & Auditoriums – Directory with venue details.
 
 - 🛠️ Admin Panel – Manage movies, showtimes, cast, and production details.
-
+- ✉️ Email Confirmation – Booking and payment receipts.
+- 💳 Payments – Simple payment flow for showtime reservations.
+  
 - 🐳 Dockerized Setup – Containerized for easy deployment (in progress).
 
 - ⚙️ CI/CD with GitHub Actions – Automated testing & deployment (in progress).
@@ -121,23 +124,28 @@ A full-stack web application for booking movie tickets — featuring dynamic sea
 - 📣 Notifications – Users receive a notification after every major action (booking, review, payment, etc.).
  ## 🏗️ Next Up
 
-- 🐳 Docker & CI/CD (Compose, build/test/workflow)
+
+
+
+- 🐳 Dockerization – Full setup with Compose (frontend, backend, DB).
+- ⚙️ CI/CD – GitHub Actions pipeline:
+
 
 - 🎨 Frontend polish (filter panel UX, mobile tweaks, infinite scroll)
 
-- More advanced payment logic
+- 💳 Payments – Expand logic (refunds, promos, VIP pricing).
 
 - VIP showtime logic
 
-- Multi-language support
+- 🌍 Multi-language support
 
-- Dark mode toggle
+- 🌙Dark mode toggle
 
-- Push notifications (new releases)
 
-- Retro movie voting system
+- 🗳️ Feature Voting System – Users vote for retro/classic screenings.
 
-- “Coming Soon” opt-in
+- 🎞️ Coming Soon Alerts – Users subscribe to movie releases.
+
 
 
 # 🧪 Testing
