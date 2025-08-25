@@ -32,6 +32,7 @@ import AdminPanel from './AdminPanel';
 import EditUser from './components/EditUser'; // Import EditUser component
 import ServiceReview from './components/ServiceReview';
 import NotificationsList from './components/Notifications';
+import PrivateRoute from './components/PrivateRoute';
 import { useAuth } from './contexts/AuthContext';
 
 // Main App component
@@ -61,32 +62,29 @@ function App() {
           <Route
             path="/profile"
             element={
-              loading
-                ? <p>Loading…</p>
-                : user
-                  ? <Profile/>
-                  : <Navigate to="/login"/>
+              <PrivateRoute>
+                <Profile/>
+              </PrivateRoute>
             }
           />
-
           <Route path="*"            element={<h2>Page not found</h2>} />
           <Route path="/showtimes" element={<ShowtimeList />} />
           <Route path="/showtimes/:id" element={<ShowtimeDetail />} />
           <Route path="/theaters" element={<TheaterListing />} />
-          <Route path="/booking" element={<Booking />} />
-          <Route path="/bookings/:bookingId" element={<BookingDetail />} />
+          <Route path="/booking" element={<PrivateRoute><Booking /></PrivateRoute>} />
+          <Route path="/bookings/:bookingId" element={<PrivateRoute><BookingDetail /></PrivateRoute>} />
           <Route path="/directors/:directorId" element={<DirectorDetails />} />
           <Route path="/producers/:producerId" element={<ProducerDetails />} />
           <Route path="/theaters/:theaterId" element={<TheaterDetails />} />
           <Route path="/actors/:actorId" element={<ActorDetails />} />
           <Route path="/movies/:id/reviews" element={<Review />} />
-          <Route path="/user/bookings/:id" element={<UserBooking />} />
-          <Route path="/reviews/:userId" element={<UserReview />} />
-          <Route path="/watchlist/:userId" element={<UserWatchlist />} />
+          <Route path="/user/bookings/:id" element={<PrivateRoute><UserBooking /></PrivateRoute>} />
+          <Route path="/reviews/:userId" element={<PrivateRoute><UserReview /></PrivateRoute>} />
+          <Route path="/watchlist/:userId" element={<PrivateRoute><UserWatchlist /></PrivateRoute>} />
           <Route path="/admin/*" element={<AdminPanel />} />
-          <Route path="/user/edit/:id" element={<EditUser />} />
-          <Route path="/serviceReview/:bookingId" element={<ServiceReview />} />
-          <Route path="/notifications" element={<NotificationsList />} />
+          <Route path="/user/edit/:id" element={<PrivateRoute><EditUser /></PrivateRoute>} />
+          <Route path="/serviceReview/:bookingId" element={<PrivateRoute><ServiceReview /></PrivateRoute>} />
+          <Route path="/notifications" element={<PrivateRoute><NotificationsList /></PrivateRoute>} />
         </Routes>
       </main>
     </Router>

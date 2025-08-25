@@ -1,51 +1,118 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import { useNotifications } from '../contexts/NotificationContext';
+import { useParams, useNavigate }    from 'react-router-dom';
+import { useNotifications }           from '../contexts/NotificationContext';
+import {
+  createFavorite,
+  deleteFavorite,
+  fetchFavoritesByMovie
+} from '../api/favourite';
+// ← make sure this matches your API file!
+import { fetchBookingDetails }     from '../api/booking';
 
 import {
   fetchServiceReviews,
   createServiceReview
 } from '../api/serviceReview';
+import { useAuth } from '../contexts/AuthContext';
 import '../styles/ServiceReview.css';
- export default function ServiceReview() {
-   const { bookingId } = useParams();
-   const [reviews, setReviews] = useState([]);
-   const [form, setForm]       = useState({
-     all_rating: 5,
-     show_rating: 5,
-     auditorium_rating: 5,
-     comment: ''
-   });
-   const [error, setError]     = useState(null);
-   const { reload: reloadNotifs }  = useNotifications();
+export default function ServiceReview() {
+  const { bookingId }           = useParams();
+  const navigate                = useNavigate();
+  const { user, loading: authLoading } = useAuth();          // grab loading
+  const { reload: reloadNotifs} = useNotifications();
 
-   useEffect(() => {
+  const [movieId, setMovieId]         = useState(null);
+  const [reviews, setReviews]         = useState([]);
+  const [form, setForm]               = useState({ all_rating:5, show_rating:5, auditorium_rating:5, comment:'' });
+  const [error, setError]             = useState(null);
+  const [favoriteEntry, setFavoriteEntry] = useState(null);
+
+  // 1) load reviews
+  useEffect(() => {
     if (!bookingId) return;
-     fetchServiceReviews(bookingId)
-       .then(res => setReviews(res.data))
-       .catch(() => setError('Failed to load service reviews.'));
-   }, [bookingId]);
+    fetchServiceReviews(bookingId)
+      .then(r => setReviews(r.data))
+      .catch(() => setError('Failed to load service reviews.'));
+  }, [bookingId]);
 
-   const handleSubmit = async e => {
-     e.preventDefault();
-     setError(null);
-     try {
-       await createServiceReview(bookingId, form);
-       const res = await fetchServiceReviews(bookingId);
-       setReviews(res.data);
-       reloadNotifs();
-     } catch (err) {
-       setError(
-         err.response?.data?.non_field_errors?.[0]
-         || 'Could not submit service review.'
-       );
-     }
-   };
+  // 2) load booking → only after auth and bookingId exist
+  useEffect(() => {
+    if (authLoading || !user || !bookingId) return;         // ← guard!
+    fetchBookingDetails(bookingId)                                  // ← use correct helper
+      .then(res => {
+        
+        setMovieId(res.data.showtime.movie.id);
+      })
+      .catch(err => {
+      });
+  }, [authLoading, user, bookingId, navigate]);
 
-   return (
-     <div className="service-review">
-       <h3>Service Review</h3>
-       {error && <p className="error">{error}</p>}
+  // 3) once we know movieId, see if there's already a favorite
+  useEffect(() => {
+    if (!movieId || !user) return;
+    fetchFavoritesByMovie(movieId)
+      .then(r => {
+        const favs = Array.isArray(r.data) ? r.data : r.data.results || [];
+        setFavoriteEntry(favs[0] || null);
+      })
+      .catch(() => {
+        /* ignore or console.warn */
+      });
+  }, [movieId, user]);
+
+  const handleToggleFavorite = async () => {
+    setError(null);
+    try {
+      if (!movieId) throw new Error("No movieId");
+      if (favoriteEntry) {
+        // remove existing
+        await deleteFavorite(favoriteEntry.id);
+        setFavoriteEntry(null);
+      } else {
+        // create new
+        const res = await createFavorite(movieId);
+        setFavoriteEntry(res.data);
+      }
+      reloadNotifs();
+    } catch (err) {
+      console.error(err.response?.data || err);
+      setError('Failed to update favorites.');
+    }
+  };
+
+  const handleSubmit = async e => {
+    e.preventDefault();
+    setError(null);
+    try {
+      await createServiceReview(bookingId, form);
+      const res = await fetchServiceReviews(bookingId);
+      setReviews(res.data);
+      reloadNotifs();
+    } catch (err) {
+      setError(
+        err.response?.data?.non_field_errors?.[0]
+        || 'Could not submit service review.'
+      );
+    }
+  };
+
+  // early return while we’re still logging in
+  if (authLoading) {
+    return <p>Loading your session…</p>;
+  }
+
+  return (
+    <div className="service-review">
+      <h3>Service Review</h3>
+      {error && <p className="error">{error}</p>}
+
+     {user && movieId ? (
+        <button  className="submit"  onClick={handleToggleFavorite}>
+          {favoriteEntry ? 'Remove from Favorites' : 'Add to Favorites'}
+        </button>
+      ) : user ? (
+        <button disabled>Loading booking…</button>
+      ) : null}
 
       {reviews.length > 0 ? (
         <div className="existing-review">

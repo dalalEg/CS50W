@@ -3,7 +3,7 @@ from django.contrib import admin
 from .models import (
     User, Movie, Genre, Seat, Review, Showtime, Booking, Notification,
     Actor, Director, Producer, Payment, watchlist, Role, Auditorium, Theater,
-    RateService
+    RateService, Favourite
 )
 
 @admin.register(User)
@@ -138,3 +138,8 @@ class RateServiceAdmin(admin.ModelAdmin):
     list_display = ('user', 'booking', 'all_rating')
     search_fields = ('user__username', 'booking__showtime__movie__title')
     list_filter = ('all_rating', 'show_rating', 'auditorium_rating')
+
+@admin.register(Favourite)
+class FavouriteAdmin(admin.ModelAdmin):
+    list_display = ('user', 'movie', 'added_at')
+    search_fields = ('user__username', 'movie__title')

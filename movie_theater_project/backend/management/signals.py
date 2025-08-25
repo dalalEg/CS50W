@@ -24,7 +24,9 @@ def notify_favourites_on_related_movie(sender, instance, created, **kwargs):
     director_ids = Favourite.objects.filter(movie__director=instance.director).values_list('user_id', flat=True)
     # users who favourited any movie by the same producer
     producer_ids = Favourite.objects.filter(movie__producer=instance.producer).values_list('user_id', flat=True)
+    # users who favourited any movie by either the same director or producer
     user_ids = set(director_ids) | set(producer_ids)
+
     for uid in user_ids:
         role = []
         if uid in director_ids:
