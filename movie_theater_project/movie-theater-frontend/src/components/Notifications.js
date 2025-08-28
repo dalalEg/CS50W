@@ -8,9 +8,11 @@ export default function NotificationsList() {
       {notes.map(n => (
         <li key={n.id} className={n.is_read ? 'read' : 'unread'}>
           <p className='message'>{n.message}</p>
+          <p>received {new Date(n.created_at).toLocaleString()}</p>
           {!n.is_read && (
             <button onClick={() => markRead(n.id)}>Mark read</button>
           )}
+          
         </li>
       ))}
     </ul>

@@ -350,15 +350,23 @@ class MovieViewSet(viewsets.ModelViewSet):
     @reviews.mapping.post
     @permission_classes([IsAuthenticated])
     def add_review(self, request, pk=None):
-        serializer = ReviewSerializer(data=request.data, context={'request': request})
+        serializer = ReviewSerializer( data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
         serializer.save(user=request.user, movie_id=pk)
         # Create a notification for the user
         Notification.objects.create(
             user=request.user,
             message=f"🌟 New review for {serializer.instance.movie.title}"
+
         )
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+    @action(detail=False, methods=['get'], url_path='popular_movies')
+    def popular_movies(self, request):
+        popular = self.get_queryset().filter(rating__gte=4.0)
+        serializer = self.get_serializer(popular, many=True)
+        return Response(serializer.data)        
+            
+
 class SeatViewSet(viewsets.ModelViewSet):
     """ViewSet for managing seats."""
     queryset = Seat.objects.all()
@@ -408,7 +416,7 @@ class ShowtimeViewSet(viewsets.ModelViewSet):
     queryset         = Showtime.objects.all()
     serializer_class = ShowtimeSerializer
     filter_backends  = [DjangoFilterBackend, SearchFilter, OrderingFilter]
-
+    permission_classes = [IsAdminOrReadOnly]
     # keep searching by movie title / theater name
     search_fields    = ['movie__title', 'auditorium__theater__name']
 
@@ -423,7 +431,7 @@ class ShowtimeViewSet(viewsets.ModelViewSet):
       'auditorium__theater__location': ['exact','icontains'],
       'available_seats': ['gte','lte'],
     }
-
+    
     # allow ?ordering=start_time or ?ordering=-available_seats
     ordering_fields  = ['start_time','available_seats','movie__rating']
     ordering         = ['start_time']
@@ -457,12 +465,12 @@ class ReviewViewSet(viewsets.ModelViewSet):
     search_fields    = ['content']
 
     def perform_create(self, serializer):
-        # Create a notification for the user
+        review = serializer.save(user=self.request.user)
         Notification.objects.create(
             user=self.request.user,
-            message=f"Your review for {serializer.validated_data['movie'].title} has been created."
+            message=f"Your review for {review.movie.title} has been created."
         )
-        serializer.save(user=self.request.user)
+
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def perform_update(self, serializer):
@@ -483,7 +491,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
 class NotificationViewSet(viewsets.ModelViewSet):
     queryset          = Notification.objects.all()
     serializer_class   = NotificationSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsNotificationOwnerOrStaff]
 
     def get_queryset(self):
         # only this user’s notifications
@@ -710,6 +718,9 @@ class PaymentViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     filter_backends  = [DjangoFilterBackend]
     filterset_fields = ['booking']
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
     @action(detail=False, methods=['post'], url_path='process')
     def process_payment(self, request):
         # debug print so you see the payload
@@ -861,8 +872,8 @@ class AdminDashboardView(APIView):
 
         # --- revenue ---
         total_revenue = Payment.objects.filter(status='Completed').aggregate(sum=Sum('amount'))['sum'] or 0
-        refunds = Payment.objects.filter(status='refunded').aggregate(sum=Sum('amount'))['sum'] or 0
-        failed  = Payment.objects.filter(status__in=['failed','error']).count()
+        refunds = Payment.objects.filter(status='Refunded').aggregate(sum=Sum('amount'))['sum'] or 0
+        failed  = Payment.objects.filter(status__in=['Failed','Error']).count()
 
         # revenue by movie
         rev_by_movie = (

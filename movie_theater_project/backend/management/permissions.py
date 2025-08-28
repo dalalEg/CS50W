@@ -30,18 +30,9 @@ class IsBookingOwnerOrStaff(BasePermission):
 
 
 class IsNotificationOwnerOrStaff(BasePermission):
-    def has_permission(self, request, view):
-        # allow any authenticated user to read
-        if request.method in SAFE_METHODS:
-            return bool(request.user and request.user.is_authenticated)
-        # only staff can create/update/delete
-        return bool(request.user and request.user.is_staff)
-
-    def has_object_permission(self, request, view, obj):
-        # same rule per-object
-        if request.method in SAFE_METHODS:
-            return True
-        return bool(request.user and request.user.is_staff)
+      def has_object_permission(self, request, view, obj):
+      
+        return (obj.user == request.user or request.user.is_staff) and request.user.is_authenticated
 class IsAuthenticated(BasePermission):
     """
     Custom permission to only allow authenticated users to access the view.

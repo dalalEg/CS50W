@@ -76,9 +76,9 @@ class BookingForm(forms.ModelForm):
 @admin.register(Booking)
 class BookingAdmin(admin.ModelAdmin):
     form         = BookingForm
-    list_display = ('user','showtime','seat_list','cost','status')
-    search_fields = ('user__username','showtime__movie__title','status')
-    list_filter   = ('booking_date','status')
+    list_display = ('user','showtime','seat_list','cost','status','attended')
+    search_fields = ('user__username','showtime__movie__title','status','attended')
+    list_filter   = ('booking_date','status','attended','showtime__auditorium')
 
     def seat_list(self, obj):
         # join each seat_number into a comma‐separated string

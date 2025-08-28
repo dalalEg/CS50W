@@ -1,7 +1,7 @@
 from django.test import TestCase
 from django.contrib.auth import get_user_model
 from .models import (User, Movie, Genre,Seat,Showtime,Review, 
-                     Notification,Booking,Actor,Director,Auditorium,Producer,Payment,watchlist,Role,Theater)
+                     Notification,Booking,Actor,Director,Auditorium,Producer,Payment,watchlist,Role,Theater, RateService, Favourite)
 from django.utils import timezone  # <-- Add this import
 from datetime import timedelta
 from django.utils.timezone import make_aware, datetime
@@ -65,7 +65,10 @@ class DirectorModelTest(TestCase):
     def test_director_creation(self):
         """Test that the director is created with the correct attributes."""
         self.assertEqual(self.director.name, "Christopher Nolan")
-        self.assertEqual(self.director.biography, "A British-American director.")        
+        self.assertEqual(self.director.biography, "A British-American director.")    
+    def test_director_str(self):
+        """Test the string representation of the director."""
+        self.assertEqual(str(self.director), "Christopher Nolan")
 
 class ProducerModelTest(TestCase):
     """Test case for Producer model."""
@@ -76,6 +79,9 @@ class ProducerModelTest(TestCase):
         """Test that the producer is created with the correct attributes."""
         self.assertEqual(self.producer.name, "Emma Thomas")
         self.assertEqual(self.producer.biography, "A British-American producer.")
+    def test_producer_str(self):
+        """Test the string representation of the producer."""
+        self.assertEqual(str(self.producer), "Emma Thomas")
 
 class MovieModelTest(TestCase):
     """Test case for Movie model."""
@@ -193,30 +199,19 @@ class ReviewModelTest(TestCase):
 class BookingModelTest(TestCase):
     """Test case for Booking model."""
     def setUp(self):
-        self.user = User.objects.create_user(username="dalal", password="test123")
-        self.movie = Movie.objects.create(title="Inception", description="Dreams", release_date="2024-01-01")
-        self.showtime = Showtime.objects.create(
-            movie=self.movie,
-            start_time=timezone.now() + timedelta(days=1),
-            end_time=timezone.now() + timedelta(days=1, hours=2)
-        )
-       
-    def test_booking_creation(self):
-        """Test that the booking is created with the correct attributes."""
-        booking = Booking.objects.create(user=self.user, showtime=self.showtime, seats=2)
-        self.assertEqual(booking.user.username, "dalal")
-        self.assertEqual(booking.seats, 2)
-        self.assertEqual(str(booking), f"dalal booked {self.movie.title} on {booking.booking_date}")
+        self.user = User.objects.create_user(username="testuser", password="testpass")
+        self.theater = Theater.objects.create(name="Test Theater", location="Test Location")
+        self.auditorium = Auditorium.objects.create(name="Test Auditorium", total_seats=100, theater=self.theater)
+        self.movie = Movie.objects.create(title="Test Movie", description="Test Description", release_date="2025-01-01", rating=5.0)
+        self.showtime = Showtime.objects.create(movie=self.movie, start_time=timezone.now(), end_time=timezone.now() + timedelta(hours=2), auditorium=self.auditorium)
+        self.seat1 = Seat.objects.create(showtime=self.showtime, seat_number="A1", is_booked=False)
+        self.seat2 = Seat.objects.create(showtime=self.showtime, seat_number="A2", is_booked=False)
+        self.booking = Booking.objects.create(user=self.user, showtime=self.showtime, cost=20.00, status="Confirmed")
+        self.booking.seats.set([self.seat1, self.seat2])
 
-    def test_booking_cost(self):
-        """Test that the booking cost is calculated correctly."""
-        booking = Booking.objects.create(user=self.user, showtime=self.showtime, seats=2, cost=20.00)
-        self.assertEqual(booking.cost, 20.00)
     def test_booking_str(self):
-        """Test the string representation of the booking."""
-        booking = Booking.objects.create(user=self.user, showtime=self.showtime, seats=2)
-        self.assertEqual(str(booking), f"{self.user.username} booked {self.movie.title} on {booking.booking_date}")
-
+        """Test the string representation of the Booking model."""
+        self.assertEqual(str(self.booking), f"{self.user.username} booked {self.showtime.movie.title} on {self.booking.booking_date}")
 
 class RoleModelTest(TestCase):
     """Test case for Role model."""
@@ -239,21 +234,12 @@ class RoleModelTest(TestCase):
 class TheaterModelTest(TestCase):
     """Test case for Theater model."""
     def setUp(self):
-        """Create a theater instance for testing."""
-        self.audittoriums =[ Auditorium.objects.create(name="Main Auditorium", total_seats=200),
-                            Auditorium.objects.create(name="VIP Auditorium", total_seats=100) ]
-        self.theater = Theater.objects.create(name="Cineplex", location="Downtown")
-        self.theater.auditoriums.set(self.audittoriums)  # Set the many-to-many relationship
-    def test_theater_creation(self):
-        """Test that the theater is created with the correct attributes."""
-        self.assertEqual(self.theater.name, "Cineplex")
-        self.assertEqual(self.theater.location, "Downtown")
-        self.assertEqual(self.theater.auditoriums.count(), 2)
-        self.assertIn(self.audittoriums[0], self.theater.auditoriums.all())
-        self.assertIn(self.audittoriums[1], self.theater.auditoriums.all())
+        self.theater = Theater.objects.create(name="Test Theater", location="Test Location")
+        self.auditorium = Auditorium.objects.create(name="Test Auditorium", total_seats=100, theater=self.theater)
+
     def test_theater_str(self):
-        """Test the string representation of the theater."""
-        self.assertEqual(str(self.theater), "Cineplex - Downtown")
+        """Test the string representation of the Theater model."""
+        self.assertEqual(str(self.theater), "Test Theater - Test Location")
 
 class NotificationModelTest(TestCase):
     """Test case for Notification model."""
@@ -285,3 +271,50 @@ class AuditoriumModelTest(TestCase):
     def test_auditorium_str(self):
         """Test the string representation of the auditorium."""
         self.assertEqual(str(self.auditorium), "Main Auditorium - Downtown (200 seats)")
+
+class PaymentModelTest(TestCase):
+    """Test case for Payment model."""
+    def setUp(self):
+        self.user = User.objects.create_user(username="testuser", password="testpass")
+        self.payment = Payment.objects.create(user=self.user, amount=100.0, status="Completed")
+
+    def test_payment_str(self):
+        """Test the string representation of the Payment model."""
+        self.assertEqual(str(self.payment), f"Payment {self.payment.pk} for Booking None: {self.payment.status}")
+
+class WatchlistModelTest(TestCase):
+    """Test case for Watchlist model."""
+    def setUp(self):
+        self.user = User.objects.create_user(username="testuser", password="testpass")
+        self.movie = Movie.objects.create(title="Test Movie", description="Test Description", release_date="2025-01-01", rating=5.0)
+        self.watchlist = watchlist.objects.create(user=self.user, movie=self.movie)
+
+    def test_watchlist_str(self):
+        """Test the string representation of the Watchlist model."""
+        self.assertEqual(str(self.watchlist), f"{self.user.username} - {self.movie.title} Watchlist")
+
+class RateServiceModelTest(TestCase):
+    """Test case for RateService model."""
+    def setUp(self):
+        self.user = User.objects.create_user(username="testuser", password="testpass")
+        self.theater = Theater.objects.create(name="Test Theater", location="Test Location")
+        self.auditorium = Auditorium.objects.create(name="Test Auditorium", total_seats=100, theater=self.theater)
+        self.movie = Movie.objects.create(title="Test Movie", description="Test Description", release_date="2025-01-01", rating=5.0)
+        self.showtime = Showtime.objects.create(movie=self.movie, start_time=timezone.now(), end_time=timezone.now() + timedelta(hours=2), auditorium=self.auditorium)
+        self.booking = Booking.objects.create(user=self.user, showtime=self.showtime, status="Confirmed")
+        self.rate_service = RateService.objects.create(user=self.user, booking=self.booking, all_rating=5, show_rating=4, auditorium_rating=3)
+
+    def test_rate_service_str(self):
+        """Test the string representation of the RateService model."""
+        self.assertEqual(str(self.rate_service), f"Service Review by {self.user.username} for {self.movie.title}")
+
+class FavouriteModelTest(TestCase):
+    """Test case for Favourite model."""
+    def setUp(self):
+        self.user = User.objects.create_user(username="testuser", password="testpass")
+        self.movie = Movie.objects.create(title="Test Movie", description="Test Description", release_date="2025-01-01", rating=5.0)
+        self.favourite = Favourite.objects.create(user=self.user, movie=self.movie)
+
+    def test_favourite_str(self):
+        """Test the string representation of the Favourite model."""
+        self.assertEqual(str(self.favourite), f"{self.user.username} - {self.movie.title} Favourite")

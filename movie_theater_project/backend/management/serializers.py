@@ -50,34 +50,57 @@ class ProducerSerializer(serializers.ModelSerializer):
         fields = ['id','name','date_of_birth','biography']
 
 class MovieSerializer(serializers.ModelSerializer):
+    # ── READ-ONLY NESTED OUTPUT ────────────────────────────
     genres     = GenreSerializer(source='genre', many=True, read_only=True)
-    genre_list = serializers.SerializerMethodField()
     director   = DirectorSerializer(read_only=True)
-    actors     = ActorSerializer(many=True, read_only=True)
     producer   = ProducerSerializer(read_only=True)
+    actors     = ActorSerializer(many=True, read_only=True)
     poster     = serializers.ImageField(use_url=True, required=False)
-    duration   = serializers.DurationField()
+    duration   = serializers.DurationField(required=False)
+
+    # ── WRITE-ONLY PK INPUT ────────────────────────────────
+    director_id = serializers.PrimaryKeyRelatedField(
+        queryset=Director.objects.all(),
+        source="director",
+        write_only=True,
+        required=False
+    )
+    producer_id = serializers.PrimaryKeyRelatedField(
+        queryset=Producer.objects.all(),
+        source="producer",
+        write_only=True,
+        required=False
+    )
+    genre_ids = serializers.PrimaryKeyRelatedField(
+        queryset=Genre.objects.all(),
+        source="genre",
+        many=True,
+        write_only=True,
+        required=False
+    )
+    actor_ids = serializers.PrimaryKeyRelatedField(
+        queryset=Actor.objects.all(),
+        source="actors",
+        many=True,
+        write_only=True,
+        required=False
+    )
+
     class Meta:
-        model  = Movie
+        model = Movie
         fields = [
-            'id',
-            'title',
-            'description',
-            'release_date',
-            'genre_list',
-            'genres',        # ← now included in JSON
-            'rating',
-            'created_at',
-            'poster',
-            'trailer',
-            'director',
-            'actors',
-            'producer',
-            'duration',
+            "id", "title", "description", "release_date", "rating",
+            "poster", "trailer", "duration", "created_at",
+            # read-only expanded
+            "genres", "director", "producer", "actors",
+            # write-only IDs
+            "director_id", "producer_id", "genre_ids", "actor_ids",
         ]
 
-    def get_genre_list(self, obj):
-        return obj.get_genres()
+
+    def get_genres(self):
+        return ", ".join([genre.name for genre in self.genre.all()]) if self.genre.count() else "No genres"
+
 class TheaterSerializer(serializers.ModelSerializer):
     class Meta:
         model = Theater
@@ -98,7 +121,11 @@ class ShowtimeSerializer(serializers.ModelSerializer):
                          queryset=Auditorium.objects.all(),
                          write_only=True
                       )
-
+    movie_id       = serializers.PrimaryKeyRelatedField(
+                         source='movie',
+                         queryset=Movie.objects.all(),
+                         write_only=True
+                      )
     class Meta:
         model  = Showtime
         fields = [
@@ -112,7 +139,8 @@ class ShowtimeSerializer(serializers.ModelSerializer):
             'language',
             'is_VIP',
             'auditorium',
-            'auditorium_id'
+            'auditorium_id',
+            'movie_id'
         ]
    
 
@@ -122,6 +150,8 @@ class SeatSerializer(serializers.ModelSerializer):
     class Meta:
         model = Seat
         fields = ['id', 'showtime', 'seat_number', 'is_booked', 'price']
+  
+   
 
 class ReviewSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
@@ -135,9 +165,15 @@ class ReviewSerializer(serializers.ModelSerializer):
         min_value=1,
         max_value=5
     )
+    movie_id = serializers.PrimaryKeyRelatedField(
+        queryset=Movie.objects.all(),
+        source='movie',  # maps to the `movie` FK
+        write_only=True
+    )
+
     class Meta:
         model = Review
-        fields = ['id', 'user', 'movie', 'content','rating',  'created_at', 'updated_at', 'anonymous']
+        fields = ['id', 'user', 'movie', 'content','rating',  'created_at', 'updated_at', 'anonymous', 'movie_id']
         read_only_fields = ['id', 'user', 'movie', 'created_at']
 
 
@@ -158,7 +194,7 @@ class BookingSerializer(serializers.ModelSerializer):
         write_only=True,
         required=False,
     )
-
+    
     class Meta:
         model  = Booking
         fields = [
@@ -229,11 +265,21 @@ class NotificationSerializer(serializers.ModelSerializer):
         model = Notification
         fields = ['id', 'message', 'is_read', 'created_at']
         read_only_fields = ['id', 'message', 'created_at']
+    def create(self, validated_data):
+        user = self.context['request'].user
+        return Notification.objects.create(user=user, **validated_data)
 
 class PaymentSerializer(serializers.ModelSerializer):
+    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+    booking_id = serializers.PrimaryKeyRelatedField(
+        source='booking',
+        queryset=Booking.objects.all(),
+        write_only=True
+    )
+
     class Meta:
         model  = Payment
-        fields = ['id', 'booking', 'amount', 'status', 'created_at']
+        fields = ['id','user','booking', 'amount', 'status', 'created_at','payment_method','payment_date','booking_id']
         read_only_fields = ['id','status','created_at']
 
 
@@ -262,12 +308,24 @@ class WatchlistSerializer(serializers.ModelSerializer):
                 message="This movie is already in your watchlist."
             )
         ]
+
+
 class RoleSerializer(serializers.ModelSerializer):
+    # IDs for input
+    actor_id = serializers.PrimaryKeyRelatedField(
+        queryset=Actor.objects.all(), source="actor", write_only=True
+    )
+    movie_id = serializers.PrimaryKeyRelatedField(
+        queryset=Movie.objects.all(), source="movie", write_only=True
+    )
+
+    # Nested serializers for output
     actor = ActorSerializer(read_only=True)
     movie = MovieSerializer(read_only=True)
+
     class Meta:
         model = Role
-        fields = ['id', 'character_name', 'actor', 'movie']
+        fields = ["id", "actor", "movie", "character_name", "actor_id", "movie_id"]
 
 class RateServiceSerializer(serializers.ModelSerializer):
 
