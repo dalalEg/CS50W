@@ -1,11 +1,4 @@
-from ast import Is, Not
-from calendar import month
-from encodings import search_function
-from hmac import new
-from re import search
-
 import re
-from tkinter import W
 from rest_framework.response       import Response
 from django.db import IntegrityError
 from django.shortcuts import render, redirect

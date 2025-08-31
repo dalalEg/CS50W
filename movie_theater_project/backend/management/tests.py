@@ -1,5 +1,7 @@
 from calendar import c
+from email.mime import audio
 from math import e
+from re import A
 from django.test import TestCase
 from rest_framework import status
 from rest_framework.test import APIClient
@@ -225,6 +227,12 @@ class ActorAPITests(BaseAPITestCase):
         response = self.client.delete(f'/api/actors/{self.actor.id}/')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(Actor.objects.count(), 1)
+    def test_get_actor_movies(self):
+        """Test retrieving movies for a specific actor."""
+        response = self.client.get(f'/api/actors/{self.actor.id}/movies/')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0]['title'], 'Inception')
 
 class DirectorAPITests(BaseAPITestCase):
     """Tests for the Director API endpoints.
@@ -288,7 +296,11 @@ class DirectorAPITests(BaseAPITestCase):
         response = self.client.delete(f'/api/directors/{self.director.id}/')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(Director.objects.count(), 1)
-
+    def test_get_director_movies(self):
+        """Test retrieving movies for a specific director."""
+        response = self.client.get(f'/api/directors/{self.director.id}/movies/')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 1)
 
 class ProducerAPITests(BaseAPITestCase):    
     """Tests for the Producer API endpoints.
@@ -355,6 +367,12 @@ class ProducerAPITests(BaseAPITestCase):
         response = self.client.delete(f'/api/producers/{self.producer.id}/')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(Producer.objects.count(), 1)
+    def test_get_producer_movies(self):
+        """Test retrieving movies for a specific producer."""
+        response = self.client.get(f'/api/producers/{self.producer.id}/movies/')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0]['title'], 'Inception')
 
 class RoleAPITests(BaseAPITestCase):
     """Tests for the Role API endpoints.
@@ -656,6 +674,37 @@ class TheaterAPITests(BaseAPITestCase):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(Theater.objects.count(), 1)
 
+    def test_get_theater_showtimes(self):
+        """Test retrieving showtimes for a specific theater."""
+        self.login_as_admin()
+        auditorium = Auditorium.objects.create(
+            name="Auditorium 1",
+            theater=self.theater,
+            total_seats=100,
+            available_seats=100
+        )
+        response = self.client.post('/api/showtimes/', {
+            'movie_id': self.movie.id,
+            'start_time': timezone.now() + timedelta(days=1, hours=20),
+            'end_time': timezone.now() + timedelta(days=1, hours=22),
+            'available_seats': 100,
+            'auditorium_id': auditorium.id
+        })
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        response = self.client.get(f'/api/theaters/{self.theater.id}/showtimes/')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0]['movie']['title'], 'Inception')
+        self.assertEqual(response.data[0]['auditorium']['name'], 'Auditorium 1')
+
+
+    def test_get_theater_auditoriums(self):
+        """Test retrieving auditoriums for a specific theater."""
+        response = self.client.get(f'/api/theaters/{self.theater.id}/auditoriums/')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0]['name'], 'Auditorium 1')
+
 class AuditoriumAPITests(BaseAPITestCase):
     """Tests for the Auditorium API endpoints.
     """
@@ -727,6 +776,12 @@ class AuditoriumAPITests(BaseAPITestCase):
         response = self.client.delete(f'/api/auditoriums/{self.auditorium.id}/')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(Auditorium.objects.count(), 1)
+
+    def test_get_auditorium_theater_details(self):
+        """Test retrieving the theater details for a specific auditorium."""
+        response = self.client.get(f'/api/auditoriums/{self.auditorium.id}/theater/')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['name'], self.theater.name)
 
 class ShowtimeAPITests(BaseAPITestCase):
     """Tests for the Showtime API endpoints.
@@ -816,6 +871,14 @@ class ShowtimeAPITests(BaseAPITestCase):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(Showtime.objects.count(), 1)   
         self.assertEqual(Showtime.objects.get(id=self.showtime.id).movie.title, 'Inception')
+
+    def test_get_showtime_seats(self):
+        """Test retrieving seats for a specific showtime."""
+        response = self.client.get(f'/api/showtimes/{self.showtime.id}/seats/')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0]['seat_number'], 'B1')
+
 
 class SeatAPITests(BaseAPITestCase):
     """Tests for the Seat API endpoints.

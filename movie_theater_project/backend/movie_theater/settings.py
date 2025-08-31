@@ -22,8 +22,8 @@ CELERY_BEAT_SCHEDULE = {
     },
 }
 
-CELERY_BROKER_URL = 'redis://localhost:6380/0'
-CELERY_RESULT_BACKEND = 'redis://localhost:6380/0'
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
 
 
 
@@ -79,6 +79,7 @@ MEDIA_URL  = "/media/"
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",  # React dev server
+    "http://react_app:3000",  # React container
 ]
 # Trust the React origin for CSRF purposes
 CSRF_TRUSTED_ORIGINS = [
