@@ -30,15 +30,14 @@ A full-stack movie theater booking web application built with Django REST Framew
 - 🔔 **Coming Soon Alerts** (**planned**).  
 - 🗳️ **Feature Voting** (**planned**).
 
----
 
 ## 🛠️ Tech Stack
 - **Backend:** Django + DRF, Celery + Redis (scheduled tasks), PostgreSQL  
 - **Frontend:** React, Axios, React Router, Bootstrap  
 - **Auth:** Django sessions  
 - **Background jobs:** Celery Beat for reminders & auto-cleanup  
-- **Containerization:** Docker Compose (backend, frontend, db, redis) — *in progress*  
-- **CI/CD:** GitHub Actions (lint/tests/build) — *in progress*  
+- **Containerization:** Docker Compose (backend, frontend, db, redis)  
+- **CI/CD:** GitHub Actions for automated tests & coverage  — *in progress*  
 - **Media:** Posters/images served in Docker env  
 
 ---
@@ -102,9 +101,9 @@ A full-stack movie theater booking web application built with Django REST Framew
 -  **Celery tasks**: pending-payment reminder (T+24h), auto-delete unpaid (T+48h), 24h pre-showtime reminder ,  New showtime alert
  
 - **Admin Analytics API**: users/bookings/revenue/top movies/watchlist + **auditorium utilization (seat-based)**  
+- 🐳 **Dockerization** – Compose services (web, api, db, redis, worker, beat) + `.env`  
 
 ## 🚧 Roadmap → 🏗️ Next Up
-- 🐳 **Dockerization** – Compose services (web, api, db, redis, worker, beat) + `.env`  
 - ⚙️ **CI/CD (GitHub Actions)** – Python/Node job matrix, migrations, fixtures, test reports, Docker build & push  
 - 🎨 **Frontend polish** – Filter UX, mobile refinements, infinite scroll/pagination  
 - 💳 **Payments** – Refunds, promo codes, VIP pricing tiers  
@@ -119,13 +118,70 @@ A full-stack movie theater booking web application built with Django REST Framew
 ## 🧪 Testing
 - ✅ **Django tests**: models, viewsets, API (bookings, movies, auth, reviews)  
 - ✅ **Seat/booking integrity**: seat reservation & double-booking prevention  
-- 🔄 **Update tests after model changes** (Seat per showtime, pricing)  
-- 🕒 **Celery task tests** (unit): pending-reminder, auto-cancel, showtime-reminder  
-- 🧩 **Celery integration tests** (with Redis broker, time windows) — *planned*  
+- ✅ **Celery task tests** (unit): pending-reminder, auto-cancel, showtime-reminder  
+- ✅ **Celery integration tests** (with Redis broker, time windows) 
 - 🧪 **React component tests** (Jest + RTL) — *planned*  
 - ⚙️ **CI (Actions)**: run Python/Node tests, lint, coverage gates — *planned*
+## ✅ Running Tests & Coverage
+```bash
+# Inside the backend container
+python manage.py test
 
+# Run coverage
+coverage run --source='.' manage.py test
+coverage report -m
+```
+- Coverage: ~91% of backend code
+
+- Ensures critical functionality works before deployment
+## ⚡ Celery & Redis
+
+- Background task processing powered by Celery
+
+- Redis used as the task broker and result backend
+
+- Tasks include sending reminders and notifications for bookings
+
+- Celery worker runs automatically in the Docker container
+
+## 🐳 Docker Notes
+
+- Backend, frontend, PostgreSQL, and Redis each run in separate containers
+
+- Docker volumes persist database data (postgres_data)
+
+- Docker network ensures all services can communicate seamlessly
+
+## 📈 CI/CD
+
+- GitHub Actions used for automated testing, linting, and coverage reporting
+
+- Ensures code quality and reliability for production
+
+## 📝 Future Features
+
+- VIP Showtime Logic: Actor events, limited seats, dynamic pricing
+
+- Retro Voting & Review Analytics: Users vote for past shows and rate experiences
+## 🏗 Getting Started
+
+### Prerequisites
+- [Docker](https://www.docker.com/get-started)  
+- [Docker Compose](https://docs.docker.com/compose/install/)  
+
+### Run the project
+```bash
+# Clone the repository
+git clone https://github.com/dalalEg/CS50W.git
+
+cd movie_theater_project
+# Start all services with Docker Compose
+docker compose up --build
+```
+- Backend: http://localhost:8000
+- Frontend: http://localhost:3000
 ## 🏗️ Architecture
+
 The system follows a **modular service-oriented architecture**:  
 
 ```plaintext
@@ -167,7 +223,7 @@ The system follows a **modular service-oriented architecture**:
 
 <img width="1886" height="875" alt="image" src="https://github.com/user-attachments/assets/f21aa082-7397-4319-af30-df42a495530d" />
 
-## Movie Datails Page
+## Movie Details Page
 
 <img width="667" height="799" alt="image" src="https://github.com/user-attachments/assets/ba31af31-77b2-4136-b579-e821280c711f" />
 
@@ -179,7 +235,7 @@ The system follows a **modular service-oriented architecture**:
 
 <img width="651" height="747" alt="image" src="https://github.com/user-attachments/assets/a213987c-c138-4dd7-b1c2-9f0febe99b42" />
 
-## Booking Confirmed (Payed)
+## Booking Confirmed (Paid)
 
 <img width="741" height="450" alt="image" src="https://github.com/user-attachments/assets/4fd705df-2716-4fcf-9574-7153dd59a67c" />
 
