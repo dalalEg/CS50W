@@ -109,8 +109,8 @@ class ProducerAdmin(admin.ModelAdmin):
 @admin.register(Payment)
 class PaymentAdmin(admin.ModelAdmin):
     list_display = ('user', 'amount', 'payment_date', 'booking__showtime__movie__title', 'status')
-    list_filter = ('status', 'payment_method', 'payment_date')
-    search_fields = ('user__username',)
+    list_filter = ('status', 'payment_method', 'payment_date','booking__showtime__movie__title')
+    search_fields = ('user__username','booking__showtime__movie__title')
 
 @admin.register(watchlist)
 class WatchlistAdmin(admin.ModelAdmin):

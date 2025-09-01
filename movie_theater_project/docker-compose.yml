@@ -2,7 +2,7 @@ services:
   backend:
     build: ./backend
     container_name: django_app
-    command: gunicorn movie_theater.wsgi:application --bind 0.0.0.0:8000
+    command: python manage.py runserver 0.0.0.0:8000   # dev mode
     volumes:
       - ./backend:/app
     ports:
@@ -12,6 +12,8 @@ services:
     depends_on:
       - db
       - redis
+    networks:
+      - app_network
 
   frontend:
     build: ./movie-theater-frontend
@@ -22,6 +24,8 @@ services:
     tty: true
     depends_on:
       - backend
+    networks:
+      - app_network
 
   db:
     image: postgres:15
@@ -34,27 +38,35 @@ services:
       - postgres_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
+    networks:
+      - app_network
 
   redis:
     image: redis:7
     container_name: redis_cache
     ports:
       - "6379:6379"
+    networks:
+      - app_network
 
   celery:
     build:
       context: ./backend
       dockerfile: Dockerfile
     command: celery -A movie_theater worker --loglevel=info
-    environment:
-      - CELERY_BROKER_URL=redis://redis:6379/0
-      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    env_file:
+      - ./backend/.env
     depends_on:
       - redis
+      - backend   # make sure Django is up
     volumes:
-      - .:/app
+      - ./backend:/app
     networks:
-      - default
+      - app_network
 
 volumes:
   postgres_data:
+
+networks:
+  app_network:
+    driver: bridge

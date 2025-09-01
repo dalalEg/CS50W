@@ -29,6 +29,7 @@ COPY . .
 
 # Add a non-root user
 RUN addgroup --system appgroup && adduser --system --group appuser
+RUN apt-get update && apt-get install -y sqlite3 --no-install-recommends && rm -rf /var/lib/apt/lists/*
 USER appuser
 
 # Expose the application port
@@ -38,4 +39,4 @@ EXPOSE 8000
 HEALTHCHECK CMD curl --fail http://localhost:8000/health || exit 1
 
 # Run the application
-CMD ["gunicorn", "movie_theater.wsgi:application", "--bind", "0.0.0.0:8000"]
+CMD ["gunicorn", "movie_theater.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "3", "--timeout", "120"]

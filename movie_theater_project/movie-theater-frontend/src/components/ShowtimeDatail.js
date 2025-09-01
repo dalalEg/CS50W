@@ -28,8 +28,7 @@ function ShowtimeDetail() {
       fetchBookingsByUser(user.id)
         .then(res => {
           const showtimeId = parseInt(id, 10);
-          const userBookings = res.data.filter(booking => booking.showtime.id === showtimeId);
-          console.log(userBookings);
+          const userBookings = res.data.filter(booking => booking.showtime.id === showtimeId && booking.status === 'Confirmed');
           setBooked(userBookings.length > 0);
         })
         .catch(() => setError("Failed to load bookings"));
