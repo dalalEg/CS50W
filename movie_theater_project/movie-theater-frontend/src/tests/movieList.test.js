@@ -43,6 +43,8 @@ describe('MovieList Component', () => {
     // Wait for movies to appear
     await waitFor(() => {
       expect(screen.getByText('Movie One')).toBeInTheDocument();
+    });
+    await waitFor(() => {
       expect(screen.getByText('Movie Two')).toBeInTheDocument();
     });
 
@@ -52,7 +54,9 @@ describe('MovieList Component', () => {
 
     await waitFor(() => {
       expect(screen.getByText('Movie One')).toBeInTheDocument();
-      expect(screen.queryByText('Movie Two')).toBeInTheDocument();
+    });
+    await waitFor(() => {
+      expect(screen.queryByText('Movie Two')).not.toBeInTheDocument();
     });
   });
 

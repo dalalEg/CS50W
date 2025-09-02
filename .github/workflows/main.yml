@@ -103,7 +103,7 @@ jobs:
       - name: Install dependencies
         run: |
           cd movie_theater_project/movie-theater-frontend
-          npm ci
+          npm ci --audit=false
 
       - name: Run Frontend Linter
         run: |

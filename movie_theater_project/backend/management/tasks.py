@@ -24,7 +24,7 @@ def send_upcoming_showtime_reminders():
     for booking in bookings:
         try:
             obj, created = Notification.objects.get_or_create(
-                user=booking.user, message=f"⏰ Reminder: your showtime for"
+                user=booking.user, message=f"⏰ Reminder: your showtime for "
                 f"”{booking.showtime.movie.title}” "
                 f"is at {booking.showtime.start_time.strftime('%Y-%m-%d %H:%M')}.")
             if created:
