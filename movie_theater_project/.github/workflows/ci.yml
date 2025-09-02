@@ -32,6 +32,9 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
+      - name: Debug - List files
+        run: ls -R
+
       - name: Cache pip
         uses: actions/cache@v3
         with:
@@ -80,6 +83,9 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
+
+      - name: Debug - List files
+        run: ls -R
 
       - name: Cache Node modules
         uses: actions/cache@v3
