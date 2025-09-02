@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from "react";
-import {useParams, Link} from "react-router-dom";
+import { Link} from "react-router-dom";
 import { useAuth } from '../contexts/AuthContext';
 import { useNotifications } from '../contexts/NotificationContext';
 import RatingReview from "./RatingReview" 
@@ -26,7 +26,7 @@ const UserReview = () => {
         setError("Failed to load user reviews");
         setLoading(false);
       });
-  }, [user?.id]);
+  }, [user?.id,user]);
 
   if (loading) return <p>Loading user reviews...</p>;
   if (error) return <p>{error}</p>;

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';  // remove the invalid `use` import
-import { Link,useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { fetchTheaters ,searchTheaters}          from '../api/theater';
 import { fetchAuditoriumByTheater } from '../api/auditorium';
 import '../styles/TheaterListing.css';

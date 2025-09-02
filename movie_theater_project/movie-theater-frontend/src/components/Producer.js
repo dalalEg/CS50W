@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { useLocation, useNavigate, Link, useParams } from 'react-router-dom';
+import {  Link, useParams } from 'react-router-dom';
 import { fetchProducerById } from '../api/producer';
 import { fetchMovieByProducer } from '../api/movies';
 import '../styles/Producer.css';
 export default function ProducerDetails() {
     const { producerId } = useParams();
-    const navigate = useNavigate();
     const [error, setError] = useState(null);
     const [producer, setProducer] = useState(null);
     const [loading, setLoading] = useState(true);

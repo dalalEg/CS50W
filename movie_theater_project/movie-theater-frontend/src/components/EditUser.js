@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from "react";
-import {useParams, Link} from "react-router-dom";
+import {useParams} from "react-router-dom";
 import {fetchCurrentUser,updateUser} from '../api/user';
 // Profile component to display user profile information
 // This component fetches and displays the user's profile details such as name, email, and points.
@@ -34,6 +34,7 @@ function EditUser() {
 
   if (error) return <p className="error">{error}</p>;
   if (!user) return <p className="error">User not found</p>;
+  if (loading) return <p>Loading user profile...</p>;
   return (  
     <div className="profile">
       <p><strong>Email:</strong> <input type="email" value={user.email} onChange={(e) => setUser({...user, email: e.target.value})} /></p>

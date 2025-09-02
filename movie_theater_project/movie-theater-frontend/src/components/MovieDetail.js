@@ -26,19 +26,19 @@ function MovieDetail() {
       .catch(() => setError("Failed to load movie details"));
   }, [id]);
   useEffect(() => {
-    {
+    
       fetchShowtimesByMovie(id)
         .then(resp => setShowtimes(resp.data))
         .catch(() => setError("Failed to load showtimes"));
-    }
+    
   }, [id]);
 
   useEffect(() => {
-    {
+    
       fetchRolesByMovie(id)
         .then(resp => setRoles(resp.data))
         .catch(() => setError("Failed to load roles"));
-    }
+    
   }, [id]);
 
   useEffect(() => {
@@ -85,7 +85,7 @@ function MovieDetail() {
    };
   if (error)   return <p className="error">{error}</p>;
   if (!movie) return <p className="loading">Loading…</p>;
-
+  if (authLoading) return <p className="loading">Loading…</p>;
   return (
     <div className="movie-detail">
       <Link to="/">← Back to List</Link>

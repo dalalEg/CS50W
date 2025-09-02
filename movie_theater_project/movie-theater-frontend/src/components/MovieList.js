@@ -1,4 +1,4 @@
-import React, { use, useEffect, useState } from 'react';
+import React, {  useEffect, useState } from 'react';
 import { fetchMovies,searchMovies } from '../api/movies';
 import { fetchGenres } from '../api/genre.js';
 import { useNavigate }  from 'react-router-dom';

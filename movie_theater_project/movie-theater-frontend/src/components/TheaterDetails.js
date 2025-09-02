@@ -1,4 +1,4 @@
-import React, { use, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { fetchShowtimesByTheater } from '../api/showtimes';
 import { fetchTheaterById } from '../api/theater';

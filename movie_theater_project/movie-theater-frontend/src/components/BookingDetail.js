@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, Link, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { fetchBookingById, cancelBooking, updateBooking } from '../api/booking';
 import { fetchAvailableSeats } from '../api/seats';
 import ConfirmDialog from './ConfirmDialog';
@@ -22,8 +22,6 @@ export default function BookingDetail() {
   const [availableSeats, setAvailableSeats] = useState([]);
   const { reload: reloadNotifs } = useNotifications();
 
-  // Load booking
-  const [payment, setPaying] = useState(null);
   useEffect(() => {
     if (!bookingId) { setLoading(false); return; }
     (async () => {
@@ -68,7 +66,6 @@ export default function BookingDetail() {
   if (!booking) return <div>No booking found.</div>;
 
   const canCancel = new Date(booking.showtime.start_time) > new Date() && booking.status !== 'Cancelled';
-  const canEdit = editing && canCancel;
 
   const editableSeats = editing
     ? [

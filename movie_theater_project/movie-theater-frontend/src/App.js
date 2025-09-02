@@ -1,12 +1,10 @@
 import './App.css';
-import React, {useEffect } from 'react';
+import React from 'react';
 import {
   BrowserRouter as Router,
   Routes,
   Route,
-  Link,
   Navigate,
-  useNavigate
 } from 'react-router-dom';
 import NavBar   from './components/NavBar';
 import MovieList   from './components/MovieList';
@@ -40,7 +38,7 @@ function App() {
   const { user, loading, logout } = useAuth();
   const handleLogout = logout;
   // on mount, you might ping /api/auth/user or read a cookie/token
-
+  if (loading) return <p className="loading">Loading…</p>;
 
   return (
     <Router>

@@ -1,34 +1,47 @@
 import re
-from rest_framework.response       import Response
+from rest_framework.response import Response
 from django.db import IntegrityError
 from django.shortcuts import render, redirect
-from rest_framework import viewsets,filters,generics
+from rest_framework import viewsets, filters, generics
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
 from django.utils import timezone
 from datetime import datetime, timedelta
 from rest_framework.views import APIView
-from rest_framework.decorators import api_view,action,permission_classes
-from rest_framework.permissions import AllowAny,IsAdminUser
+from rest_framework.decorators import api_view, action, permission_classes
+from rest_framework.permissions import AllowAny, IsAdminUser
 from rest_framework.response import Response
 from django.views.decorators.csrf import csrf_exempt
 from .tasks import (
-   send_pending_booking_reminder,
-   delete_unpaid_booking,
-   send_showtime_reminder
- )
-from .permissions import IsAdminOrReadOnly, IsReviewOwnerOrReadOnly,IsAuthenticated, IsBookingOwnerOrStaff, IsNotificationOwnerOrStaff
-from .permissions import IsWatchlistOwnerOrStaff,IsUserEmailVerified
+    send_pending_booking_reminder,
+    delete_unpaid_booking,
+    send_showtime_reminder
+)
+from .permissions import IsAdminOrReadOnly, IsReviewOwnerOrReadOnly, IsAuthenticated, IsBookingOwnerOrStaff, IsNotificationOwnerOrStaff
+from .permissions import IsWatchlistOwnerOrStaff, IsUserEmailVerified
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.contrib.auth import authenticate, login, logout
-from .serializers import( MovieSerializer, ShowtimeSerializer, SeatSerializer, 
-                         GenreSerializer, ReviewSerializer, NotificationSerializer,
-                         BookingSerializer, ActorSerializer, DirectorSerializer,
-                         ProducerSerializer, PaymentSerializer, WatchlistSerializer,
-                         RoleSerializer, TheaterSerializer,UserSerializer,AuditoriumSerializer,
-                         RateServiceSerializer, FavouriteSerializer)
+from .serializers import (
+    MovieSerializer,
+    ShowtimeSerializer,
+    SeatSerializer,
+    GenreSerializer,
+    ReviewSerializer,
+    NotificationSerializer,
+    BookingSerializer,
+    ActorSerializer,
+    DirectorSerializer,
+    ProducerSerializer,
+    PaymentSerializer,
+    WatchlistSerializer,
+    RoleSerializer,
+    TheaterSerializer,
+    UserSerializer,
+    AuditoriumSerializer,
+    RateServiceSerializer,
+    FavouriteSerializer)
 from rest_framework import serializers
 from django.shortcuts import get_object_or_404
 from rest_framework import status
@@ -36,18 +49,37 @@ from django.db import transaction
 from django.db.models import F, Count, Sum, Avg, Q
 from django.db.models.functions import TruncDate, ExtractWeekDay
 from django.contrib.auth.models import User
-from rest_framework import routers  
-from .models import (User, Movie, Genre,Seat,Showtime,Review, 
-                     Notification,Booking,Actor,Director,Auditorium,Producer,Payment,watchlist as Watchlist,Role,Theater,
-                     RateService, Favourite)
+from rest_framework import routers
+from .models import (
+    User,
+    Movie,
+    Genre,
+    Seat,
+    Showtime,
+    Review,
+    Notification,
+    Booking,
+    Actor,
+    Director,
+    Auditorium,
+    Producer,
+    Payment,
+    watchlist as Watchlist,
+    Role,
+    Theater,
+    RateService,
+    Favourite)
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.conf import settings
+
+
 def index(request):
     return render(request, 'management/index.html')
-   
+
+
 @csrf_exempt
-def login_view(request,user=None):
+def login_view(request, user=None):
     if request.method == 'POST':
         # Extract username and password from the request
         username = request.POST.get('username')
@@ -63,7 +95,7 @@ def login_view(request,user=None):
             # Redirect to a success page or the index page
             if user.is_superuser:
                 return HttpResponseRedirect(reverse("admin:index"))
-            return  render(request, 'management/index.html', {
+            return render(request, 'management/index.html', {
                 'title': 'Home',
                 'name': user.username,
             })
@@ -74,7 +106,8 @@ def login_view(request,user=None):
             })
     else:
         return render(request, 'management/login.html')
-        
+
+
 def logout_view(request):
     logout(request)
     return HttpResponseRedirect(reverse("index"))
@@ -85,7 +118,7 @@ def register(request):
     """Register a new user."""
     # If the request method is POST, attempt to register the user
     if request.method == "POST":
-        #Extract username, email, and password from the request
+        # Extract username, email, and password from the request
         username = request.POST["username"]
         email = request.POST["email"]
         password = request.POST["password"]
@@ -94,15 +127,17 @@ def register(request):
         if not username or not password or not email or not confirmation:
             return render(request, "management/register.html", {
                 "message": "All fields are required."
-        })
-      
-        # check that the email is valid 
-        if not email or '@' not in email or '.' not in email.split('@')[-1] :
+            })
+
+        # check that the email is valid
+        if not email or '@' not in email or '.' not in email.split('@')[-1]:
             return render(request, "management/register.html", {
                 "message": "Invalid email address."
             })
         # check that the username and mail and not already in use
-        if User.objects.filter(username=username).exists() or User.objects.filter(email=email).exists():
+        if User.objects.filter(
+                username=username).exists() or User.objects.filter(
+                email=email).exists():
             return render(request, "management/register.html", {
                 "message": "Username or email already taken."
             })
@@ -111,8 +146,8 @@ def register(request):
             return render(request, "management/register.html", {
                 "message": "Passwords must match."
             })
-        try:        
-        # Attempt to create new user
+        try:
+            # Attempt to create new user
             user = User.objects.create_user(username, email, password)
             user.save()
         except IntegrityError:
@@ -123,6 +158,8 @@ def register(request):
         return HttpResponseRedirect(reverse("index", args=(user.username,)))
     else:
         return render(request, "management/register.html")
+
+
 @api_view(['GET'])
 def generate_token(request):
     # generate token
@@ -144,6 +181,7 @@ def generate_token(request):
         status=status.HTTP_200_OK
     )
 
+
 @api_view(['GET'])
 def confirm_email(request, uid, token):
     try:
@@ -157,22 +195,24 @@ def confirm_email(request, uid, token):
         user.save()
         return Response({"message": "Email confirmed successfully!"})
     return Response({"error": "Invalid or expired token"}, status=400)
-    
 
-#API views (login and register).
+
+# API views (login and register).
 @api_view(['POST'])
 def api_login(request):
     """API endpoint for user login."""
     username = request.data.get('username')
     password = request.data.get('password')
     if not username or not password:
-        return Response({'error': 'Username and password are required.'}, status=400)
+        return Response(
+            {'error': 'Username and password are required.'}, status=400)
     user = authenticate(request, username=username, password=password)
     if user is not None:
         login(request, user)
         return Response({'message': 'Login successful.'})
     else:
         return Response({'error': 'Invalid username or password.'}, status=401)
+
 
 @api_view(['POST'])
 def api_register(request):
@@ -190,7 +230,10 @@ def api_register(request):
     if User.objects.filter(email=email).exists():
         return Response({'error': 'Email already taken.'}, status=400)
 
-    user = User.objects.create_user(username=username, email=email, password=password)
+    user = User.objects.create_user(
+        username=username,
+        email=email,
+        password=password)
     login(request, user)
 
     # Return logged-in user info (like /api/auth/user/)
@@ -212,7 +255,8 @@ def api_logout(request):
     logout(request)
     return Response({'message': 'Logout successful.'}, status=204)
 
-@api_view(['GET','PUT'])
+
+@api_view(['GET', 'PUT'])
 @permission_classes([AllowAny])
 def api_user_profile(request):
     """
@@ -221,31 +265,35 @@ def api_user_profile(request):
     """
     if request.method == 'GET':
         if not request.user.is_authenticated:
-           return Response(None, status=200)
+            return Response(None, status=200)
         return Response(UserSerializer(request.user).data, status=200)
     if not request.user.is_authenticated:
-       return Response({'detail': 'Authentication required.'}, status=403)
+        return Response({'detail': 'Authentication required.'}, status=403)
     serializer = UserSerializer(request.user, data=request.data, partial=True)
     serializer.is_valid(raise_exception=True)
     serializer.save()
     Notification.objects.create(
-      user=request.user,
-      message="🔧 Your profile was updated"
+        user=request.user,
+        message="🔧 Your profile was updated"
     )
     return Response(serializer.data, status=200)
 
- #API views (generic class-based or viewsets).
+ # API views (generic class-based or viewsets).
+
+
 class GenreViewSet(viewsets.ModelViewSet):
     """ViewSet for managing genres."""
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
     permission_classes = [IsAdminOrReadOnly]
 
+
 class ActorViewSet(viewsets.ModelViewSet):
     """ViewSet for managing actors."""
     queryset = Actor.objects.all()
     serializer_class = ActorSerializer
     permission_classes = [IsAdminOrReadOnly]
+
     @action(detail=True, methods=['get'], url_path='movies')
     def movies(self, request, pk=None):
         """Custom action to get movies featuring a specific actor."""
@@ -254,13 +302,14 @@ class ActorViewSet(viewsets.ModelViewSet):
         movies = Movie.objects.filter(roles__in=roles)
         serializer = MovieSerializer(movies, many=True)
         return Response(serializer.data)
-    
+
 
 class DirectorViewSet(viewsets.ModelViewSet):
     """ViewSet for managing directors."""
     queryset = Director.objects.all()
     serializer_class = DirectorSerializer
     permission_classes = [IsAdminOrReadOnly]
+
     @action(detail=True, methods=['get'], url_path='movies')
     def movies(self, request, pk=None):
         """Custom action to get movies directed by a specific director."""
@@ -269,18 +318,21 @@ class DirectorViewSet(viewsets.ModelViewSet):
         serializer = MovieSerializer(movies, many=True)
         return Response(serializer.data)
 
+
 class ProducerViewSet(viewsets.ModelViewSet):
     """ViewSet for managing producers."""
     queryset = Producer.objects.all()
     serializer_class = ProducerSerializer
     permission_classes = [IsAdminOrReadOnly]
+
     @action(detail=True, methods=['get'], url_path='movies')
     def movies(self, request, pk=None):
-        """Custom action to get movies produced by a specific producer."""  
+        """Custom action to get movies produced by a specific producer."""
         producer = get_object_or_404(Producer, pk=pk)
         movies = Movie.objects.filter(producer=producer)
         serializer = MovieSerializer(movies, many=True)
         return Response(serializer.data)
+
 
 class RoleViewSet(viewsets.ModelViewSet):
     """ViewSet for managing roles."""
@@ -320,10 +372,13 @@ class MovieViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['get'], url_path='showtimes')
     def showtimes(self, request, pk=None):
-        shows = Showtime.objects.filter(movie_id=pk, start_time__gte=timezone.now(),
+        shows = Showtime.objects.filter(
+            movie_id=pk,
+            start_time__gte=timezone.now(),
             auditorium__available_seats__gt=0)
         serializer = ShowtimeSerializer(shows, many=True)
         return Response(serializer.data)
+
     @action(detail=True, methods=['get'], url_path='roles')
     def roles(self, request, pk=None):
         """Custom action to get roles for a specific movie."""
@@ -332,18 +387,23 @@ class MovieViewSet(viewsets.ModelViewSet):
         serializer = RoleSerializer(roles, many=True)
         return Response(serializer.data)
 # GET /api/movies/{pk}/reviews/ → list (open to all)
+
     @action(detail=True, methods=['get'], url_path='reviews',
             permission_classes=[AllowAny])
     def reviews(self, request, pk=None):
         qs = Review.objects.filter(movie_id=pk)
-        serializer = ReviewSerializer(qs, many=True, context={'request': request})
+        serializer = ReviewSerializer(
+            qs, many=True, context={
+                'request': request})
         return Response(serializer.data)
 
     # POST /api/movies/{pk}/reviews/ → create (only auth’d)
     @reviews.mapping.post
     @permission_classes([IsAuthenticated])
     def add_review(self, request, pk=None):
-        serializer = ReviewSerializer( data=request.data, context={'request': request})
+        serializer = ReviewSerializer(
+            data=request.data, context={
+                'request': request})
         serializer.is_valid(raise_exception=True)
         serializer.save(user=request.user, movie_id=pk)
         # Create a notification for the user
@@ -353,12 +413,13 @@ class MovieViewSet(viewsets.ModelViewSet):
 
         )
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
     @action(detail=False, methods=['get'], url_path='popular_movies')
     def popular_movies(self, request):
         popular = self.get_queryset().filter(rating__gte=4.0)
         serializer = self.get_serializer(popular, many=True)
-        return Response(serializer.data)        
-            
+        return Response(serializer.data)
+
 
 class SeatViewSet(viewsets.ModelViewSet):
     """ViewSet for managing seats."""
@@ -372,31 +433,35 @@ class TheaterViewSet(viewsets.ModelViewSet):
     queryset = Theater.objects.all()
     serializer_class = TheaterSerializer
     permission_classes = [IsAdminOrReadOnly]
-    filter_backends  = [DjangoFilterBackend, SearchFilter, OrderingFilter]
-    search_fields    = ['name', 'location']
-    ordering_fields  = ['name', 'location']
-    ordering         = ['name']
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    search_fields = ['name', 'location']
+    ordering_fields = ['name', 'location']
+    ordering = ['name']
 
     @action(detail=True, methods=['get'], url_path='auditoriums')
     def auditoriums(self, request, pk=None):
         qs = Auditorium.objects.filter(theater_id=pk)
         serializer = AuditoriumSerializer(qs, many=True)
         return Response(serializer.data)
-    @action(detail=True, methods=['get'], url_path='showtimes') 
+
+    @action(detail=True, methods=['get'], url_path='showtimes')
     def showtimes(self, request, pk=None):
         """Custom action to get showtimes for a specific theater."""
         theater = get_object_or_404(Theater, pk=pk)
-        showtimes = Showtime.objects.filter(auditorium__theater=theater, start_time__gte=timezone.now(),
+        showtimes = Showtime.objects.filter(
+            auditorium__theater=theater,
+            start_time__gte=timezone.now(),
             auditorium__available_seats__gt=0)
         serializer = ShowtimeSerializer(showtimes, many=True)
         return Response(serializer.data)
-    
+
 
 class AuditoriumViewSet(viewsets.ModelViewSet):
     """ViewSet for managing auditoriums."""
     queryset = Auditorium.objects.all()
     serializer_class = AuditoriumSerializer
     permission_classes = [IsAdminOrReadOnly]
+
     @action(detail=True, methods=['get'], url_path='theater')
     def get_theater(self, request, pk=None):
         """Custom action to get the theater for a specific auditorium."""
@@ -405,29 +470,31 @@ class AuditoriumViewSet(viewsets.ModelViewSet):
         serializer = TheaterSerializer(theater)
         return Response(serializer.data)
 
+
 class ShowtimeViewSet(viewsets.ModelViewSet):
-    queryset         = Showtime.objects.all()
+    queryset = Showtime.objects.all()
     serializer_class = ShowtimeSerializer
-    filter_backends  = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     permission_classes = [IsAdminOrReadOnly]
     # keep searching by movie title / theater name
-    search_fields    = ['movie__title', 'auditorium__theater__name']
+    search_fields = ['movie__title', 'auditorium__theater__name']
 
     # allow URL ?start_time__date=2025-08-15&language=French&is_VIP=true
     filterset_fields = {
-      'start_time':    ['date', 'gte', 'lte'],
-      'language':      ['exact', 'icontains'],
-      'is_VIP':        ['exact'],
-      'thD_available': ['exact'],      # 3D
-      'parking_available':['exact'],
-      'auditorium__name': ['exact','icontains'],
-      'auditorium__theater__location': ['exact','icontains'],
-      'available_seats': ['gte','lte'],
+        'start_time': ['date', 'gte', 'lte'],
+        'language': ['exact', 'icontains'],
+        'is_VIP': ['exact'],
+        'thD_available': ['exact'],      # 3D
+        'parking_available': ['exact'],
+        'auditorium__name': ['exact', 'icontains'],
+        'auditorium__theater__location': ['exact', 'icontains'],
+        'available_seats': ['gte', 'lte'],
     }
-    
+
     # allow ?ordering=start_time or ?ordering=-available_seats
-    ordering_fields  = ['start_time','available_seats','movie__rating']
-    ordering         = ['start_time']
+    ordering_fields = ['start_time', 'available_seats', 'movie__rating']
+    ordering = ['start_time']
+
     def get_queryset(self):
         user = self.request.user
         base_qs = Showtime.objects.filter(
@@ -439,6 +506,7 @@ class ShowtimeViewSet(viewsets.ModelViewSet):
             return Showtime.objects.all()
         # everyone else only sees future, non‐sold‐out showtimes
         return base_qs
+
     @action(detail=True, methods=['get'], url_path='seats')
     def get_seats(self, request, pk=None):
         """Custom action to get seats for a specific showtime."""
@@ -446,16 +514,15 @@ class ShowtimeViewSet(viewsets.ModelViewSet):
         seats = Seat.objects.filter(showtime=showtime)
         serializer = SeatSerializer(seats, many=True)
         return Response(serializer.data)
-    
-    
+
 
 class ReviewViewSet(viewsets.ModelViewSet):
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
-    permission_classes = [IsReviewOwnerOrReadOnly,IsUserEmailVerified]
-    filter_backends  = [DjangoFilterBackend, filters.SearchFilter]
-    filterset_fields = ['user','movie']
-    search_fields    = ['content']
+    permission_classes = [IsReviewOwnerOrReadOnly, IsUserEmailVerified]
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter]
+    filterset_fields = ['user', 'movie']
+    search_fields = ['content']
 
     def perform_create(self, serializer):
         review = serializer.save(user=self.request.user)
@@ -472,7 +539,8 @@ class ReviewViewSet(viewsets.ModelViewSet):
         Notification.objects.create(
             user=self.request.user,
             message=f"✏️ Review updated for {review.movie.title}"
-         )
+        )
+
     def perform_destroy(self, instance):
         # Create a notification for the user
         Notification.objects.create(
@@ -481,14 +549,16 @@ class ReviewViewSet(viewsets.ModelViewSet):
         )
         return super().perform_destroy(instance)
 
+
 class NotificationViewSet(viewsets.ModelViewSet):
-    queryset          = Notification.objects.all()
-    serializer_class   = NotificationSerializer
+    queryset = Notification.objects.all()
+    serializer_class = NotificationSerializer
     permission_classes = [IsAuthenticated, IsNotificationOwnerOrStaff]
 
     def get_queryset(self):
         # only this user’s notifications
-        return Notification.objects.filter(user=self.request.user).order_by('-created_at')
+        return Notification.objects.filter(
+            user=self.request.user).order_by('-created_at')
 
     def partial_update(self, request, *args, **kwargs):
         # guard object‐level perms
@@ -502,21 +572,24 @@ class BookingViewSet(viewsets.ModelViewSet):
     """ViewSet for managing bookings."""
     queryset = Booking.objects.all()
     serializer_class = BookingSerializer
-    permission_classes = [IsBookingOwnerOrStaff, IsAuthenticated, IsUserEmailVerified]
-    
+    permission_classes = [
+        IsBookingOwnerOrStaff,
+        IsAuthenticated,
+        IsUserEmailVerified]
+
     def get_queryset(self):
         user = self.request.user
         if user.is_staff:
-           return Booking.objects.all()
+            return Booking.objects.all()
         return Booking.objects.filter(user=user)
-    
+
     def perform_create(self, serializer):
-        booking=serializer.save(user=self.request.user)
+        booking = serializer.save(user=self.request.user)
         Notification.objects.create(
             user=self.request.user,
             message=f"✅ Booking created for {booking.showtime.movie.title}"
         )
-         # 1) remind in 24 h if still pending
+        # 1) remind in 24 h if still pending
         send_pending_booking_reminder.apply_async(
             args=[booking.id],
             countdown=86400,  # 24*60*60 seconds
@@ -545,21 +618,27 @@ class BookingViewSet(viewsets.ModelViewSet):
         qs = self.get_queryset().filter(user=request.user)
         serializer = self.get_serializer(qs, many=True)
         return Response(serializer.data)
-   
+
     def destroy(self, request, *args, **kwargs):
         booking = self.get_object()
         if booking.user != request.user and not request.user.is_staff:
-            return Response({'error': 'You do not have permission to delete this booking.'}, status=status.HTTP_403_FORBIDDEN)
+            return Response(
+                {
+                    'error': 'You do not have permission to delete this booking.'},
+                status=status.HTTP_403_FORBIDDEN)
         # Ensure the booking is not in the past
         if booking.showtime.start_time < timezone.now():
-            return Response({'error': 'Cannot cancel a booking for a past showtime.'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'Cannot cancel a booking for a past showtime.'},
+                            status=status.HTTP_400_BAD_REQUEST)
         # Ensure the booking has seats
         if not booking.seats.exists():
-            return Response({'error': 'No seats booked for this booking.'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'No seats booked for this booking.'},
+                            status=status.HTTP_400_BAD_REQUEST)
         num_seats = booking.seats.count()
         # Ensure the booking is not already cancelled
         if booking.status == 'Cancelled':
-            return Response({'error': 'This booking has already been cancelled.'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'This booking has already been cancelled.'},
+                            status=status.HTTP_400_BAD_REQUEST)
         booking.status = 'Cancelled'
         booking.save()
         # Use a transaction to ensure atomicity
@@ -599,7 +678,7 @@ class BookingViewSet(viewsets.ModelViewSet):
             instance.save(update_fields=['attended'])
         serializer = self.get_serializer(instance)
         return Response(serializer.data)
-    
+
     def perform_update(self, serializer):
         booking = serializer.save()
         Notification.objects.create(
@@ -631,12 +710,13 @@ class WatchlistViewSet(viewsets.ModelViewSet):
             user=self.request.user,
             message=f"⭐ Added {new.movie.title} to your watchlist"
         )
+
     def perform_destroy(self, instance):
         title = instance.movie.title
         instance.delete()
         Notification.objects.create(
-        user=self.request.user,
-        message=f"🗑 Removed {title} from your watchlist"
+            user=self.request.user,
+            message=f"🗑 Removed {title} from your watchlist"
         )
 
 
@@ -648,11 +728,12 @@ class RateServiceViewSet(viewsets.ModelViewSet):
     PUT/PATCH /api/rate-services/{pk}/  → update (if you allow editing)
     DELETE /api/rate-services/{pk}/     → delete
     """
-    queryset          = RateService.objects.all()
-    serializer_class   = RateServiceSerializer
-    permission_classes = [IsAuthenticated,IsReviewOwnerOrReadOnly]
-    filter_backends   = [DjangoFilterBackend]
+    queryset = RateService.objects.all()
+    serializer_class = RateServiceSerializer
+    permission_classes = [IsAuthenticated, IsReviewOwnerOrReadOnly]
+    filter_backends = [DjangoFilterBackend]
     filterset_fields = ['booking']
+
     def get_queryset(self):
         user = self.request.user
         # staff see all, users only their own
@@ -672,7 +753,7 @@ class RateServiceViewSet(viewsets.ModelViewSet):
         Notification.objects.create(
             user=user,
             message=f"🌟 New review for {booking.showtime.movie.title}"
-        )   
+        )
         serializer.save(user=user, booking=booking)
 
 
@@ -696,21 +777,23 @@ class FavouriteViewSet(viewsets.ModelViewSet):
             user=self.request.user,
             message=f"❤️ You favorited {fav.movie.title}"
         )
+
     def perform_destroy(self, instance):
         title = instance.movie.title
         super().perform_destroy(instance)
         Notification.objects.create(
-        user=self.request.user,
-        message=f"💔 You unfavorited {title}"
+            user=self.request.user,
+            message=f"💔 You unfavorited {title}"
         )
 
 
 class PaymentViewSet(viewsets.ModelViewSet):
-    queryset         = Payment.objects.all()
+    queryset = Payment.objects.all()
     serializer_class = PaymentSerializer
     permission_classes = [IsAuthenticated]
-    filter_backends  = [DjangoFilterBackend]
+    filter_backends = [DjangoFilterBackend]
     filterset_fields = ['booking']
+
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
@@ -725,19 +808,20 @@ class PaymentViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
         try:
-            booking = get_object_or_404(Booking, pk=booking_id, user=request.user)
+            booking = get_object_or_404(
+                Booking, pk=booking_id, user=request.user)
 
             if booking.status != 'Pending':
-                 return Response(
-                     {"detail": "Booking already paid or cancelled"},
-                     status=status.HTTP_400_BAD_REQUEST
-                 )
+                return Response(
+                    {"detail": "Booking already paid or cancelled"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
 
             if hasattr(booking, 'payment'):
-                 return Response(
-                     {"detail": "Payment already exists for this booking."},
-                     status=status.HTTP_400_BAD_REQUEST
-                 )
+                return Response(
+                    {"detail": "Payment already exists for this booking."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
 
             # mock “charge”
             payment = Payment.objects.create(
@@ -750,43 +834,48 @@ class PaymentViewSet(viewsets.ModelViewSet):
             booking.status = "Confirmed"
             booking.save(update_fields=["status"])
             Notification.objects.create(
-                user=request.user,
-                message=f"💳 Payment received for booking #{payment.booking.showtime.movie.title}"
-            )
+                user=request.user, message=f"💳 Payment received for booking #"
+                f"{payment.booking.showtime.movie.title}")
             return Response(
                 {"payment_id": payment.id, "status": "success"},
                 status=status.HTTP_200_OK
             )
         except Exception as e:
             # print full traceback to your runserver console
-            import traceback; traceback.print_exc()
+            import traceback
+            traceback.print_exc()
             # return the exception message in JSON so you see it in the browser
             return Response(
                 {"detail": str(e)},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
-        
+
 
 class AdminDashboardView(APIView):
     permission_classes = [IsAdminUser]
 
     def get(self, request):
-        now       = timezone.now()
-        week_ago  = now - timezone.timedelta(days=7)
+        now = timezone.now()
+        week_ago = now - timezone.timedelta(days=7)
         month_ago = now - timezone.timedelta(days=30)
 
         # --- existing users / growth stats ---
-        total_users     = User.objects.count()
-        new_week        = User.objects.filter(date_joined__gte=week_ago).count()
-        new_month       = User.objects.filter(date_joined__gte=month_ago).count()
-        active_users    = User.objects.filter(is_active=True).count()
-        verified_emails = User.objects.filter(is_active=True, email_verified=True).count()
+        total_users = User.objects.count()
+        new_week = User.objects.filter(date_joined__gte=week_ago).count()
+        new_month = User.objects.filter(date_joined__gte=month_ago).count()
+        active_users = User.objects.filter(is_active=True).count()
+        verified_emails = User.objects.filter(
+            is_active=True, email_verified=True).count()
 
         # --- Conversion funnel ---
         registered = total_users
-        verified   = verified_emails
-        booked     = Booking.objects.filter(status__in=['Pending','Confirmed']).values('user').distinct().count()
-        paid       = Payment.objects.filter(status='Completed').values('booking__user').distinct().count()
+        verified = verified_emails
+        booked = Booking.objects.filter(
+            status__in=[
+                'Pending',
+                'Confirmed']).values('user').distinct().count()
+        paid = Payment.objects.filter(status='Completed').values(
+            'booking__user').distinct().count()
         funnel = {
             "registered": registered,
             "verified": verified,
@@ -795,13 +884,16 @@ class AdminDashboardView(APIView):
         }
 
         # retention vs churn
-        old_users   = User.objects.filter(date_joined__lte=month_ago)
-        booked_old  = old_users.filter(bookings__created_at__gte=month_ago).distinct().count()
+        old_users = User.objects.filter(date_joined__lte=month_ago)
+        booked_old = old_users.filter(
+            bookings__created_at__gte=month_ago).distinct().count()
         retention_rate = booked_old / old_users.count() if old_users.exists() else 0
 
         # top 5 users by points
-        top_users_qs = User.objects.annotate(total_points=Sum('points')).order_by('-total_points')[:5]
-        top_users = [{'id': u.id, 'username': u.username, 'total_points': u.total_points or 0} for u in top_users_qs]
+        top_users_qs = User.objects.annotate(
+            total_points=Sum('points')).order_by('-total_points')[:5]
+        top_users = [{'id': u.id, 'username': u.username,
+                      'total_points': u.total_points or 0} for u in top_users_qs]
 
         # daily growth trend (last 30 d)
         growth = (
@@ -813,11 +905,11 @@ class AdminDashboardView(APIView):
         )
 
         # --- booking stats ---
-        total_bookings  = Booking.objects.count()
-        pending         = Booking.objects.filter(status='Pending').count()
-        confirmed       = Booking.objects.filter(status='Confirmed').count()
-        cancelled       = Booking.objects.filter(status='Cancelled').count()
-        attended        = Booking.objects.filter(attended=True).count()
+        total_bookings = Booking.objects.count()
+        pending = Booking.objects.filter(status='Pending').count()
+        confirmed = Booking.objects.filter(status='Confirmed').count()
+        cancelled = Booking.objects.filter(status='Cancelled').count()
+        attended = Booking.objects.filter(attended=True).count()
 
         # Repeat vs one-time customers
         repeat_customers = (
@@ -833,7 +925,9 @@ class AdminDashboardView(APIView):
         lead_times = Booking.objects.filter(status='Confirmed')\
             .annotate(lead=F('showtime__start_time') - F('created_at'))\
             .aggregate(avg_lead=Avg('lead'))['avg_lead']
-        avg_lead_hours = (lead_times.total_seconds()/3600) if lead_times else 0
+        avg_lead_hours = (
+            lead_times.total_seconds() /
+            3600) if lead_times else 0
 
         # bookings by day of week
         dow = (
@@ -843,7 +937,8 @@ class AdminDashboardView(APIView):
 
       # --- Global occupancy (all showtimes) ---
         total_seats = Seat.objects.count()  # all seats
-        booked_seats = Seat.objects.filter(is_booked=True).count()  # all booked seats
+        booked_seats = Seat.objects.filter(
+            is_booked=True).count()  # all booked seats
         occupancy_rate = booked_seats / total_seats if total_seats else 0
 
         # --- Auditorium utilization (per hall) ---
@@ -851,7 +946,7 @@ class AdminDashboardView(APIView):
         auditorium_utilization = []
 
         for aud in auditoriums:
-        # All seats belonging to showtimes in this auditorium
+            # All seats belonging to showtimes in this auditorium
             seats_qs = Seat.objects.filter(showtime__auditorium=aud)
             total_seats = seats_qs.count()
             booked_seats = seats_qs.filter(is_booked=True).count()
@@ -860,13 +955,17 @@ class AdminDashboardView(APIView):
             auditorium_utilization.append({
                 "auditorium_id": aud.id,
                 "auditorium": aud.name,
-                "occupancy_rate": round(occupancy ,2)  # percentage
+                "occupancy_rate": round(occupancy, 2)  # percentage
             })
 
         # --- revenue ---
-        total_revenue = Payment.objects.filter(status='Completed').aggregate(sum=Sum('amount'))['sum'] or 0
-        refunds = Payment.objects.filter(status='Refunded').aggregate(sum=Sum('amount'))['sum'] or 0
-        failed  = Payment.objects.filter(status__in=['Failed','Error']).count()
+        total_revenue = Payment.objects.filter(
+            status='Completed').aggregate(
+            sum=Sum('amount'))['sum'] or 0
+        refunds = Payment.objects.filter(
+            status='Refunded').aggregate(
+            sum=Sum('amount'))['sum'] or 0
+        failed = Payment.objects.filter(status__in=['Failed', 'Error']).count()
 
         # revenue by movie
         rev_by_movie = (
@@ -878,16 +977,17 @@ class AdminDashboardView(APIView):
 
         # Revenue trend (last 30 days)
         revenue_trend = (
-            Payment.objects.filter(status="Completed", created_at__gte=month_ago)
-            .annotate(day=TruncDate("created_at"))
-            .values("day")
-            .annotate(total=Sum("amount"))
-            .order_by("day")
-        )
+            Payment.objects.filter(
+                status="Completed",
+                created_at__gte=month_ago) .annotate(
+                day=TruncDate("created_at")) .values("day") .annotate(
+                total=Sum("amount")) .order_by("day"))
 
         # --- movie analytics ---
-        top_movies = Movie.objects.annotate(booked=Count('showtimes__bookings')).order_by('-booked')[:5]
-        top_movies_data = [{'title': m.title, 'bookings': m.booked} for m in top_movies]
+        top_movies = Movie.objects.annotate(booked=Count(
+            'showtimes__bookings')).order_by('-booked')[:5]
+        top_movies_data = [{'title': m.title, 'bookings': m.booked}
+                           for m in top_movies]
 
         top_rated = (
             Review.objects.values('movie__title')
@@ -895,7 +995,6 @@ class AdminDashboardView(APIView):
             .filter(cnt__gte=5)
             .order_by('-avg')[:5]
         )
-        
 
         most_reviewed = sorted(
             [{'title': r['movie__title'], 'reviews': r['cnt']} for r in top_rated],
@@ -906,9 +1005,12 @@ class AdminDashboardView(APIView):
             .annotate(count=Count('id'))
             .order_by('-count')[:5]
         )
-        Favourite_data = [{'title': f['movie__title'], 'favorited': f['count']} for f in top_favorited]
-        top_watchlisted = Movie.objects.annotate(watched=Count('watchlists')).order_by('-watched')[:5]
-        watchlist_data = [{'title': m.title, 'watchlisted': m.watched} for m in top_watchlisted]
+        Favourite_data = [{'title': f['movie__title'],
+                           'favorited': f['count']} for f in top_favorited]
+        top_watchlisted = Movie.objects.annotate(
+            watched=Count('watchlists')).order_by('-watched')[:5]
+        watchlist_data = [{'title': m.title, 'watchlisted': m.watched}
+                          for m in top_watchlisted]
 
         # --- service review analytics ---
         svc_aud_qs = RateService.objects.values(
@@ -916,9 +1018,11 @@ class AdminDashboardView(APIView):
             aud_name=F('booking__showtime__auditorium__name'),
         ).annotate(avg_rating=Avg('all_rating')).order_by('-avg_rating')
         service_by_auditorium = [
-            {"auditorium_id": r['aud_id'], "auditorium": r['aud_name'], "average_rating": float(r['avg_rating'] or 0)}
-            for r in svc_aud_qs
-        ]
+            {
+                "auditorium_id": r['aud_id'],
+                "auditorium": r['aud_name'],
+                "average_rating": float(
+                    r['avg_rating'] or 0)} for r in svc_aud_qs]
 
         svc_th_qs = RateService.objects.values(
             th_id=F('booking__showtime__auditorium__theater__id'),

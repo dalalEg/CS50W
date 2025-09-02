@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { createBooking } from '../api/booking';
-import { useAuth } from '../contexts/AuthContext';
 import { useNotifications } from '../contexts/NotificationContext';
 
 // Booking component to confirm and finalize a booking
@@ -17,7 +16,6 @@ export default function Booking() {
   const { reload: reloadNotifs } = useNotifications();
   const showtimeId = state?.showtimeId;
   const seats      = state?.seats      || [];
-  const { user } = useAuth();
   if (!showtimeId || !seats.length) {
     return (
       <div className="booking-confirm">

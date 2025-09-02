@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { useLocation, useNavigate, Link, useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { fetchDirectorById } from '../api/director';
 import { fetchMovieByDirector } from '../api/movies';
 import '../styles/Director.css';
 import '../index.css';
 export default function DirectorDetails() {
     const { directorId } = useParams();
-    const navigate = useNavigate();
     const [error, setError] = useState(null);
     const [director, setDirector] = useState(null);
     const [loading, setLoading] = useState(true);

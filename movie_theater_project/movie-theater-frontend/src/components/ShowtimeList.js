@@ -1,9 +1,8 @@
-import React, { use, useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import React, {  useEffect, useState } from 'react';
+import {  Link } from 'react-router-dom';
 import { fetchShowtimes ,searchShowtimes }   from '../api/showtimes';
 import { fetchGenres } from '../api/genre';
 import '../styles/ShowtimeList.css';
-import { searchMovies } from '../api/movies';
 
 function ShowtimeList() {
   const [showtimes, setShowtimes] = useState([]);
@@ -19,7 +18,7 @@ function ShowtimeList() {
   const [filterVIP,      setFilterVIP]      = useState(false);
   const [filter3D,       setFilter3D]       = useState(false);
   const [filterParking,  setFilterParking]  = useState(false);
-  const [location,       setLocation]       = useState('');
+  const [location]       = useState('');
   const [sortBy, setSortBy]   = useState('alpha.desc');
   
   useEffect(() => {
@@ -52,8 +51,8 @@ function ShowtimeList() {
     const [h=0, m=0, s=0] = durStr.split(':').map(n => parseInt(n,10));
     return h*3600 + m*60 + s;
   }
-
- const displayShowtimes = showtimes
+  if (loading) return <p className="loading">Loading…</p>;
+  const displayShowtimes = showtimes
   .filter(st => {
     if (new Date(st.start_time) < new Date()) return false;
     const start = new Date(st.start_time);

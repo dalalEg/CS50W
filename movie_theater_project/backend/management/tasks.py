@@ -1,9 +1,10 @@
 from celery import shared_task
 from django.contrib.auth import get_user_model
 from django.utils.timezone import now, timedelta
-from .models import Booking,Notification, Payment
+from .models import Booking, Notification, Payment
 
 User = get_user_model()
+
 
 @shared_task
 def send_upcoming_showtime_reminders():
@@ -23,16 +24,16 @@ def send_upcoming_showtime_reminders():
     for booking in bookings:
         try:
             obj, created = Notification.objects.get_or_create(
-                user=booking.user,
-                message=f"⏰ Reminder: your showtime for “{booking.showtime.movie.title}” "
-                        f"is at {booking.showtime.start_time.strftime('%Y-%m-%d %H:%M')}."
-            )
+                user=booking.user, message=f"⏰ Reminder: your showtime for"
+                f"”{booking.showtime.movie.title}” "
+                f"is at {booking.showtime.start_time.strftime('%Y-%m-%d %H:%M')}.")
             if created:
                 count += 1
         except Exception as e:
             print(f"Error: Exception occurred during get_or_create - {e}")
 
     return f"Reminders sent for {count} bookings."
+
 
 @shared_task(bind=True, max_retries=3, default_retry_delay=60)
 def send_pending_booking_reminder(self, booking_id):
@@ -42,33 +43,34 @@ def send_pending_booking_reminder(self, booking_id):
     Notification.objects.get_or_create(
         user=booking.user,
         message=(
-          f"⏳ You still have a pending booking #{booking.showtime.movie.title}. "
-          "Please complete payment within 24 hours."
+            f"⏳ You still have a pending booking #{booking.showtime.movie.title}. "
+            "Please complete payment within 24 hours."
         )
     )
 
 
 @shared_task(bind=True, max_retries=3, default_retry_delay=60)
 def delete_unpaid_booking(self, booking_id):
-     # use the TextChoices constant so casing always matches
-     booking = Booking.objects.filter(
-         pk=booking_id,
-         status='Pending'
-     ).first()
-     if not booking:
-         return f"Booking {booking_id} not found or not pending"
+    # use the TextChoices constant so casing always matches
+    booking = Booking.objects.filter(
+        pk=booking_id,
+        status='Pending'
+    ).first()
+    if not booking:
+        return f"Booking {booking_id} not found or not pending"
 
-     # mark it cancelled
-     booking.status = 'Cancelled'
-     booking.save(update_fields=['status'])
-     Notification.objects.create(
-         user=booking.user,
-         message=(
-             f"❌ Your booking for “{booking.showtime.movie.title}” was not paid in time "
-             "and has been automatically cancelled."
-         )
-     )
-     return f"Booking {booking_id} cancelled"
+    # mark it cancelled
+    booking.status = 'Cancelled'
+    booking.save(update_fields=['status'])
+    Notification.objects.create(
+        user=booking.user,
+        message=(
+            f"❌ Your booking for “{booking.showtime.movie.title}” was not paid in time "
+            "and has been automatically cancelled."
+        )
+    )
+    return f"Booking {booking_id} cancelled"
+
 
 @shared_task(bind=True, max_retries=3, default_retry_delay=60)
 def send_showtime_reminder(self, booking_id):
@@ -79,7 +81,7 @@ def send_showtime_reminder(self, booking_id):
     Notification.objects.get_or_create(
         user=booking.user,
         message=(
-          f"⏰ Reminder: your showtime for “{showtime.movie.title}” "
-          f"is on {showtime.start_time.strftime('%Y-%m-%d %H:%M')}."
+            f"⏰ Reminder: your showtime for “{showtime.movie.title}” "
+            f"is on {showtime.start_time.strftime('%Y-%m-%d %H:%M')}."
         )
     )

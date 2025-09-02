@@ -7,4 +7,3 @@ class ManagementConfig(AppConfig):
 
     def ready(self):
         import management.signals
-        

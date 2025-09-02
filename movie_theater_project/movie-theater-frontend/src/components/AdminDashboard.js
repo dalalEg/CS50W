@@ -1,13 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { fetchAdminDashboard }         from '../api/admin';
-import { useAuth } from '../contexts/AuthContext';
 import '../styles/AdminDashboard.css';
 
 export default function AdminDashboard() {
   const [data, setData]   = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
-  const { user } = useAuth();
   useEffect(() => {
     fetchAdminDashboard()
       .then(r => setData(r.data))

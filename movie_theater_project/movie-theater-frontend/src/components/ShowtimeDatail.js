@@ -1,4 +1,4 @@
-import React, { use, useEffect, useState } from 'react';
+import React, {  useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { fetchShowtimeById } from '../api/showtimes';
 import { fetchSeats } from '../api/seats';
@@ -11,7 +11,7 @@ function ShowtimeDetail() {
   const { id } = useParams();
   const [seats, setSeats]               = useState([]);
   const [selected, setSelected]         = useState([]);
-  const [bookingResult, setBookingResult] = useState(null);
+  const [bookingResult] = useState(null);
   const [error, setError]               = useState(null);
   const [showtime, setShowtime]         = useState(null);
   const navigate = useNavigate();            // ← hook at top
@@ -33,7 +33,7 @@ function ShowtimeDetail() {
         })
         .catch(() => setError("Failed to load bookings"));
     }
-  }, [user]);
+  }, [user, id]);
   useEffect(() => {
     fetchSeats(id).then(r => setSeats(r.data));
   }, [id]);
