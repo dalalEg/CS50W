@@ -8,22 +8,25 @@ import '../styles/Profile.css';
 
 function Profile() {
   const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading] = useState(true);
   const [emailSent, setEmailSent] = useState(false);
   const { user } = useAuth();
 
   const handleConfirmEmail = () => {
     generateToken(user.id, user.email)
       .then(() => {
+        setEmailSent(true);
         alert("Confirmation email sent!");
       })
       .catch(() => {
         alert("Failed to send confirmation email.");
+        setError("Failed to send confirmation email.");
       });
   };
 
   if (error) return <p className="error">{error}</p>;
   if (!user) return <p className="error">User not found</p>;
+  if (loading) return <p>Loading...</p>;
   return (  
     <div className="profile">
       <h1>User Profile</h1>

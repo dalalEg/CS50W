@@ -42,7 +42,7 @@ function MovieList() {
 
   const parseDuration = (duration) => {
     if (!duration) return 0;
-    const [hours, minutes, seconds] = duration.split(':').map(Number);
+    const [hours, minutes, ] = duration.split(':').map(Number);
     return (hours * 60) + minutes; // duration in minutes
   };
 
