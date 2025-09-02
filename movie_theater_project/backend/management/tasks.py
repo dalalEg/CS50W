@@ -25,8 +25,9 @@ def send_upcoming_showtime_reminders():
         try:
             obj, created = Notification.objects.get_or_create(
                 user=booking.user, message=f"⏰ Reminder: your showtime for "
-                f"”{booking.showtime.movie.title}” "
-                f"is at {booking.showtime.start_time.strftime('%Y-%m-%d %H:%M')}.")
+                f"\"{booking.showtime.movie.title}\" "
+                f"is at {booking.showtime.start_time.strftime('%Y-%m-%d %H:%M')}."
+            )
             if created:
                 count += 1
         except Exception as e:
