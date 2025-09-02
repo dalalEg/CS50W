@@ -335,12 +335,8 @@ class BookingModelTest(TestCase):
 
     def test_booking_str(self):
         """Test the string representation of the Booking model."""
-        self.assertEqual(
-            str(
-                self.booking), f"{
-                self.user.username} booked {
-                self.showtime.movie.title} on {
-                    self.booking.booking_date}")
+        self.assertEqual(str(self.booking), f"{self.user.username} booked "
+                         f"{self.showtime.movie.title} on {self.booking.booking_date}")
 
 
 class RoleModelTest(TestCase):
@@ -367,11 +363,7 @@ class RoleModelTest(TestCase):
     def test_role_str(self):
         """Test the string representation of the role."""
         self.assertEqual(
-            str(
-                self.role), f"{
-                self.actor.name} as {
-                self.role.character_name} in {
-                    self.movie.title}")
+            str(self.role), f"{self.actor.name} as {self.role.character_name} in {self.movie.title}")
 
 
 class TheaterModelTest(TestCase):
