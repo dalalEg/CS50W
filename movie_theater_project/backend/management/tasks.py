@@ -1,7 +1,7 @@
 from celery import shared_task
 from django.contrib.auth import get_user_model
 from django.utils.timezone import now, timedelta
-from .models import Booking, Notification, Payment
+from .models import Booking, Notification
 
 User = get_user_model()
 

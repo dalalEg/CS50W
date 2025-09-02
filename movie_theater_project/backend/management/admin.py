@@ -109,9 +109,9 @@ class BookingAdmin(admin.ModelAdmin):
         'showtime__auditorium')
 
     def seat_list(self, obj):
-        # join each seat_number into a comma‐separated string
+        # join each seat_number into a comma-separated string
         return ", ".join(s.seat_number for s in obj.seats.all())
-    seat_list.short_description = 'Seats'  # set a short description for the column
+    seat_list.short_description = 'Seats'
 
 
 @admin.register(Notification)

@@ -1,24 +1,20 @@
-from calendar import c
-from email.mime import audio
-from math import e
-from re import A
 from django.test import TestCase
 from rest_framework import status
 from rest_framework.test import APIClient
-from .models import Movie, Showtime, Genre, Actor, Director, Producer, Role, Theater, Auditorium, Review, Notification, Seat, Booking, watchlist as Watchlist, Payment, RateService, Favourite
+from .models import (Movie, Showtime, Genre, Actor,
+                     Director, Producer, Role, Theater, Auditorium,
+                     Review, Notification, Seat, Booking, watchlist as Watchlist,
+                     Payment, RateService, Favourite)
 from django.contrib.auth import get_user_model
-from datetime import datetime, timedelta
+from datetime import timedelta
 from django.utils import timezone
-from django import forms
 from django.contrib.admin.sites import AdminSite
 from .admin import BookingForm, BookingAdmin
-from rest_framework.permissions import SAFE_METHODS
-from .permissions import IsReviewOwnerOrReadOnly, IsNotificationOwnerOrStaff, IsWatchlistOwnerOrStaff
+from .permissions import (IsReviewOwnerOrReadOnly, IsNotificationOwnerOrStaff,
+                          IsWatchlistOwnerOrStaff)
 from .serializers import MovieSerializer, BookingSerializer
-from .tasks import send_upcoming_showtime_reminders, send_pending_booking_reminder, delete_unpaid_booking, send_showtime_reminder
-from .signals import notify_watchlist_on_new_showtime, notify_favourites_on_related_movie
-from django.db.models.signals import post_save
-from django.test.utils import override_settings
+from .tasks import (send_upcoming_showtime_reminders, send_pending_booking_reminder,
+                    delete_unpaid_booking, send_showtime_reminder)
 from unittest.mock import patch
 
 # Create your tests here.
@@ -646,7 +642,7 @@ class MovieAPITests(BaseAPITestCase):
     def test_get_showtimes_for_movie(self):
         auditorium = Auditorium.objects.create(
             name='Main Hall', available_seats=50, total_seats=100)
-        showtime = Showtime.objects.create(
+        Showtime.objects.create(
             movie=self.movie,
             auditorium=auditorium,
             start_time=timezone.now() +
@@ -1768,7 +1764,7 @@ class AdminTests(TestCase):
         form_data = {
             'status': 'confirmed',
         }
-        form = BookingForm(data=form_data)
+        BookingForm(data=form_data)
         # self.assertFalse(form.is_valid())
 
     def test_booking_admin_display(self):
@@ -1885,6 +1881,7 @@ class PermissionTests(TestCase):
                 permission.has_object_permission(
                     request, None, self.review))
         except Exception as e:
+            print(e)
             self.assertTrue(True)
 
     def test_is_notification_owner_or_staff(self):

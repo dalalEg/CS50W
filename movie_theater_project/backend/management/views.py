@@ -1,25 +1,26 @@
-import re
 from rest_framework.response import Response
+from django.core.exceptions import PermissionDenied
 from django.db import IntegrityError
-from django.shortcuts import render, redirect
-from rest_framework import viewsets, filters, generics
+from django.shortcuts import render
+from rest_framework import viewsets, filters
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
 from django.utils import timezone
-from datetime import datetime, timedelta
+from datetime import timedelta
 from rest_framework.views import APIView
 from rest_framework.decorators import api_view, action, permission_classes
 from rest_framework.permissions import AllowAny, IsAdminUser
-from rest_framework.response import Response
 from django.views.decorators.csrf import csrf_exempt
 from .tasks import (
     send_pending_booking_reminder,
     delete_unpaid_booking,
     send_showtime_reminder
 )
-from .permissions import IsAdminOrReadOnly, IsReviewOwnerOrReadOnly, IsAuthenticated, IsBookingOwnerOrStaff, IsNotificationOwnerOrStaff
-from .permissions import IsWatchlistOwnerOrStaff, IsUserEmailVerified
-from django.contrib.auth.decorators import login_required
+from .permissions import (
+    IsAdminOrReadOnly, IsReviewOwnerOrReadOnly, IsAuthenticated,
+    IsBookingOwnerOrStaff, IsNotificationOwnerOrStaff
+)
+from .permissions import IsUserEmailVerified
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.contrib.auth import authenticate, login, logout
@@ -46,12 +47,10 @@ from rest_framework import serializers
 from django.shortcuts import get_object_or_404
 from rest_framework import status
 from django.db import transaction
-from django.db.models import F, Count, Sum, Avg, Q
+from django.db.models import F, Count, Sum, Avg
 from django.db.models.functions import TruncDate, ExtractWeekDay
 from django.contrib.auth.models import User
-from rest_framework import routers
 from .models import (
-    User,
     Movie,
     Genre,
     Seat,
@@ -278,7 +277,7 @@ def api_user_profile(request):
     )
     return Response(serializer.data, status=200)
 
- # API views (generic class-based or viewsets).
+# API views (generic class-based or viewsets).
 
 
 class GenreViewSet(viewsets.ModelViewSet):
@@ -935,7 +934,7 @@ class AdminDashboardView(APIView):
             .values('dow').annotate(count=Count('id')).order_by('dow')
         )
 
-      # --- Global occupancy (all showtimes) ---
+        # --- Global occupancy (all showtimes) ---
         total_seats = Seat.objects.count()  # all seats
         booked_seats = Seat.objects.filter(
             is_booked=True).count()  # all booked seats

@@ -11,8 +11,6 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
-import os
-import management
 from celery.schedules import crontab
 
 CELERY_BEAT_SCHEDULE = {

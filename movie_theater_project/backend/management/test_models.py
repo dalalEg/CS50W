@@ -1,5 +1,4 @@
 from django.test import TestCase
-from django.contrib.auth import get_user_model
 from .models import (
     User,
     Movie,
@@ -24,7 +23,6 @@ from datetime import timedelta
 from django.utils.timezone import make_aware, datetime
 # Define the User model for testing
 # Ensure you have the correct User model imported
-User = get_user_model()
 
 
 class UserModelTest(TestCase):

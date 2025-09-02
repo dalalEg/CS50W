@@ -1,6 +1,5 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-from celery import shared_task
 
 # Create your models here.
 
@@ -181,9 +180,9 @@ class Notification(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return ( f"Notification for {self.user.username}:"
-                 f"{self.message}"
-        )
+        return (f"Notification for {self.user.username}:"
+                f"{self.message}")
+
 
 class Actor(models.Model):
     name = models.CharField(max_length=100, unique=True)
@@ -253,7 +252,6 @@ class Payment(models.Model):
     def __str__(self):
         return (f"Payment {self.pk} for Booking"
                 f" {self.booking_id}: {self.status}")
-
 
 
 class watchlist(models.Model):

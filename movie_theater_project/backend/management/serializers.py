@@ -1,7 +1,3 @@
-import email
-from enum import unique
-from os import read
-import re
 from rest_framework import serializers
 from .models import (
     User, Movie, Booking, Showtime, Seat,
