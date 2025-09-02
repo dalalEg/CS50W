@@ -1753,7 +1753,7 @@ class AdminTests(TestCase):
             'showtime': Showtime.objects.first(),
             'status': 'confirmed',
         }
-        form = BookingForm(data=form_data)
+        BookingForm(data=form_data)
 
     def test_booking_form_invalid(self):
         """Test that BookingForm fails validation with missing fields."""
