@@ -32,6 +32,9 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
+      - name: Debug - List files
+        run: ls -R
+
       - name: Cache pip
         uses: actions/cache@v3
         with:
@@ -47,14 +50,14 @@ jobs:
 
       - name: Install backend dependencies
         run: |
-          cd backend
+          cd movie_theater_project/backend
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install coverage
 
       - name: Run Backend Linter
         run: |
-          cd backend
+          cd movie_theater_project/backend
           flake8
 
       - name: Run Django tests with coverage
@@ -63,7 +66,7 @@ jobs:
           REDIS_URL: redis://localhost:6379/0
           DJANGO_SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
         run: |
-          cd backend
+          cd movie_theater_project/backend
           coverage run manage.py test
           coverage report --fail-under=80
           coverage xml
@@ -71,7 +74,7 @@ jobs:
       - name: Upload coverage report
         uses: codecov/codecov-action@v4
         with:
-          file: backend/coverage.xml
+          file: movie_theater_project/backend/coverage.xml
           flags: backend
 
   frontend:
@@ -80,6 +83,9 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
+
+      - name: Debug - List files
+        run: ls -R
 
       - name: Cache Node modules
         uses: actions/cache@v3
@@ -96,20 +102,20 @@ jobs:
 
       - name: Install dependencies
         run: |
-          cd movie-theater-frontend
+          cd movie_theater_project/movie-theater-frontend
           npm ci
 
       - name: Run Frontend Linter
         run: |
-          cd movie-theater-frontend
+          cd movie_theater_project/movie-theater-frontend
           npm run lint
 
       - name: Run build
         run: |
-          cd movie-theater-frontend
+          cd movie_theater_project/movie-theater-frontend
           npm run build --if-present
 
       - name: Run tests
         run: |
-          cd movie-theater-frontend
+          cd movie_theater_project/movie-theater-frontend
           npm test -- --watchAll=false
