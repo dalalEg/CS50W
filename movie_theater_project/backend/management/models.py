@@ -180,8 +180,7 @@ class Notification(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return (f"Notification for {self.user.username}:"
-                f"{self.message}")
+        return (f"Notification for {self.user.username}: {self.message}")
 
 
 class Actor(models.Model):
@@ -281,8 +280,7 @@ class Role(models.Model):
     character_name = models.CharField(max_length=100)
 
     def __str__(self):
-        return (f"{self.actor.name} as"
-                f"{self.character_name} in {self.movie.title}")
+        return (f"{self.actor.name} as {self.character_name} in {self.movie.title}")
 
 
 class Auditorium(models.Model):
