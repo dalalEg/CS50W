@@ -71,6 +71,7 @@ from .models import (
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.conf import settings
+from django.contrib.auth import get_user_model
 
 
 def index(request):
@@ -854,6 +855,7 @@ class AdminDashboardView(APIView):
     permission_classes = [IsAdminUser]
 
     def get(self, request):
+        User = get_user_model()  # Use the custom user model
         now = timezone.now()
         week_ago = now - timezone.timedelta(days=7)
         month_ago = now - timezone.timedelta(days=30)
@@ -945,17 +947,7 @@ class AdminDashboardView(APIView):
         auditorium_utilization = []
 
         for aud in auditoriums:
-            # All seats belonging to showtimes in this auditorium
-            seats_qs = Seat.objects.filter(showtime__auditorium=aud)
-            total_seats = seats_qs.count()
-            booked_seats = seats_qs.filter(is_booked=True).count()
-
-            occupancy = booked_seats / total_seats if total_seats else 0
-            auditorium_utilization.append({
-                "auditorium_id": aud.id,
-                "auditorium": aud.name,
-                "occupancy_rate": round(occupancy, 2)  # percentage
-            })
+            pass
 
         # --- revenue ---
         total_revenue = Payment.objects.filter(

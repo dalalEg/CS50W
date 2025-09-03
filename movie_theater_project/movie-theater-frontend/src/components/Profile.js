@@ -1,24 +1,32 @@
-import React, {useState} from "react";
-import { Link} from "react-router-dom";
-import { useAuth }    from '../contexts/AuthContext';
-import {generateToken} from '../api/user';
-// Profile component to display user profile information
-// This component fetches and displays the user's profile details such as name, email, and points.
-import '../styles/Profile.css';
+import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
+import { generateToken } from "../api/user";
+import "../styles/Profile.css";
 
 function Profile() {
   const [error, setError] = useState(null);
-  const [loading] = useState(true);
+  const [loading, setLoading] = useState(true);
   const [emailSent, setEmailSent] = useState(false);
   const { user } = useAuth();
 
+  // Set loading to false once user data is available
+  useEffect(() => {
+    if (user) {
+      setLoading(false);
+    }
+  }, [user]);
+
   const handleConfirmEmail = () => {
+    setLoading(true); // Set loading to true while sending the email
     generateToken(user.id, user.email)
       .then(() => {
         setEmailSent(true);
+        setLoading(false);
         alert("Confirmation email sent!");
       })
       .catch(() => {
+        setLoading(false);
         alert("Failed to send confirmation email.");
         setError("Failed to send confirmation email.");
       });
@@ -27,12 +35,19 @@ function Profile() {
   if (error) return <p className="error">{error}</p>;
   if (!user) return <p className="error">User not found</p>;
   if (loading) return <p>Loading...</p>;
-  return (  
+
+  return (
     <div className="profile">
       <h1>User Profile</h1>
-        <Link to={`/user/edit/${user.id}`} className="link">Click To Edit Profile</Link>
-      <p><strong>Name:</strong> {user.username}</p>
-      <p><strong>Email:</strong> {user.email}</p>
+      <Link to={`/user/edit/${user.id}`} className="link">
+        Click To Edit Profile
+      </Link>
+      <p>
+        <strong>Name:</strong> {user.username}
+      </p>
+      <p>
+        <strong>Email:</strong> {user.email}
+      </p>
       {!user?.email_verified && (
         <div className="alert alert-warning">
           <p>Please confirm your email to unlock all features.</p>
@@ -42,10 +57,18 @@ function Profile() {
           {emailSent && <p>Confirmation email sent!</p>}
         </div>
       )}
-      <p><strong>Points:</strong> {user.points}</p>
-      <Link to={`/user/bookings/${user.id}`} className="link">Click To View Your Bookings</Link>
-      <Link to={`/reviews/${user.id}`} className="link">Click To View Your Reviews</Link>
-      <Link to={`/watchlist/${user.id}`} className="link">Click To View Your Watchlist</Link>
+      <p>
+        <strong>Points:</strong> {user.points}
+      </p>
+      <Link to={`/user/bookings/${user.id}`} className="link">
+        Click To View Your Bookings
+      </Link>
+      <Link to={`/reviews/${user.id}`} className="link">
+        Click To View Your Reviews
+      </Link>
+      <Link to={`/watchlist/${user.id}`} className="link">
+        Click To View Your Watchlist
+      </Link>
     </div>
   );
 }

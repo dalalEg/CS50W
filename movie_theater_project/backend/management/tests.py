@@ -1980,7 +1980,7 @@ class TaskTests(TestCase):
         send_upcoming_showtime_reminders()
         mock_get_or_create.assert_called_once_with(
             user=self.user, message=f"⏰ Reminder: your showtime for “{self.showtime.movie.title}”"
-            f"is at {self.showtime.start_time.strftime('%Y-%m-%d %H:%M')}.")
+            f" is at {self.showtime.start_time.strftime('%Y-%m-%d %H:%M')}.")
 
     @patch("management.tasks.Notification.objects.get_or_create")
     def test_send_pending_booking_reminder(self, mock_get_or_create):
