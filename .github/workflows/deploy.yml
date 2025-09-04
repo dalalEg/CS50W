@@ -59,5 +59,15 @@ jobs:
       - name: Run Django tests
         run: python manage.py test
 
+      - name: Install Redis
+        run: sudo apt-get update && sudo apt-get install -y redis-server
+
+      - name: Start Redis
+        run: sudo service redis-server start
+
       - name: Deploy to Render
         run: curl -X POST "$RENDER_DEPLOY_HOOK"
+
+      - name: Start Celery Worker
+        run: |
+          nohup celery -A movie_theater worker --loglevel=info &
