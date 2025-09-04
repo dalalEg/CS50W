@@ -11,7 +11,10 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
+from pickle import TRUE
 from celery.schedules import crontab
+import os
+from urllib.parse import urlparse
 
 CELERY_BEAT_SCHEDULE = {
     'send-showtime-reminders-every-24-hours': {
@@ -35,9 +38,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-#6ia8v+dyaago@ylz$!2a2ak$-1r!^nmyf_b%%@rey8f^ud*sh'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
 
-ALLOWED_HOSTS = []
+
+DEBUG = os.getenv("DJANGO_DEBUG", "False") == "True"
+
+ALLOWED_HOSTS = [
+".onrender.com", ".netlify.app", "localhost", "127.0.0.1", "movie-theater-dots.onrender.com"
+]
+
 
 AUTH_USER_MODEL = 'management.User'
 # Application definition
@@ -57,6 +65,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',  # Middleware for CORS
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -82,8 +91,8 @@ CORS_ALLOWED_ORIGINS = [
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:3000",
 ]
-CSRF_COOKIE_SECURE = False
-SESSION_COOKIE_SECURE = False
+CSRF_COOKIE_SECURE = TRUE
+SESSION_COOKIE_SECURE = TRUE
 CSRF_COOKIE_SAMESITE = None
 SESSION_COOKIE_SAMESITE = None
 # In development, allow all origins for CORS
@@ -154,7 +163,9 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
@@ -162,3 +173,8 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # settings.py
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+
+# Frontend origin and CORS settings
+FRONTEND_ORIGIN = os.getenv("FRONTEND_ORIGIN", "")
+CORS_ALLOWED_ORIGINS = [FRONTEND_ORIGIN] if FRONTEND_ORIGIN else []
+CSRF_TRUSTED_ORIGINS = [FRONTEND_ORIGIN] if FRONTEND_ORIGIN else []

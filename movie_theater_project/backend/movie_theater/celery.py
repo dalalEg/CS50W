@@ -2,7 +2,9 @@
 import os
 import django
 from celery import Celery
-
+import logging
+logger = logging.getLogger(__name__)
+logger.info("Celery app initialized.")
 # 1) point at your settings
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'movie_theater.settings')
 
