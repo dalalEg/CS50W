@@ -14,7 +14,6 @@ from pathlib import Path
 from pickle import TRUE
 from celery.schedules import crontab
 import os
-from urllib.parse import urlparse
 
 CELERY_BEAT_SCHEDULE = {
     'send-showtime-reminders-every-24-hours': {
@@ -43,7 +42,7 @@ SECRET_KEY = 'django-insecure-#6ia8v+dyaago@ylz$!2a2ak$-1r!^nmyf_b%%@rey8f^ud*sh
 DEBUG = os.getenv("DJANGO_DEBUG", "False") == "True"
 
 ALLOWED_HOSTS = [
-".onrender.com", ".netlify.app", "localhost", "127.0.0.1", "movie-theater-dots.onrender.com"
+    ".onrender.com", ".netlify.app", "localhost", "127.0.0.1", "movie-theater-dots.onrender.com"
 ]
 
 
@@ -117,7 +116,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'movie_theater.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
@@ -178,3 +176,29 @@ EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 FRONTEND_ORIGIN = os.getenv("FRONTEND_ORIGIN", "")
 CORS_ALLOWED_ORIGINS = [FRONTEND_ORIGIN] if FRONTEND_ORIGIN else []
 CSRF_TRUSTED_ORIGINS = [FRONTEND_ORIGIN] if FRONTEND_ORIGIN else []
+
+# Determine the environment (development or production)
+ENVIRONMENT = os.getenv("DJANGO_ENV", "development")
+
+if ENVIRONMENT == "development":
+    DEBUG = True
+    CORS_ALLOW_ALL_ORIGINS = False
+    CORS_ALLOWED_ORIGINS = [
+        "http://localhost:3000",  # React dev server
+    ]
+    CSRF_TRUSTED_ORIGINS = [
+        "http://localhost:3000",
+    ]
+    CSRF_COOKIE_SECURE = False
+    SESSION_COOKIE_SECURE = False
+else:  # Production settings
+    DEBUG = False
+    CORS_ALLOW_ALL_ORIGINS = False
+    CORS_ALLOWED_ORIGINS = [
+        "https://your-frontend-app.netlify.app",  # Replace with your frontend domain
+    ]
+    CSRF_TRUSTED_ORIGINS = [
+        "https://your-frontend-app.netlify.app",  # Replace with your frontend domain
+    ]
+    CSRF_COOKIE_SECURE = True
+    SESSION_COOKIE_SECURE = True
