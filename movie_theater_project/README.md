@@ -1,4 +1,8 @@
-🎬 Movie Theater Web App
+# 🎬 Movie Theater Web App
+
+[![CI](https://github.com/dalalEg/CS50W/actions/workflows/ci.yml/badge.svg)](https://github.com/dalalEg/CS50W/actions/workflows/main.yml)
+[![Code Style](https://img.shields.io/badge/code%20style-flake8-blue.svg)](https://flake8.pycqa.org/)
+[![Coverage](https://img.shields.io/badge/coverage-91%25-brightgreen.svg)](91%)
 
 A full-stack movie theater booking web application built with Django REST Framework and React, featuring real-time seat selection, user reviews, watchlists, rich search and filtering, notifications, and an admin management system for movies and showtimes
 
@@ -116,13 +120,17 @@ A full-stack movie theater booking web application built with Django REST Framew
 ---
 
 ## 🧪 Testing
+
 - ✅ **Django tests**: models, viewsets, API (bookings, movies, auth, reviews)  
 - ✅ **Seat/booking integrity**: seat reservation & double-booking prevention  
 - ✅ **Celery task tests** (unit): pending-reminder, auto-cancel, showtime-reminder  
-- ✅ **Celery integration tests** (with Redis broker, time windows) 
-- 🧪 **React component tests** (Jest + RTL) — *planned*  
-- ⚙️ **CI (Actions)**: run Python/Node tests, lint, coverage gates — *planned*
-## ✅ Running Tests & Coverage
+- ✅ **Celery integration tests** (with Redis broker, time windows)  
+- 🧪 **React component tests** (Jest + RTL) — *in progress* (MovieList, Profile, etc.)  
+- ⚙️ **CI (GitHub Actions)**: Python + Node job matrix, lint (flake8), test reports, coverage  
+
+### ✅ Running Tests & Coverage
+
+**Backend (Django + DRF)**
 ```bash
 # Inside the backend container
 python manage.py test
@@ -130,11 +138,8 @@ python manage.py test
 # Run coverage
 coverage run --source='.' manage.py test
 coverage report -m
-```
-- Coverage: ~91% of backend code
 
-- Ensures critical functionality works before deployment
-## ⚡ Celery & Redis
+``` 
 
 - Background task processing powered by Celery
 
