@@ -56,9 +56,12 @@ SECRET_KEY = 'django-insecure-#6ia8v+dyaago@ylz$!2a2ak$-1r!^nmyf_b%%@rey8f^ud*sh
 DEBUG = os.getenv("DJANGO_DEBUG", "False") == "True"
 
 ALLOWED_HOSTS = [
-    ".onrender.com", ".netlify.app", "localhost", "127.0.0.1", "movie-theater-dots.onrender.com"
+    ".onrender.com",
+    ".netlify.app",
+    "localhost",
+    "127.0.0.1",
+    "movie-theater-dots.onrender.com",
 ]
-
 
 AUTH_USER_MODEL = 'management.User'
 # Application definition
