@@ -18,9 +18,14 @@ import os
 USE_CELERY = os.getenv("USE_CELERY", "True").lower() == "true"
 
 if USE_CELERY:
-
-    CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", "redis://localhost:6379/0")
-    CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", "redis://localhost:6379/0")
+    # Use CI Redis if running in GitHub Actions
+    if os.getenv("GITHUB_ACTIONS") == "true":
+        CELERY_BROKER_URL = os.getenv("LOCAL_REDIS_URL", "redis://localhost:6379/0")
+        CELERY_RESULT_BACKEND = os.getenv("LOCAL_REDIS_URL", "redis://localhost:6379/0")
+    else:
+        # Otherwise use production Redis from env
+        CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL")
+        CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND")
 
     CELERY_BEAT_SCHEDULE = {
         'send-showtime-reminders-every-24-hours': {
@@ -32,6 +37,7 @@ else:
     CELERY_BROKER_URL = None
     CELERY_RESULT_BACKEND = None
     CELERY_BEAT_SCHEDULE = {}
+
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
