@@ -13,6 +13,10 @@ from .admin import BookingForm, BookingAdmin
 from .permissions import (IsReviewOwnerOrReadOnly, IsNotificationOwnerOrStaff,
                           IsWatchlistOwnerOrStaff)
 from .serializers import MovieSerializer, BookingSerializer
+from .tasks import (send_upcoming_showtime_reminders, send_pending_booking_reminder,
+                    delete_unpaid_booking, send_showtime_reminder)
+from unittest.mock import patch
+
 # Create your tests here.
 User = get_user_model()
 
@@ -1948,8 +1952,8 @@ class SerializerTests(TestCase):
                 self.booking.cost))
 
 
-"""
 class TaskTests(TestCase):
+    """Tests for tasks."""
 
     def setUp(self):
         self.user = User.objects.create_user(
@@ -1972,6 +1976,7 @@ class TaskTests(TestCase):
 
     @patch("management.tasks.Notification.objects.get_or_create")
     def test_send_upcoming_showtime_reminders(self, mock_get_or_create):
+        """Test that reminders are sent for upcoming showtimes."""
         send_upcoming_showtime_reminders()
         mock_get_or_create.assert_called_once_with(
             user=self.user, message=f"⏰ Reminder: your showtime for “{self.showtime.movie.title}”"
@@ -1979,20 +1984,23 @@ class TaskTests(TestCase):
 
     @patch("management.tasks.Notification.objects.get_or_create")
     def test_send_pending_booking_reminder(self, mock_get_or_create):
+        """Test that reminders are sent for pending bookings."""
         send_pending_booking_reminder(self.booking.id)
         mock_get_or_create.assert_called()
 
     @patch("management.tasks.Notification.objects.create")
     def test_delete_unpaid_booking(self, mock_create):
+        """Test that unpaid bookings are cancelled and notifications are sent."""
         delete_unpaid_booking(self.booking.id)
         mock_create.assert_called()
 
     @patch("management.tasks.Notification.objects.get_or_create")
     def test_send_showtime_reminder(self, mock_get_or_create):
+        """Test that reminders are sent for confirmed bookings."""
         self.booking.status = "Confirmed"
         self.booking.save()
         send_showtime_reminder(self.booking.id)
-        mock_get_or_create.assert_called() """
+        mock_get_or_create.assert_called()
 
 
 class MockRequest:
