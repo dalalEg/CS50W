@@ -46,7 +46,7 @@ jobs:
         ports:
           - 6379:6379
         options: >-
-          --requirepass ""  # no password if not needed
+          --network-alias redis
     defaults:
       run:
         working-directory: movie_theater_project/backend
