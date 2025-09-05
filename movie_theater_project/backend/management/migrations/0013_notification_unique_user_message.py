@@ -9,9 +9,4 @@ class Migration(migrations.Migration):
         ('management', '0012_payment_booking_payment_created_at_and_more'),
     ]
 
-    operations = [
-        migrations.AddConstraint(
-            model_name='notification',
-            constraint=models.UniqueConstraint(fields=('user', 'message'), name='unique_user_message'),
-        ),
-    ]
+  

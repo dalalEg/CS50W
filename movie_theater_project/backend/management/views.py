@@ -49,7 +49,6 @@ from rest_framework import status
 from django.db import transaction
 from django.db.models import F, Count, Sum, Avg
 from django.db.models.functions import TruncDate, ExtractWeekDay
-from django.contrib.auth.models import User
 from .models import (
     Movie,
     Genre,
@@ -72,6 +71,8 @@ from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.conf import settings
 from django.contrib.auth import get_user_model
+
+User = get_user_model()
 
 
 def index(request):
@@ -118,6 +119,7 @@ def register(request):
     """Register a new user."""
     # If the request method is POST, attempt to register the user
     if request.method == "POST":
+        print("Debug: Received POST request for registration")
         # Extract username, email, and password from the request
         username = request.POST["username"]
         email = request.POST["email"]
@@ -125,12 +127,14 @@ def register(request):
         confirmation = request.POST["confirmation"]
         # Ensure username, email, and password provided
         if not username or not password or not email or not confirmation:
+            print("Debug: Missing fields in registration")
             return render(request, "management/register.html", {
                 "message": "All fields are required."
             })
 
         # check that the email is valid
         if not email or '@' not in email or '.' not in email.split('@')[-1]:
+            print("Debug: Invalid email address")
             return render(request, "management/register.html", {
                 "message": "Invalid email address."
             })
@@ -138,11 +142,13 @@ def register(request):
         if User.objects.filter(
                 username=username).exists() or User.objects.filter(
                 email=email).exists():
+            print("Debug: Username or email already taken")
             return render(request, "management/register.html", {
                 "message": "Username or email already taken."
             })
         # Ensure password matches confirmation
         if password != confirmation:
+            print("Debug: Passwords do not match")
             return render(request, "management/register.html", {
                 "message": "Passwords must match."
             })
@@ -151,10 +157,12 @@ def register(request):
             user = User.objects.create_user(username, email, password)
             user.save()
         except IntegrityError:
+            print("Debug: Username already taken")
             return render(request, "management/register.html", {
                 "message": "Username already taken."
             })
         login(request, user)
+        print("Debug: User registered successfully")
         return HttpResponseRedirect(reverse("index", args=(user.username,)))
     else:
         return render(request, "management/register.html")
@@ -220,14 +228,19 @@ def api_register(request):
     email = request.data.get('email')
     password = request.data.get('password')
     confirmation = request.data.get('confirmation')
+    print("Debug: Received POST request for registration")
 
     if not username or not email or not password or not confirmation:
+        print("Debug: Missing fields in API registration")
         return Response({'error': 'All fields are required.'}, status=400)
     if password != confirmation:
+        print("Debug: Passwords do not match")
         return Response({'error': 'Passwords must match.'}, status=400)
     if User.objects.filter(username=username).exists():
+        print("Debug: Username already taken")
         return Response({'error': 'Username already taken.'}, status=400)
     if User.objects.filter(email=email).exists():
+        print("Debug: Email already taken")
         return Response({'error': 'Email already taken.'}, status=400)
 
     user = User.objects.create_user(
@@ -235,7 +248,7 @@ def api_register(request):
         email=email,
         password=password)
     login(request, user)
-
+    print("Debug: User registered successfully")
     # Return logged-in user info (like /api/auth/user/)
     return Response({
         'message': 'Registration successful.',

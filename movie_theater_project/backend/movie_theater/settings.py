@@ -96,11 +96,16 @@ MEDIA_URL = "/media/"
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",  # React dev server
     "http://react_app:3000",  # React container
+    "https://movie-theater-dots.onrender.com",
+    "https://68b9db2a7e02be00087d3838--dali-movie-theater.netlify.app",
+
 ]
 # Trust the React origin for CSRF purposes
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:3000",
     "https://movie-theater-dots.onrender.com",
+    "https://68b9db2a7e02be00087d3838--dali-movie-theater.netlify.app",
+
 ]
 CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_SECURE = True
@@ -131,12 +136,25 @@ WSGI_APPLICATION = 'movie_theater.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+
+if os.environ.get("RENDER") == "true":  # running on Render
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": os.environ["POSTGRES_DB"],
+            "USER": os.environ["POSTGRES_USER"],
+            "PASSWORD": os.environ["POSTGRES_PASSWORD"],
+            "HOST": os.environ["POSTGRES_HOST"],
+            "PORT": os.environ["POSTGRES_PORT"],
+        }
     }
-}
+else:  # local development
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
+    }
 
 
 # Password validation
