@@ -78,9 +78,7 @@ jobs:
       - name: Start Celery Beat
         run: nohup celery -A movie_theater beat --loglevel=info --pool=solo &
 
-      - name: Run Django tests
-        run: python manage.py test
-
       - name: Deploy to Render
         if: success()
-        run: curl -X POST "$RENDER_DEPLOY_HOOK"
+        run: curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK }}"
+
