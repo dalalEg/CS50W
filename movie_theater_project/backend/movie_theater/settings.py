@@ -15,15 +15,23 @@ from pickle import TRUE
 from celery.schedules import crontab
 import os
 
-CELERY_BEAT_SCHEDULE = {
-    'send-showtime-reminders-every-24-hours': {
-        'task': 'management.tasks.send_upcoming_showtime_reminders',
-        'schedule': crontab(hour=0, minute=0),  # every 24 hours
-    },
-}
+USE_CELERY = os.getenv("USE_CELERY", "false").lower() == "true"
 
-CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", "redis://localhost:6379/0")
-CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", "redis://localhost:6379/0")
+if USE_CELERY:
+
+    CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", "redis://localhost:6379/0")
+    CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", "redis://localhost:6379/0")
+
+    CELERY_BEAT_SCHEDULE = {
+        'send-showtime-reminders-every-24-hours': {
+            'task': 'management.tasks.send_upcoming_showtime_reminders',
+            'schedule': crontab(hour=0, minute=0),
+        },
+    }
+else:
+    CELERY_BROKER_URL = None
+    CELERY_RESULT_BACKEND = None
+    CELERY_BEAT_SCHEDULE = {}
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
