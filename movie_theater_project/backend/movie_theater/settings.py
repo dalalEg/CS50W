@@ -11,7 +11,6 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
-from pickle import TRUE
 from celery.schedules import crontab
 import os
 
@@ -38,8 +37,6 @@ else:
     CELERY_RESULT_BACKEND = None
     CELERY_BEAT_SCHEDULE = {}
 
-
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -56,12 +53,9 @@ SECRET_KEY = 'django-insecure-#6ia8v+dyaago@ylz$!2a2ak$-1r!^nmyf_b%%@rey8f^ud*sh
 DEBUG = os.getenv("DJANGO_DEBUG", "False") == "True"
 
 ALLOWED_HOSTS = [
-    ".onrender.com",
-    ".netlify.app",
-    "localhost",
-    "127.0.0.1",
-    "movie-theater-dots.onrender.com",
+    "*",     # add Render's internal health check IP
 ]
+
 
 AUTH_USER_MODEL = 'management.User'
 # Application definition
@@ -106,9 +100,10 @@ CORS_ALLOWED_ORIGINS = [
 # Trust the React origin for CSRF purposes
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:3000",
+    "https://movie-theater-dots.onrender.com",
 ]
-CSRF_COOKIE_SECURE = TRUE
-SESSION_COOKIE_SECURE = TRUE
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SAMESITE = None
 SESSION_COOKIE_SAMESITE = None
 # In development, allow all origins for CORS
