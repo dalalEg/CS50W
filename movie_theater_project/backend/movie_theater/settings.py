@@ -15,7 +15,7 @@ from pickle import TRUE
 from celery.schedules import crontab
 import os
 
-USE_CELERY = os.getenv("USE_CELERY", "false").lower() == "true"
+USE_CELERY = os.getenv("USE_CELERY", "True").lower() == "true"
 
 if USE_CELERY:
 
