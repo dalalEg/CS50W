@@ -49,6 +49,7 @@ else:  # production
         "68b9db2a7e02be00087d3838--dali-movie-theater.netlify.app",
     ]
 
+
 CORS_ALLOW_CREDENTIALS = True
 CSRF_COOKIE_SAMESITE = None
 SESSION_COOKIE_SAMESITE = None
@@ -56,11 +57,24 @@ SESSION_COOKIE_SAMESITE = None
 # ------------------------------------------------------------------------------
 # Database
 # ------------------------------------------------------------------------------
-DATABASES = {
-    "default": dj_database_url.config(
-        default=os.getenv("DATABASE_URL", f"sqlite:///{BASE_DIR / 'db.sqlite3'}")
-    )
-}
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+if os.getenv("RENDER", "false") == "true":
+    # On Render → Postgres
+    DATABASES = {
+        "default": dj_database_url.config(
+            default=os.getenv("DATABASE_URL")
+        )
+    }
+else:
+    # Local (even inside Docker) → SQLite
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
+    }
 
 # ------------------------------------------------------------------------------
 # Celery
