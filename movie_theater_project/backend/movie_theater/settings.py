@@ -10,12 +10,35 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
-from pathlib import Path
-from celery.schedules import crontab
 import os
+from pathlib import Path
+import dj_database_url
+from celery.schedules import crontab
 
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+
+# Environment
+ENVIRONMENT = os.getenv("DJANGO_ENV", "development")
+DEBUG = os.getenv("DEBUG", "False").lower() == "true"
+SECRET_KEY = os.getenv("SECRET_KEY", "dev-secret-key")
+
+
+# Hosts & CSRF
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "localhost").split(",")
+CSRF_TRUSTED_ORIGINS = os.getenv("CSRF_TRUSTED_ORIGINS", "http://localhost:3000").split(",")
+
+
+# Database
+DATABASES = {
+    "default": dj_database_url.config(
+        default=os.getenv("DATABASE_URL", f"sqlite:///{BASE_DIR / 'db.sqlite3'}")
+    )
+}
+
+
+# Celery
 USE_CELERY = os.getenv("USE_CELERY", "True").lower() == "true"
-
 if USE_CELERY:
     # Use CI Redis if running in GitHub Actions
     if os.getenv("GITHUB_ACTIONS") == "true":
@@ -23,8 +46,8 @@ if USE_CELERY:
         CELERY_RESULT_BACKEND = os.getenv("LOCAL_REDIS_URL", "redis://localhost:6379/0")
     else:
         # Otherwise use production Redis from env
-        CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL")
-        CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND")
+        CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", "redis://localhost:6379/0")
+        CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", "redis://localhost:6379/0")
 
     CELERY_BEAT_SCHEDULE = {
         'send-showtime-reminders-every-24-hours': {
@@ -36,9 +59,6 @@ else:
     CELERY_BROKER_URL = None
     CELERY_RESULT_BACKEND = None
     CELERY_BEAT_SCHEDULE = {}
-
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 # Quick-start development settings - unsuitable for production
@@ -70,7 +90,6 @@ INSTALLED_APPS = [
     'management.apps.ManagementConfig',  # Include the management app
     'rest_framework',  # Django REST framework for API support
     'corsheaders',  # For handling CORS
-
 ]
 
 MIDDLEWARE = [
@@ -132,29 +151,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'movie_theater.wsgi.application'
-
-# Database
-# https://docs.djangoproject.com/en/5.1/ref/settings/#databases
-
-
-if os.environ.get("RENDER") == "true":  # running on Render
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.postgresql",
-            "NAME": os.environ["POSTGRES_DB"],
-            "USER": os.environ["POSTGRES_USER"],
-            "PASSWORD": os.environ["POSTGRES_PASSWORD"],
-            "HOST": os.environ["POSTGRES_HOST"],
-            "PORT": os.environ["POSTGRES_PORT"],
-        }
-    }
-else:  # local development
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.sqlite3",
-            "NAME": BASE_DIR / "db.sqlite3",
-        }
-    }
 
 
 # Password validation
@@ -225,10 +221,12 @@ else:  # Production settings
     DEBUG = False
     CORS_ALLOW_ALL_ORIGINS = False
     CORS_ALLOWED_ORIGINS = [
-        "https://your-frontend-app.netlify.app",  # Replace with your frontend domain
+            "https://68b9db2a7e02be00087d3838--dali-movie-theater.netlify.app",
     ]
     CSRF_TRUSTED_ORIGINS = [
-        "https://your-frontend-app.netlify.app",  # Replace with your frontend domain
+        "https://68b9db2a7e02be00087d3838--dali-movie-theater.netlify.app",
     ]
     CSRF_COOKIE_SECURE = True
     SESSION_COOKIE_SECURE = True
+
+CELERY_WORKER_CANCEL_LONG_RUNNING_TASKS_ON_CONNECTION_LOSS = False

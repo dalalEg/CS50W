@@ -1,3 +1,4 @@
+version: "3.9"
 services:
   backend:
     build: ./backend
@@ -8,7 +9,7 @@ services:
     ports:
       - "8000:8000"
     env_file:
-      - ./backend/.env
+      - .env.local
     depends_on:
       - db
       - redis
@@ -24,6 +25,8 @@ services:
     tty: true
     depends_on:
       - backend
+    env_file:
+      - .env.local
     networks:
       - app_network
 
