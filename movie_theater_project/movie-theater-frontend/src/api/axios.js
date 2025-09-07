@@ -1,8 +1,11 @@
 import axios from 'axios';
 import Cookies from 'js-cookie';
+const API_URL = process.env.REACT_APP_API_URL; // reads from .env.local or Netlify env
+
+
 
 export const api = axios.create({
-  baseURL: 'http://localhost:8000/',
+  baseURL: API_URL,
   withCredentials: true,   // send session cookie
   headers: {
     'Content-Type': 'application/json',

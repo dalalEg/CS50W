@@ -46,7 +46,7 @@ else:  # production
     SESSION_COOKIE_SECURE = True
     ALLOWED_HOSTS = [
         "movie-theater-dots.onrender.com",
-        "68b9db2a7e02be00087d3838--dali-movie-theater.netlify.app",
+        "https://dali-movie-theater.netlify.app",
     ]
 
 
