@@ -58,14 +58,16 @@ SESSION_COOKIE_SAMESITE = None
 # ------------------------------------------------------------------------------
 # Database
 # ------------------------------------------------------------------------------
-
+# Use Postgres on Render.com, SQLite locally (even in Docker)
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 if os.getenv("RENDER", "false") == "true":
     # On Render → Postgres
     DATABASES = {
         "default": dj_database_url.config(
-            default=os.getenv("DATABASE_URL")
+            default=os.getenv("DATABASE_URL"),
+            conn_max_age=600,  # optional
+            ssl_require=True   # ensure SSL
         )
     }
 else:

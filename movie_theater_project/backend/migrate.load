@@ -1,0 +1,8 @@
+LOAD DATABASE
+     FROM sqlite:///data/db.sqlite3
+     INTO postgresql://movies_db_961g_user:0qVRXRSKUXyOMSAQ9ijSd8QV1WWpGDiS@dpg-d2ssj2n5r7bs73bmpba0-a.oregon-postgres.render.com/movies_db_961g?sslmode=require
+
+ WITH include no drop, create tables, create indexes
+ SET work_mem to '16MB', maintenance_work_mem to '512 MB'
+ BEFORE LOAD DO
+   $$ DROP SCHEMA public CASCADE; CREATE SCHEMA public; $$;
