@@ -18,7 +18,7 @@ export default function AdminDashboard() {
   if (!data) return <p>No data available</p>;
   
   const { users, bookings, revenue, movies, service_reviews } = data;
-  const { funnel } = users;
+  const { funnel = {} } = users || {};
   const {
     repeat_customers,
     one_time_customers,

@@ -28,7 +28,8 @@ LOCAL_ORIGINS = [
 
 PRODUCTION_ORIGINS = [
     "https://movie-theater-dots.onrender.com",  # Backend (Render)
-    "https://68b9db2a7e02be00087d3838--dali-movie-theater.netlify.app",  # Netlify frontend
+    "https://68b9db2a7e02be00087d3838--dali-movie-theater.netlify.app",  # Netlify frontend4
+    "https://dali-movie-theater.netlify.app",  # Netlify frontend
 ]
 
 if ENVIRONMENT == "development":
