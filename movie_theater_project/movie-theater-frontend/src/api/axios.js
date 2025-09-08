@@ -1,6 +1,7 @@
 import axios from 'axios';
 import Cookies from 'js-cookie';
-const API_URL = process.env.REACT_APP_API_URL; // reads from .env.local or Netlify env
+
+const API_URL = process.env.REACT_APP_API_URL || 'https://movie-theater-dots.onrender.com/api'; // Fallback to production URL
 
 
 

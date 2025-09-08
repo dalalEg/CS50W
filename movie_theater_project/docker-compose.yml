@@ -1,4 +1,3 @@
-version: "3.9"
 services:
   backend:
     build: ./backend
@@ -58,7 +57,7 @@ services:
       dockerfile: Dockerfile
     command: celery -A movie_theater worker --loglevel=info
     env_file:
-      - ./backend/.env
+      - .env.local
     depends_on:
       - redis
       - backend   # make sure Django is up
@@ -72,7 +71,7 @@ services:
       dockerfile: Dockerfile
     command: celery -A movie_theater beat --loglevel=info
     env_file:
-      - ./backend/.env
+      - .env.local
     depends_on:
       - redis
       - backend   # make sure Django is up

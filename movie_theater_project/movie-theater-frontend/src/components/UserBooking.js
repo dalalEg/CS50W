@@ -2,11 +2,12 @@ import React, {useState, useEffect} from "react";
 import {useParams, Link} from "react-router-dom";
 import {fetchCurrentUser} from '../api/user';
 import { fetchBookingsByUser } from "../api/booking";
+import { useAuth }          from '../contexts/AuthContext';
 
 import '../styles/UserBooking.css'; 
 const UserBooking = () => {
-  const { userId } = useParams();
-  const [user, setUser] = useState(null);
+  const {user} = useAuth();
+  const userId = user?.id;
   const [bookings, setBookings] = useState([]);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);

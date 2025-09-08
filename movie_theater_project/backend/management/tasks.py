@@ -2,6 +2,7 @@ from celery import shared_task
 from django.contrib.auth import get_user_model
 from django.utils.timezone import now, timedelta
 from .models import Booking, Notification
+from redis.exceptions import ConnectionError
 
 User = get_user_model()
 
@@ -11,28 +12,32 @@ def send_upcoming_showtime_reminders():
     """
     Send reminders for all showtimes starting within the next 24 hours.
     """
-    window_start = now()
-    window_end = window_start + timedelta(hours=24)
+    try:
+        window_start = now()
+        window_end = window_start + timedelta(hours=24)
 
-    bookings = Booking.objects.filter(
-        status__in=["Confirmed", "Pending"],
-        showtime__start_time__range=(window_start, window_end),
-    )
+        bookings = Booking.objects.filter(
+            status__in=["Confirmed", "Pending"],
+            showtime__start_time__range=(window_start, window_end),
+        )
 
-    print(f"Debug: Bookings queryset - {bookings}")
-    count = 0
-    for booking in bookings:
-        try:
-            obj, created = Notification.objects.get_or_create(
-                user=booking.user, message=f"⏰ Reminder: your showtime for “{booking.showtime.movie.title}” "
-                f"is at {booking.showtime.start_time.strftime('%Y-%m-%d %H:%M')}."
-            )
-            if created:
-                count += 1
-        except Exception as e:
-            print(f"Error: Exception occurred during get_or_create - {e}")
+        print(f"Debug: Bookings queryset - {bookings}")
+        count = 0
+        for booking in bookings:
+            try:
+                obj, created = Notification.objects.get_or_create(
+                    user=booking.user, message=f"⏰ Reminder: your showtime for “{booking.showtime.movie.title}” "
+                    f"is at {booking.showtime.start_time.strftime('%Y-%m-%d %H:%M')}."
+                )
+                if created:
+                    count += 1
+            except Exception as e:
+                print(f"Error: Exception occurred during get_or_create - {e}")
 
-    return f"Reminders sent for {count} bookings."
+        return f"Reminders sent for {count} bookings."
+    except ConnectionError as e:
+        print(f"Error: Redis connection issue - {e}")
+        return "Failed to send reminders due to Redis connection issues."
 
 
 @shared_task(bind=True, max_retries=3, default_retry_delay=60)

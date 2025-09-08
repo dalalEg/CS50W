@@ -14,23 +14,30 @@ function Register() {
   const navigate = useNavigate();
   const { register } = useAuth();
   const { add: addNotif } = useNotifications();
-
+  const [submitting, setSubmitting] = useState(false);
   const handleChange = e => {
     setFormData(f => ({ ...f, [e.target.name]: e.target.value }));
   };
 
   const handleSubmit = async e => {
       e.preventDefault();
+      if (submitting) return; // prevent double submits
+      setSubmitting(true);
+      console.log("Submitting registration", formData.username); // Log submission
+      setMessage('');
       if (formData.password !== formData.confirmation) {
         setMessage("Passwords don't match");
+        setSubmitting(false); // Reset submitting state
         return;
       }
       try {
         await register(formData);
-        addNotif('Welcome ' + formData.username +'! Please Confirm Your Email Address To get started.');
+        addNotif('Welcome ' + formData.username + '! Please Confirm Your Email Address To get started.');
         navigate('/');
       } catch {
         setMessage('Registration failed');
+      } finally {
+        setSubmitting(false); // Ensure submitting state is reset
       }
   };
 
@@ -81,8 +88,8 @@ function Register() {
               onChange={handleChange}
               required
             />
-            <button className="btn btn-primary w-100" type="submit">
-              Register
+            <button className="btn btn-primary w-100" type="submit" disabled={submitting}>
+              {submitting ? "Registering..." : "Register"}
             </button>
           </form>
 

@@ -23,9 +23,11 @@ export function AuthProvider({ children }) {
   };
 
   const register = async data => {
-    await api.post('/api/auth/register/', data);
-    const r = await api.get('/api/auth/user/');
-    setUser(r.data);
+    const res = await api.post('/api/auth/register/', data);
+    if (res.status === 200 || res.status === 201) {
+      setUser(res.data.user);
+  }
+
   };
 
   const logout = async () => {
