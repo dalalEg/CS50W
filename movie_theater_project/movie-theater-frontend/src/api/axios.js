@@ -1,23 +1,21 @@
+// axios.js
 import axios from 'axios';
 import Cookies from 'js-cookie';
 
-const API_URL = process.env.REACT_APP_API_URL || 'https://movie-theater-dots.onrender.com/api'; // Fallback to production URL
-
-
+const API_URL = '/api'; // <-- use relative path so Netlify proxy kicks in
 
 export const api = axios.create({
   baseURL: API_URL,
-  withCredentials: true,   // send session cookie
+  withCredentials: true,   // session cookies go through Netlify to Render
   headers: {
     'Content-Type': 'application/json',
-    'X-CSRFToken': Cookies.get('csrftoken'),  // Django CSRF protection
+    'X-CSRFToken': Cookies.get('csrftoken'),
   }
-  
 });
 
 api.defaults.xsrfCookieName = 'csrftoken';
 api.defaults.xsrfHeaderName = 'X-CSRFTOKEN';
-// before each request, add the CSRF token header
+
 api.interceptors.request.use(config => {
   const token = Cookies.get('csrftoken');
   if (token) {

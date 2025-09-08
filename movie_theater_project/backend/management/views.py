@@ -217,7 +217,7 @@ def api_login(request):
     user = authenticate(request, username=username, password=password)
     if user is not None:
         login(request, user)
-        return Response({'message': 'Login successful.'})
+        return Response({'message': 'Login successful.'}, status=200)
     else:
         return Response({'error': 'Invalid username or password.'}, status=401)
 
