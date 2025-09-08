@@ -1,6 +1,5 @@
 import React, {useState, useEffect} from "react";
-import {useParams, Link} from "react-router-dom";
-import {fetchCurrentUser} from '../api/user';
+import { Link} from "react-router-dom";
 import { fetchBookingsByUser } from "../api/booking";
 import { useAuth }          from '../contexts/AuthContext';
 
@@ -14,24 +13,16 @@ const UserBooking = () => {
 
 
  useEffect(() => {
-    fetchCurrentUser()
-      .then(resp => {
-        setUser(resp.data);
-        if (!resp.data.email_verified) {
-          setError("Please verify your email to access your bookings.");
-          setLoading(false);
-          return;
-        }
-        return fetchBookingsByUser(userId);
-      })
-      .then(resp => {
-        setBookings(resp.data);
-        setLoading(false);
-      })
-      .catch(() => {
-        setError("Failed to load user profile");
-        setLoading(false);
-      });
+    if (!userId) {
+      setBookings([]);
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
+    fetchBookingsByUser(userId)
+      .then(r => setBookings(r.data))
+      .catch(() => setError('Failed to load bookings'))
+      .finally(() => setLoading(false));
   }, [userId]);
 
   if (!user) return <p>Loading user information...</p>;
