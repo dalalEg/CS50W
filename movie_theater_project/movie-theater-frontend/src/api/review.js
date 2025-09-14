@@ -5,7 +5,8 @@ export function createReview(movieId, { content, rating, anonymous }) {
   return api.post(`/api/movies/${movieId}/reviews/`, {
     content,
     rating,
-    anonymous
+    anonymous,
+    movie_id: movieId
   });
 }
 export function fetchReviewsByMovie(movieId) {

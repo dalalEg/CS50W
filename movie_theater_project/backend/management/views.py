@@ -42,7 +42,8 @@ from .serializers import (
     UserSerializer,
     AuditoriumSerializer,
     RateServiceSerializer,
-    FavouriteSerializer)
+    FavouriteSerializer,
+    NewsSerializer)
 from rest_framework import serializers
 from django.shortcuts import get_object_or_404
 from rest_framework import status
@@ -66,7 +67,8 @@ from .models import (
     Role,
     Theater,
     RateService,
-    Favourite)
+    Favourite,
+    News)
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.conf import settings
@@ -417,6 +419,9 @@ class MovieViewSet(viewsets.ModelViewSet):
         serializer = ReviewSerializer(
             data=request.data, context={
                 'request': request})
+        if not serializer.is_valid():
+            print(serializer.errors)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         serializer.is_valid(raise_exception=True)
         serializer.save(user=request.user, movie_id=pk)
         # Create a notification for the user
@@ -526,6 +531,14 @@ class ShowtimeViewSet(viewsets.ModelViewSet):
         showtime = get_object_or_404(Showtime, pk=pk)
         seats = Seat.objects.filter(showtime=showtime)
         serializer = SeatSerializer(seats, many=True)
+        return Response(serializer.data)
+
+    @action(detail=True, methods=['get'], url_path='available_seats')
+    def get_available_seats(self, request, pk=None):
+        """Custom action to get available seats for a specific showtime."""
+        showtime = get_object_or_404(Showtime, pk=pk)
+        available_seats = Seat.objects.filter(showtime=showtime, is_booked=False)
+        serializer = SeatSerializer(available_seats, many=True)
         return Response(serializer.data)
 
 
@@ -1081,3 +1094,11 @@ class AdminDashboardView(APIView):
                 "by_theater": service_by_theater,
             },
         })
+
+
+class NewsViewSet(viewsets.ModelViewSet):
+    queryset = News.objects.all().order_by('-published_at')
+    serializer_class = NewsSerializer
+    permission_classes = [AllowAny]
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    search_fields = ['title', 'content']

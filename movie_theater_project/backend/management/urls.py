@@ -21,6 +21,7 @@ router.register(r'watchlist', views.WatchlistViewSet)
 router.register(r'rate-services', views.RateServiceViewSet)
 router.register(r'payments', views.PaymentViewSet)
 router.register(r'favorites', views.FavouriteViewSet)
+router.register(r'news', views.NewsViewSet)
 
 # Add other viewsets as needed
 urlpatterns = [

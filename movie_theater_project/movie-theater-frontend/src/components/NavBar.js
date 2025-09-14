@@ -12,6 +12,7 @@ export default function NavBar() {
             <Link to="/" className="navbar-link">All Movies</Link>
             <Link to="/showtimes" className="navbar-link">Available Showtimes</Link>
             <Link to="/theaters" className="navbar-link">Our Theaters</Link>
+            <Link to="/news" className="navbar-link">Latest News</Link>
 
         {!user && (
             <>

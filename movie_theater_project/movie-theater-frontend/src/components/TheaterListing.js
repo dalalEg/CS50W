@@ -29,15 +29,35 @@ const TheaterListing = () => {
         if (isMounted) setError(err.message);
       });
     return () => { isMounted = false; };
-  }, []);  // only run once
+  }, []); 
   useEffect(() => {
     if (location) {
+      let isMounted = true;
       const timer = setTimeout(() => {
         searchTheaters(location)
-          .then(res => setTheaters(res.data))
-          .catch(err => setError(err.message));
+          .then(res => {
+            const list = res.data;
+            // fetch auditoriums in parallel for each theater
+            return Promise.all(
+              list.map(t =>
+                fetchAuditoriumByTheater(t.id)
+                  .then(r => ({ ...t, auditoriums: r.data }))
+              )
+            );
+          })
+          .then(withAuditoriums => {
+            if (isMounted) setTheaters(withAuditoriums);
+          })
+          .catch(err => {
+            if (isMounted) setError(err.message);
+          });
       }, 300);
       return () => clearTimeout(timer);
+  }else{
+    // If location is cleared, fetch all theaters again
+      fetchTheaters()
+        .then(res => setTheaters(res.data))
+        .catch(err => setError(err.message)); 
     }
   }, [location]);
   if (error)               return <p className="error">{error}</p>;

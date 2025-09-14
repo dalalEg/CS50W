@@ -53,9 +53,19 @@ function MovieDetail() {
   }, [currentUser, id]);
 
   const handleAddOrRemoveFromWatchlist = () => {
+    if (!currentUser) {
+      setError("Please log in to manage your watchlist.");
+      return;
+    }
     if (isInWatchlist) {
+       if (!currentUser) {
+      setError("Please log in to manage your watchlist.");
+      return;
+    }
       removeFromWatchlist(watchlistEntryId)
+
         .then(() => {
+          
           setIsInWatchlist(false);
           setWatchlistEntryId(null);
           reloadNotifs();
@@ -65,7 +75,12 @@ function MovieDetail() {
           setError("Failed to remove from watchlist");
         });
     } else {
+       if (!currentUser) {
+      setError("Please log in to manage your watchlist.");
+      return;
+    }
       addToWatchlist(id)
+    
         .then(resp => {
           setIsInWatchlist(true);
           setWatchlistEntryId(resp.data.id);
@@ -116,7 +131,7 @@ function MovieDetail() {
           </p>
         )}
         <p><strong>Duration:</strong> {movie.duration} minutes</p>
-        <p><strong>Genres:</strong> {movie.genre_list}</p>
+        <p><strong>Genres:</strong> {movie.genres.map(genre => genre.name).join(", ")}</p>
         <p><strong>Director:</strong>{' '}
           <Link to={`/directors/${movie.director?.id}`} className="director-link">
             {movie.director?.name}
@@ -146,12 +161,13 @@ function MovieDetail() {
        
 
         <p><strong>Available Showtimes:</strong></p>
-         <button
-                onClick={handleAddOrRemoveFromWatchlist}
-                className='watchlist-button'
-              >
-                {isInWatchlist ? 'Already in Watchlist' : 'Add to Watchlist'}
-              </button>
+        {currentUser ? (
+          <button className="watchlist-button" onClick={handleAddOrRemoveFromWatchlist}>
+            {isInWatchlist ? "Remove from Watchlist" : "Add to Watchlist"}
+          </button>
+        ) : (
+          <p>Please log in to manage your watchlist.</p>
+        )}
         <ul>
           {showtimes.length === 0 ? (
             <li className='no-showtimes'>No showtimes available you can add this movie to your watchlist:

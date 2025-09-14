@@ -31,6 +31,7 @@ import ServiceReview from './components/ServiceReview';
 import NotificationsList from './components/Notifications';
 import PrivateRoute from './components/PrivateRoute';
 import AdminDashboard from './components/AdminDashboard';
+import News from './components/News';
 import { useAuth } from './contexts/AuthContext';
 
 // Main App component
@@ -82,6 +83,7 @@ function App() {
           <Route path="/admin/*" element={<AdminPanel />} />
           <Route path="/user/edit/:id" element={<PrivateRoute><EditUser /></PrivateRoute>} />
           <Route path="/serviceReview/:bookingId" element={<PrivateRoute><ServiceReview /></PrivateRoute>} />
+          <Route path="/news" element={<News />} />
           <Route path="/notifications" element={<PrivateRoute><NotificationsList /></PrivateRoute>} />
           <Route path="/admin/dashboard" element={<PrivateRoute>{user?.is_staff ? <AdminDashboard /> : <Navigate to="/login" />}</PrivateRoute>} />
         </Routes>

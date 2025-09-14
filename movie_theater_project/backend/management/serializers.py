@@ -2,7 +2,7 @@ from rest_framework import serializers
 from .models import (
     User, Movie, Booking, Showtime, Seat,
     Genre, Review, Notification, Actor, Director, Producer, Payment,
-    watchlist, Role, Auditorium, Theater, RateService, Favourite
+    watchlist, Role, Auditorium, Theater, RateService, Favourite, News
 )
 from rest_framework.validators import UniqueValidator, UniqueTogetherValidator
 from django.db import transaction
@@ -105,7 +105,7 @@ class MovieSerializer(serializers.ModelSerializer):
 
     def get_genres(self):
         return ", ".join([genre.name for genre in self.genre.all()]
-                         ) if self.genre.count() else "No genres"
+                         ) if self.genre.exists() else "No genres"
 
 
 class TheaterSerializer(serializers.ModelSerializer):
@@ -396,3 +396,9 @@ class FavouriteSerializer(serializers.ModelSerializer):
         model = Favourite
         fields = ['id', 'user', 'movie', 'added_at']
         read_only_fields = ['id', 'user', 'added_at']
+
+
+class NewsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = News
+        fields = ['id', 'title', 'content', 'published_at']

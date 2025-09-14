@@ -27,7 +27,8 @@ export default function Booking() {
 
   const totalCost = seats.reduce((sum, seat) => sum + Number(seat.price), 0);
 
-const handleConfirm = () => {
+const handleConfirm = async e => {
+  e.preventDefault();
   if (loading) return;
   setLoading(true);
   const seatIds = seats.map(s => s.id);

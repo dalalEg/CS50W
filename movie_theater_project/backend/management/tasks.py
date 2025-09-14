@@ -74,6 +74,15 @@ def delete_unpaid_booking(self, booking_id):
             "and has been automatically cancelled."
         )
     )
+
+    # Mark seats as available and increase available seats
+    for seat in booking.seats.all():
+        seat.is_booked = False
+        seat.save(update_fields=['is_booked'])
+
+    booking.showtime.available_seats += len(booking.seats.all())
+    booking.showtime.save(update_fields=['available_seats'])
+
     return f"Booking {booking_id} cancelled"
 
 
@@ -90,3 +99,65 @@ def send_showtime_reminder(self, booking_id):
             f"is on {showtime.start_time.strftime('%Y-%m-%d %H:%M')}."
         )
     )
+
+
+@shared_task
+def update_booking_status_after_showtime():
+    """
+    Update booking statuses after the showtime ends:
+    - Mark confirmed bookings as attended.
+    - Cancel pending bookings.
+    """
+    try:
+        current_time = now()
+
+        # Mark confirmed bookings as attended
+        confirmed_bookings = Booking.objects.filter(
+            status='Confirmed',
+            attended=False,
+            showtime__end_time__lte=current_time
+        )
+        for booking in confirmed_bookings:
+            booking.attended = True
+            booking.save(update_fields=['attended'])
+            Notification.objects.create(
+                user=booking.user,
+                message=(
+                    f"✅ Thank you for attending the showtime for “{booking.showtime.movie.title}” on "
+                    f"{booking.showtime.start_time.strftime('%Y-%m-%d %H:%M')}!"
+                    f"You can leave a review for our service which helps us improve."
+                    f"By visiting the booking details page."
+                )
+            )
+
+        # Cancel pending bookings
+        pending_bookings = Booking.objects.filter(
+            status='Pending',
+            showtime__end_time__lte=current_time
+        )
+        for booking in pending_bookings:
+            booking.status = 'Cancelled'
+            booking.save(update_fields=['status'])
+            Notification.objects.create(
+                user=booking.user,
+                message=(
+                    f"❌ Your booking for “{booking.showtime.movie.title}” was not confirmed in time "
+                    f"and has been automatically cancelled."
+                )
+            )
+
+            # Mark seats as available and increase available seats
+            for seat in booking.seats.all():
+                seat.is_available = True
+                seat.save(update_fields=['is_available'])
+
+            booking.showtime.available_seats += len(booking.seats.all())
+            booking.showtime.save(update_fields=['available_seats'])
+
+        return (
+            f"Updated statuses: {confirmed_bookings.count()} bookings marked as attended, "
+            f"{pending_bookings.count()} bookings cancelled."
+        )
+    except Exception as e:
+        print(f"Error: Exception occurred while updating booking statuses - {e}")
+        return "Failed to update booking statuses due to an error."
