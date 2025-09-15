@@ -40,6 +40,7 @@ urlpatterns = [
     path('api/auth/logout/', views.api_logout, name='api-logout'),
     path('api/auth/user/', views.api_user_profile, name='api-current-user'),
     path('api/auth/register/', views.api_register, name='api-register'),
+    path("csrf/", views.get_csrf, name="get-csrf"),
     path('api/', include(router.urls)),  # Include the API URLs
 
 ]

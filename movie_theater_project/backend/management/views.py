@@ -73,12 +73,18 @@ from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.conf import settings
 from django.contrib.auth import get_user_model
-
+from django.views.decorators.csrf import ensure_csrf_cookie
+from django.http import JsonResponse
 User = get_user_model()
 
 
 def index(request):
     return render(request, 'management/index.html')
+
+
+@ensure_csrf_cookie
+def get_csrf(request):
+    return JsonResponse({"csrfToken": request.COOKIES.get("csrftoken")})
 
 
 @csrf_exempt

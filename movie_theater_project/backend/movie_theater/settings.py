@@ -52,8 +52,8 @@ else:  # production
 
 
 CORS_ALLOW_CREDENTIALS = True
-CSRF_COOKIE_SAMESITE = "None"
-SESSION_COOKIE_SAMESITE = "None"
+CSRF_COOKIE_SAMESITE = None
+SESSION_COOKIE_SAMESITE = None
 
 # ------------------------------------------------------------------------------
 # Database

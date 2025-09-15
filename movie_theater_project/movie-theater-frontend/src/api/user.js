@@ -1,5 +1,5 @@
 // src/api/movies.js
-import { api } from './axios';
+import { api ,fetchCSRFToken} from './axios';
 
 // GET current logged in user
 export function fetchCurrentUser() {
@@ -7,15 +7,18 @@ export function fetchCurrentUser() {
 }
 
 // POST login
-export function apiLogin(creds) {
-  return api.post('api/auth/login/', creds);
+export async function apiLogin(creds) {
+  await fetchCSRFToken();
+  return await api.post('api/auth/login/', creds);
 }
-export function apiRegister(data) {
-  return api.post('api/auth/register/', data);
+export async function apiRegister(data) {
+  await fetchCSRFToken();
+  return await api.post('api/auth/register/', data);
 }
 // PUT update
-export function updateUser(data) {
-  return api.put('api/auth/user/', data);
+export async function updateUser(data) {
+  await fetchCSRFToken();
+  return await api.put('api/auth/user/', data);
 }
 
 // GET generate token

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { createBooking } from '../api/booking';
 import { useNotifications } from '../contexts/NotificationContext';
-
+import { fetchCSRFToken } from '../api/axios';
 // Booking component to confirm and finalize a booking
 // This component is responsible for displaying the booking confirmation page
 // and handling the booking creation process.
@@ -32,6 +32,7 @@ const handleConfirm = async e => {
   if (loading) return;
   setLoading(true);
   const seatIds = seats.map(s => s.id);
+  await fetchCSRFToken();
   createBooking(showtimeId, seatIds)
     .then(resp => setBooking(resp.data))
     .then(() => reloadNotifs())
