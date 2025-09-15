@@ -18,7 +18,7 @@ export function AuthProvider({ children }) {
 
   const login = async ({ username, password }) => {
     try {
-      await api.post('/api/auth/login/', { username, password }, { withCredentials: true });
+      await api.post('/api/auth/login/', { username, password }, { withCredentials: true }, { data: JSON.stringify({ username, password }) });
       const r = await api.get('/api/auth/user/', { withCredentials: true });
       setUser(r.data);
     } catch (err) {

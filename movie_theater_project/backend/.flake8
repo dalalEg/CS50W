@@ -9,5 +9,7 @@ exclude =
     .tox,
     node_modules,
     site-packages
+    apps.py
+    
 
 
