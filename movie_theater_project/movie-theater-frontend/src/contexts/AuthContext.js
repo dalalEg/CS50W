@@ -17,9 +17,14 @@ export function AuthProvider({ children }) {
   }, []);
 
   const login = async ({ username, password }) => {
-    await api.post('/api/auth/login/', { username, password });
-    const r = await api.get('/api/auth/user/');
-    setUser(r.data);
+    try {
+      await api.post('/api/auth/login/', { username, password }, { withCredentials: true });
+      const r = await api.get('/api/auth/user/', { withCredentials: true });
+      setUser(r.data);
+    } catch (err) {
+      setUser(null);
+      throw err;
+    }
   };
 
   const register = async data => {
@@ -31,7 +36,7 @@ export function AuthProvider({ children }) {
   };
 
   const logout = async () => {
-    await api.post('/api/auth/logout/');
+    await api.post('/api/auth/logout/', {}, { withCredentials: true });
     // navigate to login page
     window.location.href = '/';
     setUser(null);

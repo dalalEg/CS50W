@@ -6,4 +6,9 @@ class ManagementConfig(AppConfig):
     name = 'management'
 
     def ready(self):
-        pass
+        import management.signals
+        # Ensures signal handlers are connected
+        # This is necessary to ensure that the signal handlers are registered
+        management.signals.notify_watchlist_on_new_showtime
+        management.signals.notify_favourites_on_related_movie
+# -----------------------------------------------------------------------------

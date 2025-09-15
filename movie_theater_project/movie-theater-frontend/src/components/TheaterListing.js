@@ -55,9 +55,24 @@ const TheaterListing = () => {
       return () => clearTimeout(timer);
   }else{
     // If location is cleared, fetch all theaters again
+      let isMounted = true;
       fetchTheaters()
-        .then(res => setTheaters(res.data))
-        .catch(err => setError(err.message)); 
+        .then(res => {
+          const list = res.data;
+          // fetch auditoriums in parallel for each theater
+          return Promise.all(
+            list.map(t =>
+              fetchAuditoriumByTheater(t.id)
+                .then(r => ({ ...t, auditoriums: r.data }))
+            )
+          );
+        })
+        .then(withAuditoriums => {
+          if (isMounted) setTheaters(withAuditoriums);
+        })
+        .catch(err => {
+          if (isMounted) setError(err.message);
+        });
     }
   }, [location]);
   if (error)               return <p className="error">{error}</p>;

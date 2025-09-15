@@ -13,10 +13,13 @@ function Login({ onLogin }) {
   const handleSubmit = async e => {
     e.preventDefault();
     try {
-      await login({ username, password });
+      const response = await login({ username, password });
+      console.log('Login successful:', response);
       nav('/');
-    } catch {
+    } catch (err) {
+      console.error('Login failed:', err);
       setError('Login failed');
+      setTimeout(() => setError(''), 3000);
     }
   };
 
