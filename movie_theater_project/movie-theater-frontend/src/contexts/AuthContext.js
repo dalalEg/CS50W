@@ -10,6 +10,7 @@ export function AuthProvider({ children }) {
 
   // on mount, fetch profile (if session cookie present)
   useEffect(() => {
+    (async () => { await fetchCSRFToken(); })();
     api.get('/api/auth/user/')
       .then(r => setUser(r.data))
       .catch(() => setUser(null))
@@ -17,27 +18,21 @@ export function AuthProvider({ children }) {
   }, []);
 
   const login = async ({ username, password }) => {
-  const token = await fetchCSRFToken();
-  await api.post('/api/auth/login/', { username, password }, {
-    headers: { 'X-CSRFToken': token }
-  });
+  await fetchCSRFToken();
+  await api.post('/api/auth/login/', { username, password });
   const r = await api.get('/api/auth/user/');
   setUser(r.data);
 };
 
 const register = async (data) => {
-  const token = await fetchCSRFToken();
-  const res = await api.post('/api/auth/register/', data, {
-    headers: { 'X-CSRFToken': token }
-  });
+  await fetchCSRFToken();
+  const res = await api.post('/api/auth/register/', data);
   if (res.status === 200 || res.status === 201) setUser(res.data.user);
 };
 
 const logout = async () => {
-  const token = await fetchCSRFToken();
-  await api.post('/api/auth/logout/', {}, {
-    headers: { 'X-CSRFToken': token }
-  });
+  await fetchCSRFToken();
+  await api.post('/api/auth/logout/');
   setUser(null);
   window.location.href = '/';
 };
