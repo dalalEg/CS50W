@@ -4,7 +4,7 @@ import { api } from '../api/axios';
 import '../styles/EditUser.css';
 
 function EditUser() {
-  const { user, login } = useAuth();  // Assuming useAuth provides user and login
+  const { user } = useAuth();  // Assuming useAuth provides user and login
   const [formData, setFormData] = useState({
     username: '',
     email: '',
