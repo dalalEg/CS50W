@@ -1,3 +1,4 @@
+from html import parser
 from rest_framework.response import Response
 from django.core.exceptions import PermissionDenied
 from django.db import IntegrityError
@@ -77,6 +78,7 @@ from django.contrib.auth import get_user_model
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.http import JsonResponse
 from django.middleware.csrf import get_token
+from rest_framework.parsers import JSONParser
 User = get_user_model()
 
 
@@ -214,71 +216,61 @@ def confirm_email(request, uid, token):
         return Response({"message": "Email confirmed successfully!"})
     return Response({"error": "Invalid or expired token"}, status=400)
 
+class LoginView(APIView):
+    parser_classes = [JSONParser]  # Ensure JSON parsing
 
-# API views (login and register).
-@api_view(['POST'])
-def api_login(request):
-    """API endpoint for user login."""
-    username = request.data.get('username')
-    password = request.data.get('password')
-    if not username or not password:
-        return Response(
-            {'error': 'Username and password are required.'}, status=400)
-    user = authenticate(request, username=username, password=password)
-    if user is not None:
+    def post(self, request):
+        username = request.data.get('username')
+        password = request.data.get('password')
+        if not username or not password:
+            return JsonResponse({'error': 'Username and password are required.'}, status=400)
+        
+        user = authenticate(request, username=username, password=password)
+        if user:
+            login(request, user)
+            csrf_token = get_token(request)  # Get updated CSRF token
+            return JsonResponse({
+                'message': 'Login successful',
+                'csrfToken': csrf_token  # Return for frontend update
+            })
+        return JsonResponse({'error': 'Invalid credentials'}, status=400)
+
+def api_register(request):
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+        if not username or not email or not password:
+            return JsonResponse({'error': 'All fields are required.'}, status=400)
+        
+        if User.objects.filter(username=username).exists():
+            return JsonResponse({'error': 'Username already exists.'}, status=400)
+        
+        user = User.objects.create_user(username=username, email=email, password=password)
         login(request, user)
         csrf_token = get_token(request)
-        return Response({'message': 'Login successful.', 'csrf_token': csrf_token}, status=200)
-    else:
-        return Response({'error': 'Invalid username or password.'}, status=401)
+        return JsonResponse({
+            'message': 'Registration successful',
+            'csrfToken': csrf_token
+        })
+    return JsonResponse({'error': 'Invalid method'}, status=405)
 
-
-@api_view(['POST'])
-def api_register(request):
-    username = request.data.get('username')
-    email = request.data.get('email')
-    password = request.data.get('password')
-    confirmation = request.data.get('confirmation')
-    print("Debug: Received POST request for registration")
-
-    if not username or not email or not password or not confirmation:
-        print("Debug: Missing fields in API registration")
-        return Response({'error': 'All fields are required.'}, status=400)
-    if password != confirmation:
-        print("Debug: Passwords do not match")
-        return Response({'error': 'Passwords must match.'}, status=400)
-    if User.objects.filter(username=username).exists():
-        print("Debug: Username already taken")
-        return Response({'error': 'Username already taken.'}, status=400)
-    if User.objects.filter(email=email).exists():
-        print("Debug: Email already taken")
-        return Response({'error': 'Email already taken.'}, status=400)
-
-    user = User.objects.create_user(
-        username=username,
-        email=email,
-        password=password)
-    login(request, user)
-    print("Debug: User registered successfully")
-    # Return logged-in user info (like /api/auth/user/)
-    return Response({
-        'message': 'Registration successful.',
-        'user': {
-            'id': user.id,
-            'username': user.username,
-            'email': user.email
-        }
-    }, status=201)
-
-
-@api_view(['POST'])
-@permission_classes([AllowAny])
-@csrf_exempt
 def api_logout(request):
-    """API endpoint for user logout."""
     logout(request)
-    return Response({'message': 'Logout successful.'}, status=204)
+    return JsonResponse({'message': 'Logged out successfully'})
 
+def api_user_profile(request):
+    if request.user.is_authenticated:
+        return JsonResponse({
+            'id': request.user.id,
+            'username': request.user.username,
+            'email': request.user.email
+        })
+    return JsonResponse({'error': 'Not authenticated'}, status=401)
+
+def get_csrf(request):
+    csrf_token = get_token(request)
+    return JsonResponse({'csrfToken': csrf_token})
 
 @api_view(['GET', 'PUT'])
 @permission_classes([AllowAny])
@@ -754,7 +746,7 @@ class BookingViewSet(viewsets.ModelViewSet):
 
 class WatchlistViewSet(viewsets.ModelViewSet):
     """ViewSet for managing watchlists."""
-    queryset = Watchlist.objects.all()
+    queryset = Watchlist.objects.all().order_by('id')
     serializer_class = WatchlistSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend]

@@ -227,7 +227,7 @@ class BookingSerializer(serializers.ModelSerializer):
             'status',
             'attended',
         ]
-        read_only_fields = ['cost', 'status', 'attended']
+        read_only_fields = ['cost', 'status', 'attended', 'user']
 
     def create(self, validated_data):
         user = validated_data.pop('user')

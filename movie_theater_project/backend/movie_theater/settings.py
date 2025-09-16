@@ -38,8 +38,8 @@ if ENVIRONMENT == "development":
     CSRF_TRUSTED_ORIGINS = LOCAL_ORIGINS
     CSRF_COOKIE_SECURE = False
     SESSION_COOKIE_SECURE = False
-    CSRF_COOKIE_SAMESITE = 'None'
-    SESSION_COOKIE_SAMESITE = 'None'
+    CSRF_COOKIE_SAMESITE = 'Lax'
+    SESSION_COOKIE_SAMESITE = 'Lax'
     ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
 else:  # production
     DEBUG = False

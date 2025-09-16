@@ -36,7 +36,7 @@ urlpatterns = [
          name='confirm-email'),
     path('api/auth/generate_token/', views.generate_token,
          name='generate-confirmation-token'),
-    path('api/auth/login/', views.api_login, name='api-login'),
+    path('api/auth/login/', views.LoginView.as_view(), name='api-login'),
     path('api/auth/logout/', views.api_logout, name='api-logout'),
     path('api/auth/user/', views.api_user_profile, name='api-current-user'),
     path('api/auth/register/', views.api_register, name='api-register'),
