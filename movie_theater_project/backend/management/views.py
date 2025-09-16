@@ -76,6 +76,7 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.http import JsonResponse
+from django.middleware.csrf import get_token
 User = get_user_model()
 
 
@@ -226,7 +227,8 @@ def api_login(request):
     user = authenticate(request, username=username, password=password)
     if user is not None:
         login(request, user)
-        return Response({'message': 'Login successful.'}, status=200)
+        csrf_token = get_token(request)
+        return Response({'message': 'Login successful.', 'csrf_token': csrf_token}, status=200)
     else:
         return Response({'error': 'Invalid username or password.'}, status=401)
 

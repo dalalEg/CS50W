@@ -17,28 +17,35 @@ export function AuthProvider({ children }) {
       .finally(() => setLoading(false));
   }, []);
 
-  const login = async ({ username, password }) => {
-  await fetchCSRFToken();
-  await api.post('/api/auth/login/', { username, password });
-  // Retry fetching user profile to handle cookie delays
-  let retries = 3;
-  while (retries > 0) {
-    try {
-      const r = await api.get('/api/auth/user/');
-      if (r.data && r.data.id) {
-        setUser(r.data);
-        console.log('Login successful, user set:', r.data);
-        return;
-      }
-    } catch (err) {
-      console.error('User fetch failed, retrying...', err);
+ const login = async (username, password) => {
+  try {
+    await fetchCSRFToken();  // Ensure initial token
+    const response = await api.post('/api/auth/login/', { username, password });
+    
+    // ✅ Update CSRF token from response
+    if (response.data.csrfToken) {
+      Cookies.set('csrftoken', response.data.csrfToken, { secure: true, sameSite: 'None' });
     }
-    retries--;
-    await new Promise(resolve => setTimeout(resolve, 500));  // Wait 500ms
+    
+    const userResponse = await api.get('/api/auth/user/');
+    setUser(userResponse.data);
+  } catch (error) {
+    console.error('Login failed:', error);
   }
-  throw new Error('Failed to fetch user after login');
 };
 
+const logout = async () => {
+  try {
+    await api.post('/api/auth/logout/');
+  } catch (error) {
+    console.error('Logout failed:', error);
+  } finally {
+    // Always clear cookies and user state
+    setUser(null);
+    Cookies.remove('csrftoken');
+    Cookies.remove('sessionid');
+  }
+};
 const register = async (data) => {
   await fetchCSRFToken();
   const res = await api.post('/api/auth/register/', data);
@@ -49,12 +56,6 @@ const register = async (data) => {
   }
 };
 
-const logout = async () => {
-  await fetchCSRFToken();
-  await api.post('/api/auth/logout/');
-  setUser(null);
-  window.location.href = '/';  // Force reload to clear any cached state
-};
 
 
   return (
