@@ -71,20 +71,19 @@ export function AuthProvider({ children }) {
   };
 
   const logout = async () => {
-    try {
-      await fetchCSRFToken();  // Fetch CSRF before logout
-      await api.post('/api/auth/logout/');
-      console.log('Logout successful');
-    } catch (error) {
-      console.error('Logout failed:', error);
-    } finally {
-      // Always clear state and cookies
-      setUser(null);
-      Cookies.remove('csrftoken');
-      Cookies.remove('sessionid');
-      window.location.href = '/';  // Redirect to home
-    }
-  };
+  try {
+    await fetchCSRFToken();  // Ensure token
+    await api.post('/api/auth/logout/');
+  } catch (error) {
+    console.error('Logout failed:', error);  // Log but don't block
+  } finally {
+    // Always clear state
+    setUser(null);
+    Cookies.remove('csrftoken');
+    Cookies.remove('sessionid');
+    window.location.href = '/';  // Force redirect
+  }
+};
 
   return (
     <AuthContext.Provider value={{ user, loading, login, register, logout }}>

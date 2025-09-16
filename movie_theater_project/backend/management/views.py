@@ -1,4 +1,3 @@
-from html import parser
 from rest_framework.response import Response
 from django.core.exceptions import PermissionDenied
 from django.db import IntegrityError
@@ -216,6 +215,7 @@ def confirm_email(request, uid, token):
         return Response({"message": "Email confirmed successfully!"})
     return Response({"error": "Invalid or expired token"}, status=400)
 
+
 class LoginView(APIView):
     parser_classes = [JSONParser]  # Ensure JSON parsing
 
@@ -224,7 +224,6 @@ class LoginView(APIView):
         password = request.data.get('password')
         if not username or not password:
             return JsonResponse({'error': 'Username and password are required.'}, status=400)
-        
         user = authenticate(request, username=username, password=password)
         if user:
             login(request, user)
@@ -235,6 +234,7 @@ class LoginView(APIView):
             })
         return JsonResponse({'error': 'Invalid credentials'}, status=400)
 
+
 def api_register(request):
     if request.method == 'POST':
         username = request.POST.get('username')
@@ -242,10 +242,8 @@ def api_register(request):
         password = request.POST.get('password')
         if not username or not email or not password:
             return JsonResponse({'error': 'All fields are required.'}, status=400)
-        
         if User.objects.filter(username=username).exists():
             return JsonResponse({'error': 'Username already exists.'}, status=400)
-        
         user = User.objects.create_user(username=username, email=email, password=password)
         login(request, user)
         csrf_token = get_token(request)
@@ -255,22 +253,12 @@ def api_register(request):
         })
     return JsonResponse({'error': 'Invalid method'}, status=405)
 
+
+@csrf_exempt
 def api_logout(request):
     logout(request)
     return JsonResponse({'message': 'Logged out successfully'})
 
-def api_user_profile(request):
-    if request.user.is_authenticated:
-        return JsonResponse({
-            'id': request.user.id,
-            'username': request.user.username,
-            'email': request.user.email
-        })
-    return JsonResponse({'error': 'Not authenticated'}, status=401)
-
-def get_csrf(request):
-    csrf_token = get_token(request)
-    return JsonResponse({'csrfToken': csrf_token})
 
 @api_view(['GET', 'PUT'])
 @permission_classes([AllowAny])
