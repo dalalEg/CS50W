@@ -5,6 +5,10 @@ import Cookies from 'js-cookie';
 const AuthContext = createContext();
 export const useAuth = () => useContext(AuthContext);
 
+// Detect environment for samesite
+const isProduction = window.location.protocol === 'https:';
+const SAMESITE = isProduction ? 'None' : 'Lax';
+
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -34,7 +38,8 @@ export function AuthProvider({ children }) {
 
       // Update CSRF token if provided by backend
       if (response.data.csrfToken) {
-        Cookies.set('csrftoken', response.data.csrfToken, { secure: true, sameSite: 'None' });
+        // Use document.cookie for reliable setting
+        document.cookie = `csrftoken=${response.data.csrfToken}; path=/; secure=${isProduction}; samesite=${SAMESITE}`;
       }
 
       // Fetch user profile after login
@@ -57,7 +62,7 @@ export function AuthProvider({ children }) {
 
       // Update CSRF token if provided
       if (response.data.csrfToken) {
-        Cookies.set('csrftoken', response.data.csrfToken, { secure: true, sameSite: 'None' });
+        document.cookie = `csrftoken=${response.data.csrfToken}; path=/; secure=${isProduction}; samesite=${SAMESITE}`;
       }
 
       // Fetch user profile after register
@@ -71,23 +76,24 @@ export function AuthProvider({ children }) {
   };
 
   const logout = async () => {
-  try {
-    await fetchCSRFToken();  // Ensure token
-    await api.post('/api/auth/logout/');
-  } catch (error) {
-    console.error('Logout failed:', error);  // Log but don't block
-  } finally {
-    // Always clear state
-    setUser(null);
-    Cookies.remove('csrftoken');
-    Cookies.remove('sessionid');
-    window.location.href = '/';  // Force redirect
-  }
-};
+    try {
+      await fetchCSRFToken();  // Fetch CSRF before logout
+      await api.post('/api/auth/logout/');
+      console.log('Logout successful');
+    } catch (error) {
+      console.error('Logout failed:', error);
+    } finally {
+      // Always clear state and cookies
+      setUser(null);
+      Cookies.remove('csrftoken');
+      Cookies.remove('sessionid');
+      window.location.href = '/';  // Force redirect
+    }
+  };
 
   return (
     <AuthContext.Provider value={{ user, loading, login, register, logout }}>
-      { children }
+      {children}
     </AuthContext.Provider>
   );
 }
