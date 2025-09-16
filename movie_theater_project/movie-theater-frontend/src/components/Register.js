@@ -31,12 +31,14 @@ function Register() {
         return;
       }
       try {
-        await register(formData);
-        addNotif('Welcome ' + formData.username + '! Please Confirm Your Email Address To get started.');
-        navigate('/');
-      } catch {
-        setMessage('Registration failed');
-      } finally {
+    await register(formData);
+    console.log('Register successful');  // Debug
+    addNotif('Welcome ' + formData.username + '! Please confirm your email.');
+    navigate('/');
+  } catch (err) {
+    console.error('Register error:', err);
+    setMessage('Registration failed - check network or try again');
+  } finally {
         setSubmitting(false); // Ensure submitting state is reset
       }
   };

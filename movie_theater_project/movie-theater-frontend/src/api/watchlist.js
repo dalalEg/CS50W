@@ -1,9 +1,11 @@
-import { api,fetchCSRFToken } from './axios';
+import { api, fetchCSRFToken } from './axios';
 
 // GET list filtered by user id
-export const fetchWatchlistByUser = userId =>
-  api.get(`/api/watchlist/?user=${userId}`);
-
+export const fetchWatchlistByUser = (userId, page = 1, pageSize = 10) => {
+  // If pageSize is large (e.g., 1000), fetch all items for checking
+  const url = `/api/watchlist/?user=${userId}&page=${page}&page_size=${pageSize}`;
+  return api.get(url);
+};
 // POST to create a new entry (user is implicit via perform_create)
 export const addToWatchlist = async movieId => {
   await fetchCSRFToken();
@@ -15,3 +17,5 @@ export const removeFromWatchlist = async watchlistId => {
   await fetchCSRFToken();
   return await api.delete(`/api/watchlist/${watchlistId}/`);
 };
+
+

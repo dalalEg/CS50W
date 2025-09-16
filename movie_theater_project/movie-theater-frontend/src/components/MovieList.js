@@ -1,58 +1,77 @@
-import React, {  useEffect, useState } from 'react';
-import { fetchMovies,searchMovies } from '../api/movies';
+import React, { useEffect, useState, useCallback } from 'react';
+import { fetchMovies, searchMovies } from '../api/movies';
 import { fetchGenres } from '../api/genre.js';
-import { useNavigate }  from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import '../styles/MovieList.css';
 
 function MovieList() {
   const [movies, setMovies] = useState([]);
-  const [query, setQuery]   = useState('');
+  const [query, setQuery] = useState('');
   const [genres, setGenres] = useState([]);
   const [selectedGenre, setSelectedGenre] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError]     = useState(null);
-  const navigate              = useNavigate();
+  const [error, setError] = useState(null);
+  const navigate = useNavigate();
   const [selectedRating, setSelectedRating] = useState(0);
-  const [sortBy, setSortBy]   = useState('alpha.desc');
-  const [selectedDuration, setSelectedDuration] = useState(180); // Default to 180 minutes
+  const [sortBy, setSortBy] = useState('alpha.desc');
+  const [selectedDuration, setSelectedDuration] = useState(180);
   const [selectedYear, setSelectedYear] = useState(2000);
 
+  // Fetch genres once
   useEffect(() => {
     fetchGenres()
       .then(res => setGenres(res.data))
-      .catch(() => {/* ignore */});
+      .catch(() => {});
   }, []);
-  useEffect(() => {
-    const load = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const res = query
-          ? await searchMovies(query)
-          : await fetchMovies();
-        setMovies(res.data);
-      } catch {
-        setError('Could not load movies.');
-      } finally {
-        setLoading(false);
-      }
-    };
-    load();
-  }, [query]);
 
+  // Helper to fetch all movies (loops through pages)
+  const fetchAllMovies = useCallback(async (searchQuery = '') => {
+    let allMovies = [];
+    let page = 1;
+    while (true) {
+      const res = searchQuery ? await searchMovies(searchQuery, page) : await fetchMovies(page);
+      const newMovies = res.data.results || res.data; // Handle paginated or direct response
+      allMovies = [...allMovies, ...newMovies];
+      if (!res.data.next) break; // Stop if no more pages
+      page++;
+    }
+    return allMovies;
+  }, []);
+
+  // Fetch all movies (no pagination)
+  const fetchMoviesData = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const allMovies = await fetchAllMovies(query);
+      setMovies(allMovies);
+    } catch {
+      setError('Could not load movies.');
+    } finally {
+      setLoading(false);
+    }
+  }, [query, fetchAllMovies]);
+
+  // Fetch on mount, search, or filter changes
+  useEffect(() => {
+    fetchMoviesData();
+  }, [query, selectedGenre, selectedRating, selectedDuration, selectedYear, sortBy, fetchMoviesData]);
+
+  // Parse duration helper
   const parseDuration = (duration) => {
     if (!duration) return 0;
-    const [hours, minutes, ] = duration.split(':').map(Number);
-    return (hours * 60) + minutes; // duration in minutes
+    const [hours, minutes] = duration.split(':').map(Number);
+    return (hours * 60) + minutes;
   };
 
+  // Filter and sort movies client-side (since all are loaded)
   const displayedMovies = movies
     .filter(m => {
       const releaseYear = new Date(m.release_date).getFullYear();
       return (
         (!selectedGenre || m.genres.some(g => g.id === +selectedGenre)) &&
         (m.rating >= selectedRating || m.rating === 0.0) &&
-        parseDuration(m.duration) <= selectedDuration && // LESS than selected minutes
+        parseDuration(m.duration) <= selectedDuration &&
         releaseYear >= selectedYear
       );
     })
@@ -66,7 +85,8 @@ function MovieList() {
       if (sortBy === 'duration.desc') return parseDuration(b.duration) - parseDuration(a.duration);
       if (sortBy === 'duration.asc') return parseDuration(a.duration) - parseDuration(b.duration);
       return 0;
-  });
+    });
+
   return (
     <div className="movie-list-container">
       <div className="filters">
@@ -145,37 +165,36 @@ function MovieList() {
         </label>
       </div>
 
-    
-
+      {loading && <p>Loading movies...</p>}
+      {error && <p>{error}</p>}
       {!loading && !error && displayedMovies.length === 0 && (
         <p>No movies found{query ? ` for “${query}”` : ''}.</p>
       )}
-  
-    <div className="movie-list">
 
-      {displayedMovies.map(movie => (
-        <div
-          key={movie.id}
-          className="movie-card movie-link"
-          onClick={() => navigate(`/movies/${movie.id}`)}
-        >
-          <div className="movie-poster-container">
-            <img
-              className="movie-poster"
-              src={movie.poster || '/placeholder.jpg'}
-              alt={`${movie.title} poster`}
-            />
-          </div>
-          <div className="movie-details">
-            <h2 className="movie-title">{movie.title}</h2>
-            <p className="movie-date">{movie.release_date}</p>
-            <p className="movie-rating">
-              IMDb RATING: {movie.rating ? `${movie.rating}/10` : 'TBD'}
-            </p>
-            <p className="movie-description">{movie.description}</p>
-            <p className="movie-duration">Duration: {movie.duration ? `${movie.duration} ` : 'TBD'}</p>
-            {movie.trailer
-              ? (
+      {/* Simple list (no infinite scroll, all movies loaded) */}
+      <div className="movie-list">
+        {displayedMovies.map(movie => (
+          <div
+            key={movie.id}
+            className="movie-card movie-link"
+            onClick={() => navigate(`/movies/${movie.id}`)}
+          >
+            <div className="movie-poster-container">
+              <img
+                className="movie-poster"
+                src={movie.poster || '/placeholder.jpg'}
+                alt={`${movie.title} poster`}
+              />
+            </div>
+            <div className="movie-details">
+              <h2 className="movie-title">{movie.title}</h2>
+              <p className="movie-date">{movie.release_date}</p>
+              <p className="movie-rating">
+                IMDb RATING: {movie.rating ? `${movie.rating}/10` : 'TBD'}
+              </p>
+              <p className="movie-description">{movie.description}</p>
+              <p className="movie-duration">Duration: {movie.duration || 'TBD'}</p>
+              {movie.trailer ? (
                 <a
                   className="movie-trailer"
                   href={movie.trailer}
@@ -185,13 +204,13 @@ function MovieList() {
                 >
                   ▶ Watch Trailer
                 </a>
-              )
-              : <span className="no-trailer">No Trailer Available</span>
-            }
+              ) : (
+                <span className="no-trailer">No Trailer Available</span>
+              )}
+            </div>
           </div>
-        </div>
-      ))}
-    </div>
+        ))}
+      </div>
     </div>
   );
 }

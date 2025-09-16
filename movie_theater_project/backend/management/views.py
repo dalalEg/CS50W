@@ -5,6 +5,7 @@ from django.shortcuts import render
 from rest_framework import viewsets, filters
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
+from rest_framework.pagination import PageNumberPagination
 from django.utils import timezone
 from datetime import timedelta
 from rest_framework.views import APIView
@@ -299,6 +300,19 @@ def api_user_profile(request):
     )
     return Response(serializer.data, status=200)
 
+
+# pagination classes
+class MoviePagination(PageNumberPagination):
+    page_size = 15  # Adjust as needed (e.g., 10, 20, 25)
+    page_size_query_param = 'page_size'
+    max_page_size = 100
+
+
+class StandardPagination(PageNumberPagination):
+    page_size = 10  # Default page size
+    page_size_query_param = 'page_size'
+    max_page_size = 1000  # Allow large page_size to fetch all
+
 # API views (generic class-based or viewsets).
 
 
@@ -383,6 +397,7 @@ class MovieViewSet(viewsets.ModelViewSet):
     }
     ordering_fields = ['rating', 'release_date', 'title']
     ordering = ['title']
+    pagination_class = MoviePagination  # Add this for pagination
 
     def get_permissions(self):
         if self.action in ('create', 'update', 'partial_update', 'destroy'):
@@ -549,12 +564,20 @@ class ShowtimeViewSet(viewsets.ModelViewSet):
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
-    queryset = Review.objects.all()
+    queryset = Review.objects.all().order_by('-created_at')
     serializer_class = ReviewSerializer
     permission_classes = [IsReviewOwnerOrReadOnly, IsUserEmailVerified]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
     filterset_fields = ['user', 'movie']
     search_fields = ['content']
+    pagination_class = StandardPagination
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        user_id = self.request.query_params.get('user')
+        if user_id:
+            queryset = queryset.filter(user_id=user_id)
+        return queryset
 
     def perform_create(self, serializer):
         review = serializer.save(user=self.request.user)
@@ -608,12 +631,19 @@ class BookingViewSet(viewsets.ModelViewSet):
         IsBookingOwnerOrStaff,
         IsAuthenticated,
         IsUserEmailVerified]
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    filterset_fields = ['user', 'showtime', 'status']
+    search_fields = ['showtime__movie__title', 'showtime__auditorium__theater__name']
+    ordering_fields = ['created_at', 'showtime__start_time']
+    ordering = ['-created_at']
+    pagination_class = StandardPagination
 
     def get_queryset(self):
-        user = self.request.user
-        if user.is_staff:
-            return Booking.objects.all()
-        return Booking.objects.filter(user=user)
+        queryset = super().get_queryset()
+        user_id = self.request.query_params.get('user')
+        if user_id:
+            queryset = queryset.filter(user_id=user_id)
+        return queryset
 
     def perform_create(self, serializer):
         booking = serializer.save(user=self.request.user)
@@ -647,7 +677,7 @@ class BookingViewSet(viewsets.ModelViewSet):
         GET /api/bookings/user/
         Returns only the bookings for the authenticated user.
         """
-        qs = self.get_queryset().filter(user=request.user)
+        qs = self.get_queryset().filter(user=request.user).order_by('-created_at')
         serializer = self.get_serializer(qs, many=True)
         return Response(serializer.data)
 
@@ -728,13 +758,14 @@ class WatchlistViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend]
     # only allow filtering by movie; user is set from request
     filterset_fields = ['user', 'movie']
+    pagination_class = StandardPagination
 
     def get_queryset(self):
-        user = self.request.user
-        if user.is_staff:
-            return Watchlist.objects.all()
-        # non-staff only see their own watchlist entries
-        return Watchlist.objects.filter(user=user)
+        queryset = super().get_queryset()
+        user_id = self.request.query_params.get('user')
+        if user_id:
+            queryset = queryset.filter(user_id=user_id)
+        return queryset
 
     def perform_create(self, serializer):
         new = serializer.save(user=self.request.user)
@@ -1108,3 +1139,18 @@ class NewsViewSet(viewsets.ModelViewSet):
     permission_classes = [AllowAny]
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     search_fields = ['title', 'content']
+    pagination_class = StandardPagination
+    ordering_fields = ['published_at', 'title']
+    ordering = ['-published_at']
+
+    def get_permissions(self):
+        if self.action in ('create', 'update', 'partial_update', 'destroy'):
+            permission_classes = [IsAdminOrReadOnly]
+        else:
+            permission_classes = [AllowAny]
+        return [perm() for perm in permission_classes]
+
+    def get_queryset(self):
+        # Fixed: Return News objects, not RateService
+        # Since permission is AllowAny, return all News for everyone
+        return News.objects.all().order_by('-published_at')

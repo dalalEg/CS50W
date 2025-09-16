@@ -1,0 +1,38 @@
+.edit-user-container {
+    max-width: 600px;
+    margin: 20px auto;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+}
+.edit-user-container h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #333;
+}
+.edit-user-container form {
+    display: flex;
+    flex-direction: column;
+}  
+.edit-user-container label {
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #555;
+}
+.edit-user-container input {
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+}
+.edit-user-container button {
+    padding: 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+} 

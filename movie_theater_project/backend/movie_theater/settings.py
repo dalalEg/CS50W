@@ -38,13 +38,19 @@ if ENVIRONMENT == "development":
     CSRF_TRUSTED_ORIGINS = LOCAL_ORIGINS
     CSRF_COOKIE_SECURE = False
     SESSION_COOKIE_SECURE = False
+    CSRF_COOKIE_SAMESITE = None
+    SESSION_COOKIE_SAMESITE = None
     ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
 else:  # production
     DEBUG = False
     CORS_ALLOWED_ORIGINS = PRODUCTION_ORIGINS
     CSRF_TRUSTED_ORIGINS = PRODUCTION_ORIGINS
     CSRF_COOKIE_SECURE = True
+    SESSION_COOKIE_SAMESITE = "Lax"
     SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SAMESITE = "Lax"
+    SESSION_COOKIE_HTTPSONLY = True
+    CSRF_COOKIE_HTTPONLY = False
     ALLOWED_HOSTS = [
         "movie-theater-dots.onrender.com",
         "https://dali-movie-theater.netlify.app",
@@ -52,8 +58,7 @@ else:  # production
 
 
 CORS_ALLOW_CREDENTIALS = True
-CSRF_COOKIE_SAMESITE = None
-SESSION_COOKIE_SAMESITE = None
+
 
 # ------------------------------------------------------------------------------
 # Database
@@ -136,9 +141,8 @@ MIDDLEWARE = [
 REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': [
         'rest_framework.renderers.JSONRenderer',
-    ]
+    ],
 }
-
 # ------------------------------------------------------------------------------
 # Static & media files
 # ------------------------------------------------------------------------------

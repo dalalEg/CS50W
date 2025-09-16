@@ -1,56 +1,58 @@
-@import 'theme.css';
+@import './theme.css';
 
-.user-booking {
+.news {
   background: var(--clr-card-bg);
   color: var(--clr-text);
   padding: var(--gap-md);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow);
-  max-width: 500px;
+  max-width: 800px;
   margin: var(--gap-lg) auto;
 }
 
-.user-booking h2 {
+.news h2 {
   font-size: var(--fs-lg);
   margin-bottom: var(--gap-sm);
 }
-.user-booking ul {
+
+.news ul {
   list-style: none;
   padding: 0;
 }
-.user-booking li {
+
+.news li {
   margin-bottom: var(--gap-sm);
   padding: var(--gap-sm);
   border-bottom: 1px solid var(--clr-border);
 }
-.user-booking li:last-child {
+
+.news li:last-child {
   border-bottom: none;
 }
-.user-booking link{
-    color: var(--clr-primary);
-    margin: 0.5rem;
-    padding: 0.5rem;
-    transition: background 0.3s;
+
+.news .pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: var(--gap-md);
 }
-.user-booking .link:hover {
-  background: var(--clr-hover-bg);
-}
-.user-booking button {
+
+.news .pagination button {
   background: var(--clr-primary);
   color: var(--clr-text-light);
   border: none;
   padding: 0.5rem 1rem;
-  margin: 0.5rem;
+  margin: 0 0.5rem;
   border-radius: var(--radius-sm);
   cursor: pointer;
   transition: background 0.3s;
 }
 
-.user-booking button:hover {
+.news .pagination button:hover:not(:disabled) {
   background: var(--clr-primary-dark);
 }
 
-.user-booking form {
-  display: flex;
-  flex-direction: column;
+.news .pagination button:disabled {
+  background: var(--clr-disabled);
+  cursor: not-allowed;
 }

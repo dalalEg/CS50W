@@ -2,18 +2,18 @@
 @import './theme.css';
 
 .user-watchlist {
-  max-width: 800px;
-  margin: var(--gap-lg) auto;
-  padding: var(--gap-md);
-  display: flex;
-  flex-direction: column;
-  font-family: var(--font-base);
+  background: var(--clr-card-bg);
   color: var(--clr-text);
+  padding: var(--gap-md);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow);
+  max-width: fit-content;
+  margin: var(--gap-lg) auto;
 }
 
 .user-watchlist h2 {
-  margin-top: 0;
-  font-size: var(--fs-lg);
+ font-size: var(--fs-lg);
+  margin-bottom: var(--gap-sm);
 }
 
 .user-watchlist ul {
@@ -22,7 +22,8 @@
 }
 
 .user-watchlist li {
-  padding: var(--gap-sm) 0;
+ margin-bottom: var(--gap-sm);
+  padding: var(--gap-sm);
   border-bottom: 1px solid var(--clr-border);
 }
 
@@ -37,14 +38,20 @@
 }
 
 .user-watchlist a:hover {
-  text-decoration: underline;
+    background: var(--clr-hover-bg);
+
 }
 
 .user-watchlist button {
-  background: var(--clr-accent);
+   background: var(--clr-primary);
   color: var(--clr-text-light);
+  border: none;
+  padding: 0.5rem 1rem;
+  margin: 0.5rem;
   border-radius: var(--radius-sm);
-  margin-top: var(--gap-sm);
+  cursor: pointer;
+  transition: background 0.3s;
+  text-align: right;
 }
 .user-watchlist button:hover {
   background: bisque;

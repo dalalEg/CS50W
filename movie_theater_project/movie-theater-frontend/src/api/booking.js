@@ -5,15 +5,15 @@ import { api, fetchCSRFToken } from './axios';
 export async function createBooking(showtimeId, seatIds) {
   await fetchCSRFToken();
   return await api.post('/api/bookings/', {
-    showtime_id:  showtimeId,
-    seat_ids:  seatIds    
+    showtime_id: showtimeId,
+    seat_ids: seatIds
   });
 }
 
 export const fetchBookingById = (bookingId) =>
   api.get(`/api/bookings/${bookingId}/`);
-export const fetchBookingsByUser = () =>
-  api.get('/api/bookings/user/');
+export const fetchBookingsByUser = (userId, page = 1, pageSize = 10) =>
+  api.get(`/api/bookings/?user=${userId}&page=${page}&page_size=${pageSize}`);
 export const cancelBooking = async (bookingId) => {
   await fetchCSRFToken();
   await api.delete(`/api/bookings/${bookingId}/`);

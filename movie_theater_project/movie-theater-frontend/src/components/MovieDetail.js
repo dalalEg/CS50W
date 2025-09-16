@@ -41,13 +41,15 @@ function MovieDetail() {
     
   }, [id]);
 
-  useEffect(() => {
+ useEffect(() => {
     if (!currentUser) return;
-    fetchWatchlistByUser(currentUser.id)
+    // Fetch ALL watchlist items (pageSize=1000) to check if movie is in it
+    fetchWatchlistByUser(currentUser.id, 1, 1000)
       .then(resp => {
-       const found = resp.data.find(item => item.movie?.id === parseInt(id, 10));
-       setIsInWatchlist(Boolean(found));
-       setWatchlistEntryId(found?.id ?? null);
+        const data = resp.data.results || resp.data;  // Handle paginated or non-paginated response
+        const found = data.find(item => item.movie?.id === parseInt(id, 10));
+        setIsInWatchlist(Boolean(found));
+        setWatchlistEntryId(found?.id ?? null);
       })
       .catch(() => setError("Failed to load watchlist"));
   }, [currentUser, id]);
@@ -58,14 +60,8 @@ function MovieDetail() {
       return;
     }
     if (isInWatchlist) {
-       if (!currentUser) {
-      setError("Please log in to manage your watchlist.");
-      return;
-    }
       removeFromWatchlist(watchlistEntryId)
-
         .then(() => {
-          
           setIsInWatchlist(false);
           setWatchlistEntryId(null);
           reloadNotifs();
@@ -75,12 +71,7 @@ function MovieDetail() {
           setError("Failed to remove from watchlist");
         });
     } else {
-       if (!currentUser) {
-      setError("Please log in to manage your watchlist.");
-      return;
-    }
       addToWatchlist(id)
-    
         .then(resp => {
           setIsInWatchlist(true);
           setWatchlistEntryId(resp.data.id);
@@ -88,7 +79,6 @@ function MovieDetail() {
         })
         .catch(err => {
           const errs = err.response?.data?.non_field_errors || [];
-          // if already exists, mark as in-watchlist
           if (errs.some(e => e.includes('already in your watchlist'))) {
             setIsInWatchlist(true);
             return;
@@ -96,8 +86,8 @@ function MovieDetail() {
           console.error(err.response?.data || err);
           setError("Failed to add to watchlist");
         });
-     }
-   };
+    }
+  };
   if (error)   return <p className="error">{error}</p>;
   if (!movie) return <p className="loading">Loading…</p>;
   if (authLoading) return <p className="loading">Loading…</p>;

@@ -1,33 +1,52 @@
-import React, {useState, useEffect} from "react";
-import { Link} from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { fetchBookingsByUser } from "../api/booking";
-import { useAuth }          from '../contexts/AuthContext';
+import { useAuth } from '../contexts/AuthContext';
+import '../styles/UserBooking.css';
 
-import '../styles/UserBooking.css'; 
 const UserBooking = () => {
-  const {user} = useAuth();
+  const { user } = useAuth();
   const userId = user?.id;
   const [bookings, setBookings] = useState([]);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const pageSize = 10;  // Adjust as needed
 
-
- useEffect(() => {
+  useEffect(() => {
     if (!userId) {
       setBookings([]);
       setLoading(false);
       return;
     }
+    fetchBookings(userId, currentPage);
+  }, [userId, currentPage]);
+
+  const fetchBookings = async (userId, page) => {
     setLoading(true);
-    fetchBookingsByUser(userId)
-      .then(r => setBookings(r.data))
-      .catch(() => setError('Failed to load bookings'))
-      .finally(() => setLoading(false));
-  }, [userId]);
+    try {
+      const response = await fetchBookingsByUser(userId, page, pageSize);
+      setBookings(response.data.results || response.data);
+      setTotalPages(Math.ceil((response.data.count || 0) / pageSize));
+      setError(null);
+    } catch {
+      setError('Failed to load bookings');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePageChange = (page) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+  };
 
   if (!user) return <p>Loading user information...</p>;
   if (loading) return <p>Loading bookings...</p>;
   if (error) return <p>{error}</p>;
+
   return (
     <div className="user-booking">
       <h2>Bookings for {user.username}</h2>
@@ -44,6 +63,16 @@ const UserBooking = () => {
           </li>
         ))}
       </ul>
+      {/* Pagination Controls */}
+      <div className="pagination">
+        <button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1}>
+          Previous
+        </button>
+        <span>Page {currentPage} of {totalPages}</span>
+        <button onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages}>
+          Next
+        </button>
+      </div>
     </div>
   );
 };

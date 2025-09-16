@@ -1,4 +1,4 @@
-import { api ,fetchCSRFToken} from './axios';
+import { api, fetchCSRFToken } from './axios';
 
 // src/api/booking.js
 export async function createReview(movieId, { content, rating, anonymous }) {
@@ -13,8 +13,8 @@ export async function createReview(movieId, { content, rating, anonymous }) {
 export function fetchReviewsByMovie(movieId) {
   return api.get(`/api/movies/${movieId}/reviews/`);
 }
-export function fetchReviewsByUser(userId) {
-  return api.get(`/api/reviews/?user=${userId}`);
+export function fetchReviewsByUser(userId, page = 1, pageSize = 10) {
+  return api.get(`/api/reviews/?user=${userId}&page=${page}&page_size=${pageSize}`);
 }
 
 export async function handleDeleteReview(reviewId) {
