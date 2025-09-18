@@ -285,7 +285,7 @@ def api_user_profile(request):
 
 # pagination classes
 class MoviePagination(PageNumberPagination):
-    page_size = 15  # Adjust as needed (e.g., 10, 20, 25)
+    page_size = 25  # Adjust as needed (e.g., 10, 20, 25)
     page_size_query_param = 'page_size'
     max_page_size = 100
 

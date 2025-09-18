@@ -20,27 +20,45 @@ function Register() {
   };
 
   const handleSubmit = async e => {
-      e.preventDefault();
-      if (submitting) return; // prevent double submits
-      setSubmitting(true);
-      console.log("Submitting registration", formData.username); // Log submission
-      setMessage('');
-      if (formData.password !== formData.confirmation) {
-        setMessage("Passwords don't match");
-        setSubmitting(false); // Reset submitting state
-        return;
-      }
-      try {
-    await register(formData);
-    console.log('Register successful');  // Debug
-    addNotif('Welcome ' + formData.username + '! Please confirm your email.');
-    navigate('/');
-  } catch (err) {
-    console.error('Register error:', err);
-    setMessage('Registration failed - check network or try again');
-  } finally {
-        setSubmitting(false); // Ensure submitting state is reset
-      }
+    e.preventDefault();
+    if (submitting) return; // Prevent double submits
+    setSubmitting(true);
+    console.log("Submitting registration", formData.username); // Log submission
+    setMessage('');
+
+    // Add validation for empty fields
+    if (!formData.username.trim()) {
+      setMessage('Username is required');
+      setSubmitting(false);
+      return;
+    }
+    if (!formData.email.trim()) {
+      setMessage('Email is required');
+      setSubmitting(false);
+      return;
+    }
+    if (!formData.password.trim()) {
+      setMessage('Password is required');
+      setSubmitting(false);
+      return;
+    }
+    if (formData.password !== formData.confirmation) {
+      setMessage("Passwords don't match");
+      setSubmitting(false);
+      return;
+    }
+
+    try {
+      await register(formData);
+      console.log('Register successful');  // Debug
+      addNotif('Welcome ' + formData.username + '! Please confirm your email.');
+      navigate('/');
+    } catch (err) {
+      console.error('Register error:', err);
+      setMessage('Registration failed - check network or try again');
+    } finally {
+      setSubmitting(false); // Ensure submitting state is reset
+    }
   };
 
   return (

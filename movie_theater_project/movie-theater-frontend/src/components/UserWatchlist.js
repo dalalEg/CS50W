@@ -47,7 +47,7 @@ const UserWatchlist = () => {
 
   return (
     <div className="card user-watchlist">
-      <h2>Watchlist for {user.username}</h2>
+      <h2>You are watching your watchlist, you can manage it here:</h2>
       <ul>
         {watchlist.length === 0 && <p>No movies in watchlist.</p>}
         {watchlist.map(item => (

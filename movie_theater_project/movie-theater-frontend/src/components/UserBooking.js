@@ -49,7 +49,7 @@ const UserBooking = () => {
 
   return (
     <div className="user-booking">
-      <h2>Bookings for {user.username}</h2>
+      <h2>Your Bookings ({bookings.length} Total)</h2>
       <ul>
         {bookings.length === 0 && <p>You have no bookings yet. Click <Link to={`/showtimes`}>here</Link> to browse showtimes to book a movie.</p>}
         {bookings.map(booking => (

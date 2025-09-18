@@ -1,0 +1,4 @@
+.env.local
+# Local environment variables
+.env.production
+# Production environment variables

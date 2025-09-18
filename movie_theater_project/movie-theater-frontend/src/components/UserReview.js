@@ -84,7 +84,7 @@ const UserReview = () => {
     <div className="user-review">
       <h2>Reviews by {user.username}</h2>
       <ul>
-        {reviews.length === 0 && <p>No you did not post a review yet.</p>}
+        {reviews.length === 0 ? <p>You did not post a review yet.</p> : <p>You have {reviews.length} review{reviews.length > 1 ? 's' : ''}.</p>}
         {reviews.map(review => (
           <li key={review.id}>
             <Link to={`/movies/${review?.movie?.id}/reviews`} className="link">

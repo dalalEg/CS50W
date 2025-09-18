@@ -57,10 +57,22 @@ export function AuthProvider({ children }) {
     try {
       await fetchCSRFToken();  // Fetch CSRF before register
       console.log('Attempting register for:', data.username);
-      const response = await api.post('/api/auth/register/', data);
+      
+      // Exclude 'confirmation' from the data sent to backend
+      const { confirmation, ...registerData } = data;
+      console.log('Sending data:', registerData);  // Debug: Log what's actually sent
+      
+      // Send as FormData instead of JSON for better compatibility
+      const formData = new FormData();
+      formData.append('username', registerData.username);
+      formData.append('email', registerData.email);
+      formData.append('password', registerData.password);
+      
+      const response = await api.post('/api/auth/register/', formData);
       console.log('Register response:', response);
+      console.log('Response data:', response.data);  // Debug: Log backend response
 
-      // Update CSRF token if provided
+      // Update CSRF token if provided by backend
       if (response.data.csrfToken) {
         document.cookie = `csrftoken=${response.data.csrfToken}; path=/; secure=${isProduction}; samesite=${SAMESITE}`;
       }
@@ -71,10 +83,10 @@ export function AuthProvider({ children }) {
       return { success: true };
     } catch (error) {
       console.error('Register failed:', error.response?.data || error.message);
+      console.error('Full error:', error);  // Debug: Log full error
       throw error;
     }
   };
-
   const logout = async () => {
     try {
       await fetchCSRFToken();  // Fetch CSRF before logout

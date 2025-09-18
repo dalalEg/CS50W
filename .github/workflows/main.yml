@@ -59,7 +59,16 @@ jobs:
         run: |
           cd movie_theater_project/backend
           flake8
-
+      - name: Run Django tests with coverage
+        env:
+          DATABASE_URL: postgres://django:django@localhost:5432/movie_theater
+          REDIS_URL: redis://localhost:6379/0
+          DJANGO_SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
+        run: |
+          cd movie_theater_project/backend
+          coverage run manage.py test
+          coverage report --fail-under=80
+          coverage xml
 
       - name: Upload coverage report
         uses: codecov/codecov-action@v4
