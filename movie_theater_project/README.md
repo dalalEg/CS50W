@@ -4,130 +4,104 @@
 [![Code Style](https://img.shields.io/badge/code%20style-flake8-blue.svg)](https://flake8.pycqa.org/)
 [![Coverage](https://img.shields.io/badge/coverage-91%25-brightgreen.svg)](91%)
 
-A full-stack movie theater booking web application built with Django REST Framework and React, featuring real-time seat selection, user reviews, watchlists, search & filtering, notifications, and an admin management system.
+A **full-stack movie theater booking platform** built with **Django REST Framework + React**, featuring **real-time seat selection, bookings, reviews, watchlists, notifications, and admin analytics**.  
 
-✅ Backend deployed on Render with PostgreSQL
-✅ Frontend deployed on Netlify
+🌐 **Live Demo:**  
+- Frontend → [Netlify Deployment](https://dali-movie-theater.netlify.app)  
+- Backend API → [Render Deployment](https://movie-theater-dots.onrender.com)  
 
-## 🛠 Features
+---
 
-* 🔐 **User Authentication** – Register, login, logout with secure sessions ✅
-* 🎬 **Movie Browsing** – Trailers, posters, credits, rich details ✅
-* 🎟️ **Seat Selection** – Interactive seat map per showtime (seats stored per showtime) ✅
-* 🧾 **Booking System** – Create/confirm/cancel; seat-level reservation integrity ✅
-* ⭐ **Movie Reviews** – Write/edit/delete, average rating display ✅
-* ⭐ **Service Reviews** – (post-showtime only) ✅
-* 📌 **Watchlist & Favorites** – ✅ implemented
-* 📣 **In-App Notifications (Celery)** – Pending payment reminder, auto-cancel unpaid bookings, showtime reminder, new showtime alert ✅
-* 💳 **Payments** – Simple checkout flow (mock) ✅
-* 🏛️ **Theaters & Auditoriums** – Venue directory ✅
-* 🛠️ **Admin Panel + Analytics** – KPI dashboard (users, bookings, revenue, top movies, watchlist), auditorium utilization ✅
-* 🐳 **Dockerized Setup** – Compose for backend/frontend/DB/Redis ✅
-* ⚙️ **CI/CD with GitHub Actions** – Lint, test, build, deploy 🔄 in progress
-* 🌙 **Dark Mode Toggle** – 🔄 planned
-* 🗳️ **Feature Voting** – 🔄 planned
+## ✨ Highlights
 
-## 🛠️ Tech Stack
+- 🔐 **User Authentication** – Secure sessions (register, login, logout)  
+- 🎬 **Movie Browsing** – Trailers, posters, credits, details  
+- 🎟️ **Interactive Seat Selection** – Seat-level reservation integrity  
+- 🧾 **Booking Flow** – Create/confirm/cancel bookings  
+- ⭐ **Movie & Service Reviews** – Post-showtime feedback, ratings  
+- 📌 **Watchlist & Favorites** – Personalized movie tracking  
+- 📣 **Notifications (Celery)** – Reminders, cancellations, new showtimes  
+- 💳 **Mock Payments** – Checkout simulation  
+- 🏛️ **Theater & Auditoriums** – Venue + seating structure  
+- 📊 **Admin Dashboard** – KPIs: users, bookings, revenue, utilization  
+- 🐳 **Dockerized Setup** – Backend, frontend, DB, Redis  
+- ⚙️ **CI/CD (GitHub Actions)** – Linting, tests, build, deploy  
 
-* **Backend:** Django + DRF, PostgreSQL(currently using SQLite), Celery + Redis
-* **Frontend:** React, Axios, React Router, Bootstrap
-* **Auth:** Django sessions + CSRF
-* **Deployment:** Render (backend + DB), Netlify (frontend)
-* **Containerization:** Docker Compose
-* **CI/CD:** GitHub Actions – Python/Node jobs, lint, tests, coverage
+---
 
-## 🚧 Roadmap
+## 🖼 Screenshots
 
-### ✅ Done
+**Movies List Page**  
+<img width="1886" alt="movies-list" src="https://github.com/user-attachments/assets/f21aa082-7397-4319-af30-df42a495530d" />
 
-* Full backend models & migrations (Movie, Seat, Showtime, Booking, Actor, Director, Producer, Theater, Auditorium)
-* Seeded test data (genres, movies, theaters)
-* REST API with DRF
-* Auth: login/register/logout (Django backend + React frontend)
-* List all movies, show available showtimes
-* Profile API (authenticated user)
-* Actor/Director/Genre/Producer management via API
-* React app setup (routing, Axios, proxy)
-* Frontend ↔ Backend integration
-* Mobile-responsive layout (Bootstrap)
-* Movie Detail page (trailer, actors, reviews, showtimes)
-* Showtime detail with visual seat map
-* Booking flow (seat selection → confirmation)
-* Review system (edit/delete, average rating)
-* Watchlist & Favorites logic
-* Service review (post-showtime only)
-* Email confirmation & notifications (Celery tasks)
-* Admin analytics (users/bookings/revenue/top movies/watchlist + auditorium utilization)
-* Dockerized Compose setup
+**Movie Details Page**  
+<img width="667" alt="movie-details" src="https://github.com/user-attachments/assets/ba31af31-77b2-4136-b579-e821280c711f" />
 
-### 🚧 Next Up
+**Available Showtime List**  
+<img width="1914" alt="showtime-list" src="https://github.com/user-attachments/assets/41150828-909d-4c21-a8b4-1712b4463ec2" />
 
-* ⚙️ CI/CD (GitHub Actions) – Python/Node job matrix, migrations, fixtures, test reports, Docker build & push
-* 🎨 Frontend polish – Filter UX, mobile refinements, infinite scroll/pagination
-* 💳 Payments – Refunds, promo codes, VIP pricing tiers
-* 🎟️ VIP showtime logic – Actor events, limited seats, dynamic pricing
-* 🌍 i18n – Multi-language support
-* 🗳️ Feature voting & retro/classic screenings
-* 🌙 Dark mode toggle
+**User Bookings Page**  
+<img width="651" alt="user-bookings" src="https://github.com/user-attachments/assets/a213987c-c138-4dd7-b1c2-9f0febe99b42" />
+
+**Booking Status (Confirmed, In Progress, Canceled)**  
+<img width="741" alt="booking-status" src="https://github.com/user-attachments/assets/4fd705df-2716-4fcf-9574-7153dd59a67c" />
+<img width="741" alt="booking-in-progress" src="https://github.com/user-attachments/assets/d9e31bde-0cdf-4f7d-8fc9-46d08dc7ed37" />
+<img width="745" alt="booking-canceled" src="https://github.com/user-attachments/assets/98da251e-ca40-4096-908f-e126df830f61" />
+
+---
+
+## 🛠 Tech Stack
+
+**Backend** → Django + DRF, PostgreSQL (SQLite for local dev), Celery + Redis  
+**Frontend** → React, Axios, React Router, Bootstrap  
+**Auth** → Django sessions + CSRF  
+**Deployment** → Render (backend + DB), Netlify (frontend)  
+**Containerization** → Docker Compose (backend, frontend, DB, Redis)  
+**CI/CD** → GitHub Actions (Python/Node jobs, lint, tests, coverage, deploy)  
+
+---
 
 ## 🧪 Testing
 
-* ✅ Django tests: models, viewsets, API (bookings, movies, auth, reviews)
-* ✅ Seat/booking integrity: seat reservation & double-booking prevention
-* ✅ Celery task tests (unit & integration with Redis)
-* 🧪 React component tests (Jest + RTL) — in progress
+- ✅ Django tests for models, viewsets, API (bookings, movies, auth, reviews)  
+- ✅ Seat/booking integrity → prevents double booking  
+- ✅ Celery task tests (unit + integration with Redis)  
+- 🧪 React component tests (Jest + RTL) — *in progress*  
 
-### Running Tests & Coverage
-
-**Backend (Django + DRF)**
+Run tests:
 
 ```bash
-# Inside the backend container
+# Inside backend container
 python manage.py test
-
-# Run coverage
+```
+# Coverage
 coverage run --source='.' manage.py test
 coverage report -m
-```
 
-## 🐳 Docker Notes
+# Running Locally (Docker)
+Prerequisites:
 
-* Backend, frontend, PostgreSQL, and Redis each run in separate containers
-* Docker volumes persist database data (postgres\_data)
-* Docker network ensures seamless service communication
+Docker https://www.docker.com/get-started
 
-## 🏗 Getting Started
+Docker Compose https://docs.docker.com/compose/install/
 
-### Prerequisites
-
-* [Docker](https://www.docker.com/get-started)
-* [Docker Compose](https://docs.docker.com/compose/install/)
-
-### Run the project locally
-
+Setup:
 ```bash
 # Clone the repository
 git clone https://github.com/dalalEg/CS50W.git
-
 cd movie_theater_project
-# Start all services with Docker Compose
+# Build + run services
 docker compose up --build
-```
+``` 
 
-* Backend: [http://localhost:8000](http://localhost:8000)
-* Frontend: [http://localhost:3000](http://localhost:3000)
+Backend → http://localhost:8000
 
-### Live Deployment
+Frontend → http://localhost:3000
 
-* Frontend: [https://dali-movie-theater.netlify.app](https://dali-movie-theater.netlify.app)
-* Backend API: [https://movie-theater-dots.onrender.com](https://movie-theater-dots.onrender.com)
-
-## 🏗️ Architecture
-
-```plaintext
+# 🏗 Architecture
           ┌───────────────┐
           │   React UI    │
-          │ (Axios + JWT) │
+          │ (Axios + CSRF)│
           └───────▲───────┘
                   │ REST API calls
                   ▼
@@ -141,59 +115,19 @@ docker compose up --build
                 ▼
         ┌────────────────────┐
         │   Celery Workers   │
-        │ (background jobs)  │
+        │ (notifications)    │
         └───────┬────────────┘
                 │
                 ▼
          ┌────────────┐
-         │   Redis     │
-         │   Broker    │
+         │   Redis    │
+         │   Broker   │
          └────────────┘
 
         ┌────────────┐
-        │PostgreSQL  │
-        │ Relational │
+        │ PostgreSQL │
         │ Database   │
         └────────────┘
-```
 
 
-
-
----
-
-**Note:** README reflects live deployments and current feature status as of September 2025.
-
-# 📸 Screenshots
-* All Movies List Page
-
-<img width="1886" height="875" alt="image" src="https://github.com/user-attachments/assets/f21aa082-7397-4319-af30-df42a495530d" />
-
-* Movie Details Page
-
-<img width="667" height="799" alt="image" src="https://github.com/user-attachments/assets/ba31af31-77b2-4136-b579-e821280c711f" />
-
-* Available Showtime List Page
-
-<img width="1914" height="885" alt="image" src="https://github.com/user-attachments/assets/41150828-909d-4c21-a8b4-1712b4463ec2" />
-
-* User Bookings Page
-
-<img width="651" height="747" alt="image" src="https://github.com/user-attachments/assets/a213987c-c138-4dd7-b1c2-9f0febe99b42" />
-
-* Booking Confirmed, In Progress, Canceled
-
-<img width="741" height="450" alt="image" src="https://github.com/user-attachments/assets/4fd705df-2716-4fcf-9574-7153dd59a67c" />
-
-* In Progress
-
-<img width="741" height="491" alt="image" src="https://github.com/user-attachments/assets/d9e31bde-0cdf-4f7d-8fc9-46d08dc7ed37" />
-
-* Booking Canceled
-
-
-<img width="745" height="473" alt="image" src="https://github.com/user-attachments/assets/98da251e-ca40-4096-908f-e126df830f61" />
-
-
-
-
+# 📌 Note: Project reflects live deployments and feature set as of September 2025.
