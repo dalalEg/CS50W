@@ -1,4 +1,16 @@
+# Virtual env (Python)
+.venv/
+
+# Environment variables
 .env.local
-# Local environment variables
 .env.production
-# Production environment variables
+
+# VSCode settings
+.vscode/
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Misc
+full_tree.txt
