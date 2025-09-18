@@ -36,7 +36,6 @@ function EditUser() {
     try {
       // Assuming PUT to /api/auth/user/ for updates
       await api.put('/api/auth/user/', formData);
-      // Optionally re-fetch user or update context
       alert('Profile updated successfully!');
     } catch (err) {
       setError(err.response?.data?.detail || 'Update failed');
@@ -59,7 +58,7 @@ function EditUser() {
           value={formData.username}
           onChange={handleChange}
           placeholder="Username"
-          autoComplete="username"  // Added
+          autoComplete="username"
           required
         />
         <input
@@ -68,7 +67,7 @@ function EditUser() {
           value={formData.email}
           onChange={handleChange}
           placeholder="Email"
-          autoComplete="email"  // Added
+          autoComplete="email"
           required
         />
         <input
@@ -77,7 +76,7 @@ function EditUser() {
           value={formData.firstName}
           onChange={handleChange}
           placeholder="First Name"
-          autoComplete="given-name"  // Added
+          autoComplete="given-name"  
         />
         <input
           type="text"
@@ -85,7 +84,7 @@ function EditUser() {
           value={formData.lastName}
           onChange={handleChange}
           placeholder="Last Name"
-          autoComplete="family-name"  // Added
+          autoComplete="family-name"  
         />
         
         <button type="submit" disabled={loading}>

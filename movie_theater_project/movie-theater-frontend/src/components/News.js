@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { fetchNews } from '../api/news';
-import '../styles/News.css';  // Create this CSS file if needed
+import '../styles/News.css';  
 
 const News = () => {
   const [news, setNews] = useState([]);
@@ -8,7 +8,7 @@ const News = () => {
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const pageSize = 10;  // Adjust as needed
+  const pageSize = 10; 
 
   useEffect(() => {
     fetchNewsData(currentPage);

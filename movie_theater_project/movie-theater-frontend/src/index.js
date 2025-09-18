@@ -2,9 +2,9 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import 'bootstrap/dist/css/bootstrap.min.css';  // ← Bootstrap CSS
 import './index.css';
-import App from './App';                         // ← import App only once
+import App from './App';                       
 import './styles/theme.css';
-import { AuthProvider } from './contexts/AuthContext'; // ← import AuthProvider
+import { AuthProvider } from './contexts/AuthContext'; 
 import { ToastProvider } from './contexts/ToastContext';
 import { NotificationsProvider } from './contexts/NotificationContext'; // ← import NotificationsProvider
 const container = document.getElementById('root');

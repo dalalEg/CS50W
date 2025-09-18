@@ -285,7 +285,7 @@ def api_user_profile(request):
 
 # pagination classes
 class MoviePagination(PageNumberPagination):
-    page_size = 25  # Adjust as needed (e.g., 10, 20, 25)
+    page_size = 25
     page_size_query_param = 'page_size'
     max_page_size = 100
 
@@ -379,7 +379,7 @@ class MovieViewSet(viewsets.ModelViewSet):
     }
     ordering_fields = ['rating', 'release_date', 'title']
     ordering = ['title']
-    pagination_class = MoviePagination  # Add this for pagination
+    pagination_class = MoviePagination
 
     def get_permissions(self):
         if self.action in ('create', 'update', 'partial_update', 'destroy'):
@@ -404,7 +404,6 @@ class MovieViewSet(viewsets.ModelViewSet):
         roles = Role.objects.filter(movie=movie)
         serializer = RoleSerializer(roles, many=True)
         return Response(serializer.data)
-# GET /api/movies/{pk}/reviews/ → list (open to all)
 
     @action(detail=True, methods=['get'], url_path='reviews',
             permission_classes=[AllowAny])
@@ -685,7 +684,6 @@ class BookingViewSet(viewsets.ModelViewSet):
                             status=status.HTTP_400_BAD_REQUEST)
         booking.status = 'Cancelled'
         booking.save()
-        # Use a transaction to ensure atomicity
         with transaction.atomic():
             # free the seats
             booking.seats.update(is_booked=False)
@@ -1133,6 +1131,4 @@ class NewsViewSet(viewsets.ModelViewSet):
         return [perm() for perm in permission_classes]
 
     def get_queryset(self):
-        # Fixed: Return News objects, not RateService
-        # Since permission is AllowAny, return all News for everyone
         return News.objects.all().order_by('-published_at')

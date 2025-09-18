@@ -1,11 +1,8 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
-# Create your models here.
-
 
 class User(AbstractUser):
-    # Override to ensure user is active
     is_active = models.BooleanField(default=True)
     points = models.PositiveIntegerField(default=0)  # Add points field
     email_verified = models.BooleanField(

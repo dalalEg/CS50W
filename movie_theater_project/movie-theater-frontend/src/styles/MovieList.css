@@ -20,7 +20,7 @@
 
 .movie-poster-container {
   width: 100%;
-  aspect-ratio: 2 / 3;       /* adjust to your poster’s width/height ratio */
+  aspect-ratio: 2 / 3;      
   background-color: var(--clr-border);
   position: relative;
   overflow: hidden;
@@ -33,7 +33,7 @@
   height: 100%;
   object-fit: contain;      /* show the entire image */
   object-position: center;
-  background: none;         /* remove any background cropping hacks */
+  background: none;        
 }
 
 .movie-details {

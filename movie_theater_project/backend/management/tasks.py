@@ -56,7 +56,6 @@ def send_pending_booking_reminder(self, booking_id):
 
 @shared_task(bind=True, max_retries=3, default_retry_delay=60)
 def delete_unpaid_booking(self, booking_id):
-    # use the TextChoices constant so casing always matches
     booking = Booking.objects.filter(
         pk=booking_id,
         status='Pending'

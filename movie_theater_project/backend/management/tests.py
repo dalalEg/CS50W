@@ -20,9 +20,9 @@ from rest_framework.test import APIClient
 
 class BaseAPITestCase(TestCase):
     """Base class for API tests, providing setup and utility methods."""
-
     @classmethod
-    def setUpTestData(cls):  # Use setUpTestData for shared data to avoid leakage
+    def setUpTestData(cls):
+        """Set up test data for the entire TestCase."""
         cls.admin_user = User.objects.create_user(
             username="admin", password="adminpass", is_staff=True
         )
@@ -639,7 +639,7 @@ class MovieAPITests(APITestCase):
         response = self.client.post(f'/api/movies/{self.movie1.id}/reviews/', {
             'rating': 4,
             'content': 'Good movie!',
-            'movie_id': self.movie1.id  # Include the required movie_id field
+            'movie_id': self.movie1.id
         })
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         # Adjusted to account for the review in setUp
@@ -906,7 +906,7 @@ class ShowtimeAPITests(BaseAPITestCase):
             'movie_id': self.movie.id,
             'start_time': (timezone.now() + timedelta(days=3)).isoformat(),
             'end_time': (timezone.now() + timedelta(days=3, hours=2)).isoformat(),
-            'auditorium_id': self.auditorium.id,    # changed key here
+            'auditorium_id': self.auditorium.id,
             'parking_available': True,
             'thD_available': True,
             'language': 'English',
@@ -914,8 +914,6 @@ class ShowtimeAPITests(BaseAPITestCase):
         })
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.showtime.refresh_from_db()
-        # Comparing datetimes directly can be tricky because of slight differences.
-        # You might consider checking that the updated times are close enough.
         self.assertAlmostEqual(
             self.showtime.start_time.timestamp(),
             (timezone.now() +
@@ -1193,7 +1191,6 @@ class BookingAPITests(BaseAPITestCase):
         self.login_as_user()
         response = self.client.get('/api/bookings/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        # Adjust: expect at least 1, but allow more
         self.assertGreaterEqual(len(response.data), 1)
 
     def test_retrieve_booking(self):
@@ -1355,7 +1352,6 @@ class WatchlistAPITests(BaseAPITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         response = self.client.get('/api/watchlist/')
         self.assertEqual(response.status_code, 200)
-        # Assuming ViewSet filters by user; adjust if not
         self.assertEqual(response.data['count'], 1)
 
     def test_create_watchlist_as_user(self):

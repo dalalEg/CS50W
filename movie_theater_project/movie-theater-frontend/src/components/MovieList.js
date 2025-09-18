@@ -16,6 +16,8 @@ function MovieList() {
   const [sortBy, setSortBy] = useState('alpha.desc');
   const [selectedDuration, setSelectedDuration] = useState(180);
   const [selectedYear, setSelectedYear] = useState(2000);
+  const [currentPage, setCurrentPage] = useState(1);  // Track current page
+  const [hasMorePages, setHasMorePages] = useState(true);  // Track if more pages exist
 
   // Fetch genres once
   useEffect(() => {
@@ -24,37 +26,37 @@ function MovieList() {
       .catch(() => {});
   }, []);
 
-  // Helper to fetch all movies (loops through pages)
-  const fetchAllMovies = useCallback(async (searchQuery = '') => {
-    let allMovies = [];
-    let page = 1;
-    while (true) {
-      const res = searchQuery ? await searchMovies(searchQuery, page) : await fetchMovies(page);
-      const newMovies = res.data.results || res.data; // Handle paginated or direct response
-      allMovies = [...allMovies, ...newMovies];
-      if (!res.data.next) break; // Stop if no more pages
-      page++;
-    }
-    return allMovies;
-  }, []);
-
-  // Fetch all movies (no pagination)
-  const fetchMoviesData = useCallback(async () => {
+  // Fetch movies for the current page (incremental)
+  const fetchMoviesData = useCallback(async (page = 1, append = false) => {
     setLoading(true);
     setError(null);
     try {
-      const allMovies = await fetchAllMovies(query);
-      setMovies(allMovies);
+      const res = query ? await searchMovies(query, page) : await fetchMovies(page);
+      const newMovies = res.data.results || res.data;
+      if (append) {
+        setMovies(prev => [...prev, ...newMovies]);  // Append new movies
+      } else {
+        setMovies(newMovies);
+      }
+      setHasMorePages(!!res.data.next);  // Check if more pages exist
     } catch {
       setError('Could not load movies.');
     } finally {
       setLoading(false);
     }
-  }, [query, fetchAllMovies]);
+  }, [query]);
 
-  // Fetch on mount, search, or filter changes
+  // Load more movies (next page)
+  const loadMore = () => {
+    const nextPage = currentPage + 1;
+    setCurrentPage(nextPage);
+    fetchMoviesData(nextPage, true);  // Append mode
+  };
+
+  // Fetch on mount or when query/filters change (reset to page 1)
   useEffect(() => {
-    fetchMoviesData();
+    setCurrentPage(1);  // Reset page
+    fetchMoviesData(1, false);  // Fetch first page
   }, [query, selectedGenre, selectedRating, selectedDuration, selectedYear, sortBy, fetchMoviesData]);
 
   // Parse duration helper
@@ -64,7 +66,7 @@ function MovieList() {
     return (hours * 60) + minutes;
   };
 
-  // Filter and sort movies client-side (since all are loaded)
+  // Filter and sort movies client-side (applied to all loaded movies)
   const displayedMovies = movies
     .filter(m => {
       const releaseYear = new Date(m.release_date).getFullYear();
@@ -171,7 +173,7 @@ function MovieList() {
         <p>No movies found{query ? ` for “${query}”` : ''}.</p>
       )}
 
-      {/* Simple list (no infinite scroll, all movies loaded) */}
+      {/* Movie List */}
       <div className="movie-list">
         {displayedMovies.map(movie => (
           <div
@@ -211,6 +213,14 @@ function MovieList() {
           </div>
         ))}
       </div>
+
+      {/* Load More Button */}
+      {hasMorePages && !loading && (
+        <button className="load-more-btn" onClick={loadMore}>
+          Load More Movies
+        </button>
+      )}
+      {loading && <p>Loading more...</p>}
     </div>
   );
 }

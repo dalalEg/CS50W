@@ -6,7 +6,6 @@ import {
   deleteFavorite,
   fetchFavoritesByMovie
 } from '../api/favourite';
-// ← make sure this matches your API file!
 import { fetchBookingDetails }     from '../api/booking';
 
 import {
@@ -37,10 +36,9 @@ export default function ServiceReview() {
 
   // 2) load booking → only after auth and bookingId exist
   useEffect(() => {
-    if (authLoading || !user || !bookingId) return;         // ← guard!
-    fetchBookingDetails(bookingId)                                  // ← use correct helper
+    if (authLoading || !user || !bookingId) return;       
+    fetchBookingDetails(bookingId)
       .then(res => {
-        
         setMovieId(res.data.showtime.movie.id);
       })
       .catch(err => {
@@ -56,7 +54,7 @@ export default function ServiceReview() {
         setFavoriteEntry(favs[0] || null);
       })
       .catch(() => {
-        /* ignore or console.warn */
+       
       });
   }, [movieId, user]);
 
@@ -75,7 +73,7 @@ export default function ServiceReview() {
       }
       reloadNotifs();
     } catch (err) {
-      console.error(err.response?.data || err);
+      // console.error(err.response?.data || err);
       setError('Failed to update favorites.');
     }
   };

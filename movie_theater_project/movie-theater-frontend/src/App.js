@@ -38,7 +38,6 @@ import { useAuth } from './contexts/AuthContext';
 function App() {
   const { user, loading, logout } = useAuth();
   const handleLogout = logout;
-  // on mount, you might ping /api/auth/user or read a cookie/token
   if (loading) return <p className="loading">Loading…</p>;
 
   return (

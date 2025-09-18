@@ -13,7 +13,6 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // On mount, fetch profile if session exists
   useEffect(() => {
     (async () => {
       try {
@@ -21,7 +20,7 @@ export function AuthProvider({ children }) {
         const response = await api.get('/api/auth/user/');
         setUser(response.data);
       } catch (error) {
-        console.error('Failed to fetch user:', error);
+        // console.error('Failed to fetch user:', error);
         setUser(null);
       } finally {
         setLoading(false);
@@ -32,9 +31,9 @@ export function AuthProvider({ children }) {
   const login = async ({ username, password }) => {
     try {
       await fetchCSRFToken();  // Fetch CSRF before login
-      console.log('Attempting login for:', username);
+      // console.log('Attempting login for:', username);
       const response = await api.post('/api/auth/login/', { username, password });
-      console.log('Login response:', response);
+      // console.log('Login response:', response);
 
       // Update CSRF token if provided by backend
       if (response.data.csrfToken) {
@@ -44,11 +43,11 @@ export function AuthProvider({ children }) {
 
       // Fetch user profile after login
       const userResponse = await api.get('/api/auth/user/');
-      console.log('User fetched:', userResponse.data);
+      // console.log('User fetched:', userResponse.data);
       setUser(userResponse.data);
       return { success: true };
     } catch (error) {
-      console.error('Login failed:', error.response?.data || error.message);
+      // console.error('Login failed:', error.response?.data || error.message);
       throw error;  // Re-throw for component handling
     }
   };
@@ -56,12 +55,12 @@ export function AuthProvider({ children }) {
   const register = async (data) => {
     try {
       await fetchCSRFToken();  // Fetch CSRF before register
-      console.log('Attempting register for:', data.username);
+      // console.log('Attempting register for:', data.username);
       
       // Exclude 'confirmation' from the data sent to backend
       const { confirmation, ...registerData } = data;
-      console.log('Sending data:', registerData);  // Debug: Log what's actually sent
-      
+      // console.log('Sending data:', registerData);  // Debug: Log what's actually sent
+
       // Send as FormData instead of JSON for better compatibility
       const formData = new FormData();
       formData.append('username', registerData.username);
@@ -69,8 +68,8 @@ export function AuthProvider({ children }) {
       formData.append('password', registerData.password);
       
       const response = await api.post('/api/auth/register/', formData);
-      console.log('Register response:', response);
-      console.log('Response data:', response.data);  // Debug: Log backend response
+      // console.log('Register response:', response);
+      // console.log('Response data:', response.data);  // Debug: Log backend response
 
       // Update CSRF token if provided by backend
       if (response.data.csrfToken) {
@@ -82,8 +81,8 @@ export function AuthProvider({ children }) {
       setUser(userResponse.data);
       return { success: true };
     } catch (error) {
-      console.error('Register failed:', error.response?.data || error.message);
-      console.error('Full error:', error);  // Debug: Log full error
+      // console.error('Register failed:', error.response?.data || error.message);
+      // console.error('Full error:', error);  // Debug: Log full error
       throw error;
     }
   };
@@ -91,9 +90,9 @@ export function AuthProvider({ children }) {
     try {
       await fetchCSRFToken();  // Fetch CSRF before logout
       await api.post('/api/auth/logout/');
-      console.log('Logout successful');
+      // console.log('Logout successful');
     } catch (error) {
-      console.error('Logout failed:', error);
+      // console.error('Logout failed:', error);
     } finally {
       // Always clear state and cookies
       setUser(null);

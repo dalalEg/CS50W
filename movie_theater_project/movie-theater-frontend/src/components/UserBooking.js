@@ -12,7 +12,7 @@ const UserBooking = () => {
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const pageSize = 10;  // Adjust as needed
+  const pageSize = 10;  // Items per page
 
   useEffect(() => {
     if (!userId) {

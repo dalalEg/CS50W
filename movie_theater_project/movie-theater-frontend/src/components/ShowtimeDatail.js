@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { fetchShowtimeById } from '../api/showtimes';
 import { fetchSeats } from '../api/seats';
@@ -18,15 +18,15 @@ function ShowtimeDetail() {
   const navigate = useNavigate(); // ← hook at top
   const { user } = useAuth();
   const [booked, setBooked] = useState(false);
-
+  
   useEffect(() => {
     fetchShowtimeById(id)
       .then(resp => setShowtime(resp.data))
       .catch(() => setError("Failed to load showtime details"));
   }, [id]);
 
-  // Helper to fetch all bookings for the user (handles pagination)
-  const fetchAllBookings = async (userId) => {
+  const fetchAllBookings = useCallback(async (userId) => {
+    if (!user.email_verified) return []; // Only fetch if email is verified
     let allBookings = [];
     let page = 1;
     while (true) {
@@ -37,7 +37,7 @@ function ShowtimeDetail() {
       page++;
     }
     return allBookings;
-  };
+  }, [user.email_verified]);  
 
   /* If the current user has booked seats for this showtime */
   useEffect(() => {
@@ -50,7 +50,7 @@ function ShowtimeDetail() {
         })
         .catch(() => setError("Failed to load bookings"));
     }
-  }, [user, id]);
+  }, [user, id, fetchAllBookings]);
 
   useEffect(() => {
     fetchSeats(id).then(r => setSeats(r.data));

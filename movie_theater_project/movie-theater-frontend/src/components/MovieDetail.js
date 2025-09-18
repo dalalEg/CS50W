@@ -67,7 +67,7 @@ function MovieDetail() {
           reloadNotifs();
         })
         .catch(err => {
-          console.error(err);
+         // console.error(err);
           setError("Failed to remove from watchlist");
         });
     } else {
@@ -83,7 +83,7 @@ function MovieDetail() {
             setIsInWatchlist(true);
             return;
           }
-          console.error(err.response?.data || err);
+          // console.error(err.response?.data || err);
           setError("Failed to add to watchlist");
         });
     }

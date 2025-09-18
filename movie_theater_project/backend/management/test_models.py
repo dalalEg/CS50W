@@ -18,11 +18,9 @@ from .models import (
     Theater,
     RateService,
     Favourite)
-from django.utils import timezone  # <-- Add this import
+from django.utils import timezone
 from datetime import timedelta
 from django.utils.timezone import make_aware, datetime
-# Define the User model for testing
-# Ensure you have the correct User model imported
 
 
 class UserModelTest(TestCase):
@@ -31,7 +29,6 @@ class UserModelTest(TestCase):
     def setUp(self):
         """Create a user instance for testing."""
         # Create a user instance with username, password, and email
-        # You can also set other fields if needed
         self.user = User.objects.create_user(
             username="dalal",
             password="test123",

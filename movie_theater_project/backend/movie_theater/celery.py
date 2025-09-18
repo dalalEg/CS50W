@@ -5,7 +5,7 @@ from celery import Celery
 import logging
 logger = logging.getLogger(__name__)
 logger.info("Celery app initialized.")
-# 1) point at your settings
+# 1) point at settings
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'movie_theater.settings')
 
 # 2) let Django bootstrap its apps before we import any models/tasks

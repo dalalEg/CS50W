@@ -13,7 +13,7 @@ const UserWatchlist = () => {
   const [totalPages, setTotalPages] = useState(1);
   const { reload: reloadNotifs } = useNotifications();
   const { user } = useAuth();
-  const pageSize = 10;  // Adjust as needed
+  const pageSize = 10;  // Items per page
 
   useEffect(() => {
     if (!user) return;

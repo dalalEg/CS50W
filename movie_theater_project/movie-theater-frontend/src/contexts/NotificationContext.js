@@ -16,15 +16,14 @@ export function NotificationsProvider({ children }) {
       .catch(() => setNotes([]));
   }, [user]);
 
-  // reload every time auth finishes loading, and user flips from null→object or vice-versa
+  // Reload when auth finishes loading or user changes
   useEffect(() => {
     if (!authLoading) reload();
   }, [authLoading, user, reload]);
 
-  // OPTIONAL: poll every 30s for new
-   useEffect(() => {
-     if (user) {
-       const iv = setInterval(reload, 30000);
+  useEffect(() => {
+    if (user) {
+      const iv = setInterval(reload, 30000);
       return () => clearInterval(iv);
     }
   }, [user, reload]);
@@ -32,8 +31,13 @@ export function NotificationsProvider({ children }) {
   const markRead = id =>
     markNotificationRead(id).then(() => reload());
 
+  const add = (message) => {
+    const newNote = { id: Date.now(), message, read: false };  
+    setNotes(prev => [newNote, ...prev]);
+  };
+
   return (
-    <NotificationsContext.Provider value={{ notes, reload, markRead }}>
+    <NotificationsContext.Provider value={{ notes, reload, markRead, add }}>
       {children}
     </NotificationsContext.Provider>
   );

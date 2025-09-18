@@ -16,7 +16,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = '__all__'  # Corrected from 'all'
+        fields = '__all__'
 
 
 class GenreSerializer(serializers.ModelSerializer):
@@ -144,7 +144,7 @@ class ShowtimeSerializer(serializers.ModelSerializer):
             'movie',
             'start_time',
             'end_time',
-            'available_seats',    # ← add this
+            'available_seats',
             'parking_available',
             'thD_available',
             'language',
@@ -231,7 +231,6 @@ class BookingSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         user = validated_data.pop('user')
-        # now present thanks to source='showtime'
         showtime = validated_data.pop('showtime')
         seat_ids = validated_data.pop('seat_ids')
         seats_qs = Seat.objects.filter(id__in=seat_ids, is_booked=False)
@@ -315,13 +314,8 @@ class PaymentSerializer(serializers.ModelSerializer):
 
 
 class WatchlistSerializer(serializers.ModelSerializer):
-    # Automatically assign the logged-in user; do not expect it in the payload
     user = serializers.HiddenField(default=CurrentUserDefault())
-
-    # If you still want to return full user data, add a separate read‐only
-    # field:
     user_info = UserSerializer(source='user', read_only=True)
-
     movie = MovieSerializer(read_only=True)
     movie_id = serializers.PrimaryKeyRelatedField(
         source='movie',
@@ -371,7 +365,7 @@ class RateServiceSerializer(serializers.ModelSerializer):
     booking = serializers.PrimaryKeyRelatedField(read_only=True)
     booking_id = serializers.PrimaryKeyRelatedField(
         source='booking',
-        queryset=Booking.objects.all(),      # allow any booking
+        queryset=Booking.objects.all(),
         write_only=True
     )
 

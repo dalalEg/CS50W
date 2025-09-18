@@ -13,7 +13,7 @@ function Register() {
   const [message, setMessage] = useState('');
   const navigate = useNavigate();
   const { register } = useAuth();
-  const { add: addNotif } = useNotifications();
+  const { add: reloadNotifs } = useNotifications();
   const [submitting, setSubmitting] = useState(false);
   const handleChange = e => {
     setFormData(f => ({ ...f, [e.target.name]: e.target.value }));
@@ -23,10 +23,9 @@ function Register() {
     e.preventDefault();
     if (submitting) return; // Prevent double submits
     setSubmitting(true);
-    console.log("Submitting registration", formData.username); // Log submission
+    // console.log("Submitting registration", formData.username); // Log submission
     setMessage('');
 
-    // Add validation for empty fields
     if (!formData.username.trim()) {
       setMessage('Username is required');
       setSubmitting(false);
@@ -50,17 +49,15 @@ function Register() {
 
     try {
       await register(formData);
-      console.log('Register successful');  // Debug
-      addNotif('Welcome ' + formData.username + '! Please confirm your email.');
+      reloadNotifs('Welcome ' + formData.username + '! Please confirm your email.');  
       navigate('/');
     } catch (err) {
-      console.error('Register error:', err);
+      // console.error('Register error:', err);
       setMessage('Registration failed - check network or try again');
     } finally {
-      setSubmitting(false); // Ensure submitting state is reset
+      setSubmitting(false);
     }
   };
-
   return (
     <div className="container d-flex justify-content-center align-items-center vh-100">
       <div className="card shadow p-4" style={{minWidth:'300px', maxWidth:'500px', width:'100%'}}>
