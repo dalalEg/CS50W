@@ -1,25 +1,24 @@
-# Local dev DB
-db.sqlite3
-
-# Celery runtime
-celerybeat-schedule.*
-
 # Python cache
 __pycache__/
 
-# Coverage
-htmlcov/
-
-# Static & media files
+# Django static & media
 staticfiles/
 media/
 
-# Temporary/test/migration files
-migrate.load
-
-# Database dumps / exports
+# Local dev DB
+db.sqlite3
 db.json
 prod_data.json
 prod_data_clean.json
 prod_data_utf8.json
 sqlite_dump.sql
+
+# Celery runtime
+celerybeat-schedule.*
+
+# Coverage
+.coverage
+
+# Temporary / test files
+migrate.load
+htmlcov/
