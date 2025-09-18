@@ -1,9 +1,25 @@
+# Local dev DB
 db.sqlite3
-*.pyc
-__pycache__/
-htmlcov/
-*.json
-*.sql
+
+# Celery runtime
 celerybeat-schedule.*
-media/
+
+# Python cache
+__pycache__/
+
+# Coverage
+htmlcov/
+
+# Static & media files
 staticfiles/
+media/
+
+# Temporary/test/migration files
+migrate.load
+
+# Database dumps / exports
+db.json
+prod_data.json
+prod_data_clean.json
+prod_data_utf8.json
+sqlite_dump.sql
