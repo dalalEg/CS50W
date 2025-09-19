@@ -264,6 +264,9 @@ class BookingSerializer(serializers.ModelSerializer):
         seat_ids = validated_data.pop('seat_ids', None)
         if seat_ids is not None:
             with transaction.atomic():
+                current_seat_ids = set(instance.seats.values_list('id', flat=True))
+                new_seat_ids = set(seat_ids)
+                
                 # release seats the user unchecked
                 to_release = instance.seats.exclude(id__in=seat_ids)
                 released_count = to_release.count()
@@ -271,7 +274,18 @@ class BookingSerializer(serializers.ModelSerializer):
                 Showtime.objects.filter(pk=instance.showtime_id).update(
                     available_seats=F('available_seats') + released_count
                 )
-
+                # book new seats the user checked
+                to_book_ids = new_seat_ids - current_seat_ids
+                if to_book_ids:
+                    to_book = Seat.objects.filter(id__in=to_book_ids, is_booked=False)
+                    if to_book.count() != len(to_book_ids):
+                        raise ValidationError("One or more new seats are already booked.")
+                    booked_count = to_book.count()
+                    to_book.update(is_booked=True)
+                    Showtime.objects.filter(pk=instance.showtime_id).update(
+                        available_seats=F('available_seats') - booked_count
+                    )
+                
                 # finally update the M2M and recalc cost
                 instance.seats.set(seat_ids)
                 instance.cost = sum(s.price for s in instance.seats.all())

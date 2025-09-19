@@ -69,8 +69,8 @@ function ShowtimeList() {
     return true;
   })
   .sort((a,b) =>{
-    if (sortBy === 'showtime_date.desc') return new Date(b.start_time) - new Date(a.start_time);
     if (sortBy === 'showtime_date.asc') return new Date(a.start_time) - new Date(b.start_time);
+    if (sortBy === 'showtime_date.desc') return new Date(b.start_time) - new Date(a.start_time);
     if(sortBy === 'duration.desc') return parseDuration(b.movie?.duration) - parseDuration(a.movie?.duration);
     if (sortBy === 'duration.asc') return parseDuration(a.movie?.duration) - parseDuration(b.movie?.duration);
     return 0;
@@ -141,8 +141,8 @@ function ShowtimeList() {
                   onChange={_=>setFilterParking(f=>!f)} /> Parking
         </label>
         <select value={sortBy} onChange={e => setSortBy(e.target.value)}>
-          <option value="showtime_date.desc">Showtime Date (Closest First)</option>
-          <option value="showtime_date.asc">Showtime Date (Farthest First)</option>
+          <option value="showtime_date.desc">Showtime Date (Farthest First)</option>
+          <option value="showtime_date.asc">Showtime Date (Closest First)</option>
           <option value="duration.desc">Duration (Longest First)</option>
           <option value="duration.asc">Duration (Shortest First)</option>
         </select>

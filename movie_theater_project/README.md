@@ -1,7 +1,7 @@
 # 🎬 Movie Theater Booking System
 [![CI](https://github.com/dalalEg/CS50W/actions/workflows/ci.yml/badge.svg)](https://github.com/dalalEg/CS50W/actions/workflows/main.yml)
 [![Code Style](https://img.shields.io/badge/code%20style-flake8-blue.svg)](https://flake8.pycqa.org/)
-[![Coverage](https://img.shields.io/badge/coverage-91%25-brightgreen)](
+[![Coverage](https://img.shields.io/badge/coverage-91%25-brightgreen)](https://app.codecov.io/github/dalaleg/cs50w/commit/a813473c1eff840644d0a2a24b94942094a752d2)
 
 A **full-stack web application** for browsing movies, selecting showtimes, choosing seats, and making bookings.  
 The system integrates **Django REST Framework** on the backend with a **React frontend**, and stores data in **PostgreSQL**.  
@@ -10,7 +10,7 @@ It provides a modern, mobile-friendly interface and is designed to simulate a re
 🌐 **Live Demo:**  
 - Frontend → [Netlify Deployment](https://dali-movie-theater.netlify.app)  
 - Backend API → [Render Deployment](https://movie-theater-dots.onrender.com)  
-
+- Demo Video → [YouTube Walkthrough](https://www.youtube.com/watch?v=YrqwYAZTVQ8)
 ---
 
 ## 🚀 Project Overview
