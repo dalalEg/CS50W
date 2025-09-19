@@ -266,7 +266,6 @@ class BookingSerializer(serializers.ModelSerializer):
             with transaction.atomic():
                 current_seat_ids = set(instance.seats.values_list('id', flat=True))
                 new_seat_ids = set(seat_ids)
-                
                 # release seats the user unchecked
                 to_release = instance.seats.exclude(id__in=seat_ids)
                 released_count = to_release.count()
@@ -285,7 +284,6 @@ class BookingSerializer(serializers.ModelSerializer):
                     Showtime.objects.filter(pk=instance.showtime_id).update(
                         available_seats=F('available_seats') - booked_count
                     )
-                
                 # finally update the M2M and recalc cost
                 instance.seats.set(seat_ids)
                 instance.cost = sum(s.price for s in instance.seats.all())
