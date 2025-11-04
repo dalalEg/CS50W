@@ -1,19 +1,29 @@
 # 🌐 CS50 Web Programming Projects
 
-This repository contains completed projects from **CS50’s Web Programming with Python and JavaScript**, offered by Harvard University. The course focuses on full-stack web development, including frontend and backend technologies such as HTML, CSS, JavaScript, Python, Django, SQL, and Git.
+This repository contains the completed projects from **CS50’s Web Programming with Python and JavaScript**, offered by **Harvard University** via **edX**.
+
+✅ **Status:** Completed | **Certificate Earned:** [View Certificate](https://courses.edx.org/certificates/be096cd76ef143238d165449cbaf0361)  
+📅 **Completion:** October 2025  
+🎓 **Focus:** Full-stack web development using modern technologies — Django, React, SQL, JavaScript, and REST APIs.
+
+The course covered **frontend and backend development**, **database design**, **authentication**, **testing**, and **deployment**.  
+Each project demonstrates progressive mastery of **Django**, **JavaScript**, and **system design** principles.
+
 
 ---
-## 🎬 Movie Theater Web App (in progress)
-A full-stack movie ticket booking platform built with Django REST Framework and React, featuring dynamic seat selection, showtime filtering, and a review system.
+🎬 **Movie Theater Booking System** *(Final Project – Completed)*
+A full-stack movie ticket booking platform built with **Django REST Framework** and **React**, featuring dynamic seat selection, showtime filtering, and user reviews.
 
-### Features
-- Browse movies with posters, trailers, and actor/director details.
-- Search and filter by genre or upcoming showtimes.
-- Visual seat picker for showtime bookings.
-- User authentication with booking history in profile.
-- Leave ratings and reviews for movies.
-- Admin panel to manage movies, actors, directors, theaters, and showtimes.
-- Prevents booking cancellations for ended showtimes.
+**Features**
+- Browse and search movies by genre, date, and showtime.
+- Interactive seat picker with real-time booking validation.
+- User authentication with booking history and reviews.
+- Admin dashboard for managing movies, actors, theaters, and showtimes.
+- CI/CD setup with Docker and GitHub Actions, deployed on Render + Netlify.
+
+**Tech Stack:** Django REST Framework, React, PostgreSQL, Docker, GitHub Actions, JWT Auth, REST APIs  
+**More Details:** [Project Folder →](./movie_theater_project)
+
 
 ### Skills:
 Django REST Framework, React, Axios, React Router, Bootstrap, PostgreSQL, User Auth, API Integration, Responsive UI, Admin Customization
@@ -36,9 +46,9 @@ A full-stack social media web application built using Django, JavaScript, HTML, 
 - Recommended users to follow on your own profile.
 
 - Pagination and asynchronous updates using Fetch API.
-
-### Skills:
-Python (Django), JavaScript, DOM Manipulation, REST API, User Auth, HTML/CSS, Pagination, UI State
+  
+**Tech Stack:** Python (Django), JavaScript, DOM Manipulation, REST API, User Auth, HTML/CSS, Pagination, UI State   
+**More Details:** [Project Folder →](./project4)
 
 ---
 
@@ -53,8 +63,8 @@ A single-page email client built using **JavaScript, HTML, and CSS**, interactin
 - Dynamic UI updates using pure JavaScript and Fetch API.
 - View switching and state management inside a single JavaScript file (`inbox.js`).
 
-### Skills:  
-JavaScript, DOM Manipulation, Fetch API, REST, UI State, HTML/CSS
+**Tech Stack:** JavaScript, DOM Manipulation, Fetch API, REST, UI State, HTML/CSS
+**More Details:** [Project Folder →](./mail)
 
 ---
 
@@ -68,8 +78,8 @@ An eBay-style **auction site** built with Django.
 - Login and registration with Django authentication.
 - Automatically closes listings when auctions end.
 
-### Skills:  
-Django, Python, Models & Migrations, HTML Templates, User Auth, Forms
+**Tech Stack:** Django, Python, Models & Migrations, HTML Templates, User Auth, Forms
+**More Details:** [Project Folder →](./commerce)
 
 ---
 
@@ -83,8 +93,8 @@ A simple Wikipedia-style **encyclopedia** app using Django and Markdown.
 - Error handling for duplicates and missing entries.
 - Random article functionality.
 
-### Skills:  
-Django, Markdown, HTML Templates, Form Handling, Search Logic
+**Tech Stack:** Django, Markdown, HTML Templates, Form Handling, Search Logic
+**More Details:** [Project Folder →](./wiki)
 
 ---
 
@@ -92,7 +102,11 @@ Django, Markdown, HTML Templates, Form Handling, Search Logic
 
 ## 🛠️ Technologies Used
 
-- Python • Django • JavaScript • HTML • CSS
-- Git & GitHub • SQLite • Markdown
+- Python • Django • JavaScript • HTML • CSS 
+- Git & GitHub • SQLite / MySQl / Postgres• Markdown
+- React
+- CI / CD
+- Docker
+  
 
 ---
