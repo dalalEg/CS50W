@@ -1,9 +1,7 @@
 # Python cache
 __pycache__/
 
-# Django static & media
-staticfiles/
-media/
+
 
 # Local dev DB
 db.sqlite3
