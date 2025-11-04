@@ -6,7 +6,7 @@ class User(AbstractUser):
     is_active = models.BooleanField(default=True)
     points = models.PositiveIntegerField(default=0)  # Add points field
     email_verified = models.BooleanField(
-        default=False)  # Add email verification field
+        default=True)  # Add email verification field
 
     def __str__(self):
         return self.username

@@ -183,9 +183,10 @@ function MovieList() {
           >
             <div className="movie-poster-container">
               <img
-                className="movie-poster"
-                src={movie.poster || '/placeholder.jpg'}
-                alt={`${movie.title} poster`}
+                  className="movie-poster"
+                  src={movie.poster || '/placeholder.jpg'}
+                  alt={`${movie.title} poster`}
+ 
               />
             </div>
             <div className="movie-details">

@@ -149,13 +149,23 @@ REST_FRAMEWORK = {
 # ------------------------------------------------------------------------------
 # Static & media files
 # ------------------------------------------------------------------------------
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static'),
+]
+
+STATICFILES_FINDERS = [
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+]
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 # Ensure STATIC_ROOT exists
 if not os.path.exists(STATIC_ROOT) and not os.environ.get('RENDER'):
     os.makedirs(STATIC_ROOT, exist_ok=True)
-MEDIA_URL = "/media/"
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
 
 # ------------------------------------------------------------------------------
 # Templates

@@ -1,5 +1,6 @@
 from celery import shared_task
 from django.contrib.auth import get_user_model
+from django.db import transaction
 from django.utils.timezone import now, timedelta
 from .models import Booking, Notification
 from redis.exceptions import ConnectionError

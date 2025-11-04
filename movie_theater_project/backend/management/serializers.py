@@ -61,7 +61,7 @@ class MovieSerializer(serializers.ModelSerializer):
     director = DirectorSerializer(read_only=True)
     producer = ProducerSerializer(read_only=True)
     actors = ActorSerializer(many=True, read_only=True)
-    poster = serializers.ImageField(use_url=True, required=False)
+    poster = serializers.SerializerMethodField()
     duration = serializers.DurationField(required=False)
 
     # ── WRITE-ONLY PK INPUT ────────────────────────────────
@@ -106,7 +106,11 @@ class MovieSerializer(serializers.ModelSerializer):
     def get_genres(self):
         return ", ".join([genre.name for genre in self.genre.all()]
                          ) if self.genre.exists() else "No genres"
-
+    def get_poster(self, obj):
+        request = self.context.get('request')
+        if obj.poster and request:
+            return request.build_absolute_uri(obj.poster.url)
+        return None
 
 class TheaterSerializer(serializers.ModelSerializer):
     class Meta:
