@@ -1,5 +1,6 @@
 from django import forms
 from django.contrib import admin
+from django.utils.html import format_html
 from .models import (
     User, Movie, Genre, Seat, Review, Showtime, Booking, Notification,
     Actor, Director, Producer, Payment, watchlist, Role, Auditorium, Theater,
@@ -21,10 +22,45 @@ class UserAdmin(admin.ModelAdmin):
 
 @admin.register(Movie)
 class MovieAdmin(admin.ModelAdmin):
-    list_display = ('title', 'release_date', 'rating', 'duration')
-    search_fields = ('title',)
-    list_filter = ('release_date', 'rating', 'genre')
+    list_display = ['title', 'release_date', 'rating', 'duration_display', 'poster_preview']
+    list_filter = ['release_date', 'rating', 'genre']
+    search_fields = ['title', 'description']
+    filter_horizontal = ['genre', 'actors']  # Makes many-to-many easier to manage
+    readonly_fields = ['poster_preview', 'created_at']
+    
+    fieldsets = (
+        ('Basic Information', {
+            'fields': ('title', 'description', 'release_date', 'rating')
+        }),
+        ('Media', {
+            'fields': ('poster', 'poster_preview', 'trailer')
+        }),
+        ('Details', {
+            'fields': ('duration', 'director', 'producer', 'genre', 'actors')
+        }),
+        ('Timestamps', {
+            'fields': ('created_at',),
+            'classes': ('collapse',)
+        })
+    )
 
+    def poster_preview(self, obj):
+        if obj.poster:
+            return format_html(
+                '<img src="{}" style="width: 100px; height: 150px; object-fit: cover; border-radius: 5px;" />',
+                obj.poster.url
+            )
+        return "No poster uploaded"
+    poster_preview.short_description = "Current Poster"
+
+    def duration_display(self, obj):
+        if obj.duration:
+            total_seconds = int(obj.duration.total_seconds())
+            hours = total_seconds // 3600
+            minutes = (total_seconds % 3600) // 60
+            return f"{hours}h {minutes}m"
+        return "Not set"
+    duration_display.short_description = "Duration"
 
 @admin.register(Genre)
 class GenreAdmin(admin.ModelAdmin):
