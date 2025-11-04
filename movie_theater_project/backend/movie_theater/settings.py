@@ -153,8 +153,8 @@ STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 # Ensure STATIC_ROOT exists
-os.makedirs(STATIC_ROOT, exist_ok=True)
-MEDIA_ROOT = BASE_DIR / "media"
+if not os.path.exists(STATIC_ROOT) and not os.environ.get('RENDER'):
+    os.makedirs(STATIC_ROOT, exist_ok=True)
 MEDIA_URL = "/media/"
 
 # ------------------------------------------------------------------------------

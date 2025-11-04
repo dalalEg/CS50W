@@ -519,7 +519,7 @@ class ShowtimeViewSet(viewsets.ModelViewSet):
         user = self.request.user
         base_qs = Showtime.objects.filter(
             start_time__gte=timezone.now(),
-            auditorium__available_seats__gt=0
+            available_seats__gt=0
         )
         if user.is_staff:
             # staff still see everything

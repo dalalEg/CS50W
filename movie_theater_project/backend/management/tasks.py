@@ -56,33 +56,34 @@ def send_pending_booking_reminder(self, booking_id):
 
 @shared_task(bind=True, max_retries=3, default_retry_delay=60)
 def delete_unpaid_booking(self, booking_id):
-    booking = Booking.objects.filter(
-        pk=booking_id,
-        status='Pending'
-    ).first()
-    if not booking:
-        return f"Booking {booking_id} not found or not pending"
+    with transaction.atomic():
+        booking = Booking.objects.filter(
+            pk=booking_id,
+            status='Pending'
+        ).first()
+        if not booking:
+            return f"Booking {booking_id} not found or not pending"
 
-    # mark it cancelled
-    booking.status = 'Cancelled'
-    booking.save(update_fields=['status'])
-    Notification.objects.create(
-        user=booking.user,
-        message=(
-            f"❌ Your booking for “{booking.showtime.movie.title}” was not paid in time "
-            "and has been automatically cancelled."
+        # mark it cancelled
+        booking.status = 'Cancelled'
+        booking.save(update_fields=['status'])
+        Notification.objects.create(
+            user=booking.user,
+            message=(
+                f"❌ Your booking for “{booking.showtime.movie.title}” was not paid in time "
+                "and has been automatically cancelled."
+            )
         )
-    )
 
-    # Mark seats as available and increase available seats
-    for seat in booking.seats.all():
-        seat.is_booked = False
-        seat.save(update_fields=['is_booked'])
+        # Mark seats as available and increase available seats
+        for seat in booking.seats.all():
+            seat.is_booked = False
+            seat.save(update_fields=['is_booked'])
 
-    booking.showtime.available_seats += len(booking.seats.all())
-    booking.showtime.save(update_fields=['available_seats'])
+        booking.showtime.available_seats += len(booking.seats.all())
+        booking.showtime.save(update_fields=['available_seats'])
 
-    return f"Booking {booking_id} cancelled"
+        return f"Booking {booking_id} cancelled"
 
 
 @shared_task(bind=True, max_retries=3, default_retry_delay=60)
@@ -147,8 +148,8 @@ def update_booking_status_after_showtime():
 
             # Mark seats as available and increase available seats
             for seat in booking.seats.all():
-                seat.is_available = True
-                seat.save(update_fields=['is_available'])
+                seat.is_booked = False
+                seat.save(update_fields=['is_booked'])
 
             booking.showtime.available_seats += len(booking.seats.all())
             booking.showtime.save(update_fields=['available_seats'])
