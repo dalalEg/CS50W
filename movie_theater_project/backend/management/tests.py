@@ -591,7 +591,7 @@ class MovieAPITests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertTrue(len(response.data) > 0)
         for movie in response.data:
-            self.assertGreaterEqual(movie['rating'], "4.0   ")  # Assuming popular movies have rating >= 4.0
+            self.assertGreaterEqual(movie['rating'], "4.0")  # Assuming popular movies have rating >= 4.0
 
     def test_get_showtimes_for_movie(self):
         auditorium = Auditorium.objects.create(
