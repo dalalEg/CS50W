@@ -160,8 +160,9 @@ STATICFILES_DIRS = [
 ] if DEBUG else []
 
 # Media files (user uploads)
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_ROOT = '/opt/render/project/src/media'
 MEDIA_URL = '/media/'
+
 
 # Static files finders
 STATICFILES_FINDERS = [
@@ -238,3 +239,4 @@ LOGGING = {
         'level': 'INFO',
     },
 }
+# ------------------------------------------------------------------------------
