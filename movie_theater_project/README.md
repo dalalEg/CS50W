@@ -1,304 +1,243 @@
 # 🎬 Movie Theater Booking System
+[![CI](https://github.com/dalalEg/CS50W/actions/workflows/ci.yml/badge.svg)](https://github.com/dalalEg/CS50W/actions/workflows/main.yml)
+[![Code Style](https://img.shields.io/badge/code%20style-flake8-blue.svg)](https://flake8.pycqa.org/)
+[![Coverage](https://img.shields.io/badge/coverage-91%25-brightgreen)](
 
-A **full-stack web application** for browsing movies, selecting showtimes, choosing seats, and making bookings. The system integrates **Django REST Framework** on the backend with a **React frontend**, and stores data in **PostgreSQL**. It provides a modern, mobile-friendly interface and is designed to simulate a realistic theater booking flow.
+A **full-stack web application** for browsing movies, selecting showtimes, choosing seats, and making bookings.  
+The system integrates **Django REST Framework** on the backend with a **React frontend**, and stores data in **PostgreSQL**.  
+It provides a modern, mobile-friendly interface and is designed to simulate a realistic theater booking flow.
 
 🌐 **Live Demo:**  
 - Frontend → [Netlify Deployment](https://dali-movie-theater.netlify.app)  
-- Backend API → [Render Deployment](https://movie-theater-dots.onrender.com)  
-- Demo Video → [YouTube Walkthrough](https://www.youtube.com/watch?v=YrqwYAZTVQ8)
+- Backend API → [Render Deployment](https://movie-theater-dots.onrender.com)
+- Youtube → [Youtube Link] (https://youtu.be/YrqwYAZTVQ8?si=Rs1Y2K8C-IYdEMSz)
+---
+
+## 🚀 Project Overview
+
+This project replicates the core features of a real-world movie theater platform. Users can register, log in, browse available movies, check showtimes, select seats in real time, and confirm or cancel bookings. Additional features include **reviews, watchlists, notifications, and an analytics dashboard for admins**.  
+
+From the start, the project was designed to go beyond earlier CS50W assignments. Unlike the commerce or social network projects, this system focuses on **scheduling and seat-level booking integrity**, which required careful API design, state management, and real-time validation.
+
+The stack also incorporates **Celery with Redis for background tasks** (e.g., sending booking notifications), **Docker Compose for containerization**, and **GitHub Actions for CI/CD**, making the system robust, scalable, and production-ready.
+
+---
+
+## ✨ Features
+
+- **User Authentication**
+  - Register, log in, and log out with Django sessions and CSRF protection.
+  - Secure access to bookings and profiles.
+
+- **Movies and Showtimes**
+  - Browse movies with details like title, description, runtime, posters, and trailers.
+  - View showtimes by date, time, available seats, language, and auditorium.
+  - Advanced search and filtering by title, genre, release date, or showtime.
+
+- **Seat Selection and Booking**
+  - Interactive seat maps with real-time availability checks.
+  - Server-side validation to prevent double-booking.
+  - Full booking flow: confirmation, cancellation, and payment simulation.
+
+- **User Dashboard**
+  - Manage bookings, reviews, and watchlists.
+  - Update or cancel bookings as allowed.
+  - Add/remove movies from watchlists and favorites.
+  - Create, edit, or delete reviews; rate service post-showtime.
+- **News Section**
+  - Announcements for upcoming movies, releases, and events.
+
+- **Admin Features**
+  - Django Admin for managing movies, showtimes, and bookings.
+  - Dashboard with KPIs: revenue, utilization, users, and bookings.
+  - Role-based permissions (e.g., users edit only their reviews).
+
+- **Notifications & Background Tasks**
+  - Signals trigger notifications for watchlist updates or favorite releases.
+  - Celery tasks handle reminders, pending booking alerts, unpaid cancellations, and post-showtime feedback.
+
+- **Responsive Design**
+  - Optimized for desktops, tablets, and mobile devices.
 
 ---
 
 ## 🛠️ Distinctiveness and Complexity
 
-This project is **fundamentally distinct** from other CS50W assignments in both concept and implementation complexity.
+This project is **distinct** from other CS50W assignments in both concept and implementation.  
 
-### **Why This Is NOT a Social Network (Unlike Project 4)**
+It is **not a social network** (like Project 4), since it focuses on theater operations, scheduling, and ticketing rather than user relationships (users can't see other users' activities).  
+It is **not an e-commerce site** (like Project 2), since it doesn’t use a shopping cart model; instead, it handles real-time seat maps, showtime scheduling, and validation for bookings—closer to airline/train reservation systems than to product checkout flows.  
 
-Project 4 focused on user-to-user interactions: following users, posting content, liking posts, and viewing other users' activities. My movie theater system operates on an entirely different paradigm—**business-to-consumer service booking**. Users interact with a centralized inventory system (showtimes and seats) rather than with each other. There are no user profiles to view, no following mechanisms, no feeds of user activities, and no social interactions. The core functionality revolves around **resource reservation** (seats) and **scheduling** (showtimes), which are fundamentally different from social networking concepts.
+In terms of **complexity**, the project required solving challenges beyond earlier projects:
+- **Frontend + Backend Integration:** React for interactive UI, Django REST Framework for APIs.  
+- **Real-Time Seat Validation:** Concurrency-safe checks to prevent race conditions.  
+- **Asynchronous Tasks:** Celery for notifications and background processes.  
+- **Interconnected Models:** Complex schema for Movies, Showtimes, Bookings, Users, Reviews, etc.  
+- **Scalability:** Dockerized setup, CI/CD pipeline, and cloud deployment.  
 
-### **Why This Is NOT E-Commerce (Unlike Project 2)**
-
-While Project 2 involved product listings and bidding, my system doesn't use a shopping cart model or product inventory management. Instead, it implements **real-time seat reservation** with time-sensitive booking windows, which is closer to airline or concert ticket systems than traditional e-commerce. The key differences include:
-
-- **Inventory Scarcity**: Seats are unique, non-replenishable resources tied to specific time slots
-- **Temporal Constraints**: Bookings become invalid after showtime, unlike products that remain available
-- **Concurrency Management**: Multiple users can compete for the same seat simultaneously, requiring atomic database operations
-- **Status Workflows**: Bookings progress through Pending → Confirmed → Attended states with automated transitions
-
-### **Technical Complexity Beyond Previous Projects**
-
-This project required solving engineering challenges not present in earlier assignments:
-
-**1. Real-Time Concurrency Management**
-- Implemented atomic seat booking with Django's `F()` expressions to prevent race conditions
-- Server-side validation ensures no double-booking even under high concurrent load
-- Database-level constraints maintain data integrity across simultaneous booking attempts
-
-**2. Asynchronous Task Processing**
-- Celery background tasks handle business-critical workflows: payment deadline enforcement, showtime reminders, and automatic seat release
-- Redis message broker enables distributed task processing
-- Implemented retry mechanisms with exponential backoff for failed notifications
-
-**3. Complex State Management**
-- Frontend React context manages authentication, notifications, and real-time seat availability
-- Backend implements sophisticated booking lifecycle management with multiple status transitions
-- Cross-cutting concerns like user points, watchlists, and notifications require careful state synchronization
-
-**4. Production-Grade Architecture**
-- Dockerized multi-service deployment with PostgreSQL, Redis, and Celery workers
-- CI/CD pipeline with automated testing, linting, and deployment
-- Environment-specific configuration management for development and production
-
-**5. Advanced API Design**
-- RESTful endpoints with custom actions for complex business operations (seat selection, booking confirmation)
-- Nested resource relationships (movies→showtimes→seats→bookings) with proper filtering and pagination
-- Custom serializers handle complex validation logic and nested data transformation
-
-These technical challenges required understanding distributed systems, database concurrency, background job processing, and production deployment—concepts far beyond the scope of previous course projects.
+These elements ensure the project is not only distinct from the course’s prior projects but also reflects real-world engineering complexity.
 
 ---
 
-## 📂 Complete File Documentation
+## 🛠 Tech Stack
 
-### **Backend Files (Django)**
-
-#### **backend/management/models.py**
-This file contains the complete database schema for the movie theater system. It defines 15+ interconnected models that represent the business domain:
-
-- **User Model**: Extends Django's AbstractUser with additional fields for `points` (loyalty system) and `email_verified` (account verification status)
-- **Movie Model**: Core entity with fields for title, description, poster images, trailer URLs, duration, and rating. Includes methods for genre aggregation and string representation
-- **Genre Model**: Simple classification system with many-to-many relationship to movies
-- **Theater/Auditorium/Seat Hierarchy**: Three-level venue structure where Theater contains multiple Auditoriums, each containing multiple Seats with individual pricing
-- **Showtime Model**: Links movies to specific auditoriums with start times. Includes critical `available_seats` field that's atomically updated during bookings. Custom save method auto-populates available seats from auditorium capacity
-- **Booking Model**: Central transaction entity linking users to showtimes with seat assignments. Includes status tracking (Pending/Confirmed/Cancelled), cost calculation, and attendance marking
-- **Review System**: User reviews with ratings, linked to both movies and users with timestamp tracking
-- **Notification Model**: System-generated messages for users with read/unread status
-- **Watchlist/Favorites**: Many-to-many through tables for user preferences
-- **Actor/Director/Producer**: Personnel models with many-to-many relationships to movies through Role intermediary
-- **News Model**: Admin-managed announcements with publication dates
-
-The models implement crucial business logic including automatic cost calculation, seat availability tracking, and relationship integrity constraints.
-
-#### **backend/management/serializers.py**
-Contains Django REST Framework serializers that handle API data transformation and validation:
-
-- **MovieSerializer**: Transforms movie objects to/from JSON with nested genre data and computed fields like average ratings
-- **ShowtimeSerializer**: Includes related movie and auditorium data with real-time seat availability
-- **BookingSerializer**: Most complex serializer handling seat selection validation, booking creation, and update logic. Implements custom `create()` and `update()` methods that:
-  - Validate seat availability before booking
-  - Atomically update seat status and showtime availability
-  - Handle seat changes during booking updates (release old seats, book new ones)
-  - Recalculate total cost based on selected seats
-- **SeatSerializer**: Simple serializer for seat data with booking status
-- **UserSerializer**: Handles user registration and profile data with password validation
-- **ReviewSerializer**: Manages movie reviews with user authorization checks
-- **NotificationSerializer**: Formats notification data for frontend consumption
-
-Key validation logic includes checking seat availability, preventing past showtime bookings, and ensuring users can only modify their own bookings.
-
-#### **backend/management/views.py**
-Implements API endpoints using Django REST Framework ViewSets:
-
-- **MovieViewSet**: Full CRUD operations for movies with custom actions for retrieving showtimes and managing watchlists. Includes filtering by genre, search by title, and ordering options
-- **ShowtimeViewSet**: Manages showtime data with filtering by date and movie. Custom queryset optimization using `select_related()` for performance
-- **BookingViewSet**: Handles booking lifecycle with user-specific filtering (users only see their own bookings). Implements custom permissions ensuring booking ownership
-- **SeatViewSet**: Provides seat availability data with real-time status updates
-- **UserViewSet**: User management with registration and profile endpoints
-- **ReviewViewSet**: Movie review CRUD with user authorization
-- **NotificationViewSet**: User notification management with read/unread status updates
-
-Each ViewSet includes appropriate permission classes, filtering options, and custom business logic for complex operations like booking confirmation and cancellation.
-
-#### **backend/management/admin.py**
-Django admin interface configuration for backend data management:
-
-- **Custom Admin Classes**: Each model has tailored admin interface with optimized list displays, search fields, and filters
-- **Inline Editing**: SeatInline allows editing seats directly from showtime admin pages
-- **Custom Forms**: BookingForm includes dynamic seat filtering based on selected showtime
-- **Readonly Fields**: Prevents accidental modification of calculated fields like booking costs
-- **Search Optimization**: Implements search across related fields (e.g., search bookings by movie title)
-
-The admin interface provides a complete backend management system for theater staff to manage movies, showtimes, and bookings without technical knowledge.
-
-#### **backend/management/tasks.py**
-Celery asynchronous tasks for background business logic:
-
-- **send_showtime_reminder()**: Sends notifications 24 hours before showtime starts
-- **send_pending_booking_reminder()**: Alerts users about unpaid bookings approaching deadline
-- **delete_unpaid_booking()**: Automatically cancels unpaid bookings after 24 hours and releases seats back to inventory
-- **update_booking_status_after_showtime()**: Marks confirmed bookings as attended and sends thank you messages post-showtime
-
-Each task includes retry logic, error handling, and database transaction safety. These tasks are critical for maintaining booking integrity and customer communication.
-
-#### **backend/management/signals.py**
-Django signal handlers for automated business logic:
-
-- **Post-save signals**: Automatically create notifications when users add movies to watchlists or when favorite directors release new movies
-- **Booking signals**: Trigger point awards and inventory updates when bookings are confirmed
-- **User registration signals**: Send welcome notifications and initialize user preferences
-
-Signals enable event-driven architecture where related data updates automatically without explicit coupling between components.
-
-#### **backend/management/urls.py**
-API routing configuration using Django REST Framework routers:
-
-- **Router Setup**: DefaultRouter automatically generates RESTful URLs for all ViewSets
-- **Custom Endpoints**: Additional paths for authentication, search, and specialized actions
-- **API Versioning**: Structured for future API version management
-- **Nested Resources**: Routes for related data like movie showtimes and user bookings
-
-The URL configuration provides a clean, RESTful API surface that follows Django conventions.
-
-#### **backend/movie_theater/settings.py**
-Main Django configuration file with environment-specific settings:
-
-- **Database Configuration**: PostgreSQL for production, SQLite for development
-- **Celery Setup**: Redis broker configuration for background tasks
-- **Static/Media Files**: Configuration for image uploads and static asset serving
-- **CORS Settings**: Enables frontend-backend communication in development
-- **Security Settings**: CSRF protection, secure headers, and authentication configuration
-- **Environment Variables**: Sensitive data loaded from environment files
-
-Settings are structured for easy deployment across development and production environments.
-
-#### **backend/movie_theater/celery.py**
-Celery application configuration for background task processing:
-
-- **Broker Configuration**: Redis connection setup for task queuing
-- **Task Discovery**: Automatic detection of task modules across Django apps
-- **Beat Schedule**: Periodic task scheduling for recurring operations like reminder sending
-- **Error Handling**: Dead letter queues and retry configuration
-
-This enables the asynchronous processing crucial for booking deadlines and user notifications.
-
-### **Frontend Files (React)**
-
-#### **movie-theater-frontend/src/App.js**
-Main React application component that orchestrates the entire frontend:
-
-- **Routing Setup**: React Router configuration for all application pages (movies, showtimes, bookings, user dashboard)
-- **Context Providers**: Wraps application in AuthContext and NotificationContext for global state management
-- **Layout Structure**: Defines consistent navigation header and main content area
-- **Protected Routes**: Implements route guards that redirect unauthenticated users to login
-- **Error Boundaries**: Catches and handles React component errors gracefully
-
-The App component serves as the architectural foundation, ensuring proper state management and navigation throughout the user experience.
-
-#### **movie-theater-frontend/src/components/MovieList.js**
-Comprehensive movie browsing interface with advanced filtering capabilities:
-
-- **Pagination Logic**: Implements page-by-page movie loading with "Load More" functionality to improve performance
-- **Search and Filtering**: Real-time search by title, filtering by genre, rating, duration, and release year
-- **Sorting Options**: Multiple sort criteria including alphabetical, popularity, release date, and duration
-- **Responsive Cards**: Movie cards that adapt to different screen sizes with poster images, ratings, and descriptions
-- **Navigation Integration**: Click handlers that route to detailed movie pages
-- **Loading States**: Proper loading indicators and error handling for API calls
-
-This component demonstrates complex state management with multiple interconnected filters and real-time data fetching.
-
-#### **movie-theater-frontend/src/components/ShowtimeDetail.js**
-Interactive seat selection interface for booking process:
-
-- **Seat Map Rendering**: Visual grid representation of auditorium seats with real-time availability status
-- **Selection Logic**: Click handlers for seat selection/deselection with visual feedback
-- **Booking Validation**: Client-side checks for seat availability and user authentication
-- **Cost Calculation**: Real-time price updates as users select/deselect seats
-- **Booking Submission**: Form handling for booking confirmation with error management
-- **Responsive Design**: Seat grid adapts to mobile devices with touch-friendly interfaces
-
-The component manages complex UI state for seat selection while maintaining synchronization with backend availability data.
-
-#### **movie-theater-frontend/src/components/Register.js**
-User registration form with comprehensive validation:
-
-- **Form State Management**: Controlled inputs for username, email, password, and confirmation
-- **Client-side Validation**: Real-time validation for password matching, email format, and required fields
-- **API Integration**: Registration API calls with proper error handling and success feedback
-- **Notification Integration**: Triggers welcome notifications upon successful registration
-- **Navigation Logic**: Automatic redirection to appropriate pages based on registration status
-- **Accessibility Features**: Proper form labels, error announcements, and keyboard navigation
-
-#### **movie-theater-frontend/src/contexts/AuthContext.js**
-Global authentication state management using React Context:
-
-- **User State**: Maintains current user data, authentication status, and loading states
-- **Authentication Methods**: Login, logout, and registration functions with API integration
-- **Session Persistence**: Handles authentication token storage and validation
-- **Auto-refresh Logic**: Automatically refreshes user data and handles session expiration
-- **Permission Checking**: Provides utilities for checking user permissions and email verification status
-- **Context Provider**: Wraps application components to provide authentication state throughout component tree
-
-This context enables consistent authentication behavior across all application components.
-
-#### **movie-theater-frontend/src/contexts/NotificationContext.js**
-Real-time notification management system:
-
-- **Notification State**: Manages array of user notifications with read/unread status
-- **Real-time Updates**: Polling mechanism for fetching new notifications from backend
-- **CRUD Operations**: Functions for marking notifications as read, adding local notifications, and clearing notifications
-- **Integration Points**: Connects with various components to trigger notifications for user actions
-- **Performance Optimization**: Efficient state updates to prevent unnecessary re-renders
-
-#### **movie-theater-frontend/src/api/movies.js**
-Centralized API communication layer for movie-related operations:
-
-- **HTTP Client Setup**: Axios configuration with base URLs and authentication headers
-- **CRUD Functions**: Complete set of functions for movie operations (fetch, search, create, update, delete)
-- **Error Handling**: Consistent error processing and user-friendly error messages
-- **Request Optimization**: Proper use of HTTP methods and request/response transformation
-- **Authentication Integration**: Automatic inclusion of auth tokens in API requests
-
-Similar API modules exist for showtimes, bookings, users, and notifications, providing a clean separation between UI components and backend communication.
-
-#### **movie-theater-frontend/src/styles/MovieList.css**
-Comprehensive styling for movie browsing interface:
-
-- **Responsive Grid Layout**: CSS Grid and Flexbox for movie card arrangements that work across device sizes
-- **Filter Interface Styling**: Form controls, buttons, and layout for the filtering sidebar
-- **Card Design**: Movie poster sizing, text layout, and hover effects
-- **Mobile Optimization**: Media queries and responsive design for mobile devices
-- **Loading States**: Styling for loading spinners and skeleton components
-- **Accessibility**: Focus styles and color contrast for accessibility compliance
-
-The CSS demonstrates modern responsive design principles with mobile-first approach and accessibility considerations.
-
-### **Configuration Files**
-
-#### **docker-compose.yml**
-Multi-service container orchestration for local development:
-
-- **Service Definitions**: Separate containers for backend, frontend, PostgreSQL database, and Redis
-- **Network Configuration**: Inter-service communication setup
-- **Volume Management**: Persistent data storage for database and file uploads
-- **Environment Variables**: Service-specific configuration and secrets management
-- **Development Optimization**: Hot reload configuration for both frontend and backend development
-
-#### **backend/requirements.txt**
-Python dependency specification for backend services:
-
-Lists all required packages including Django, Django REST Framework, Celery, Redis client, PostgreSQL adapter, testing libraries, and deployment dependencies. Includes specific version numbers for reproducible builds.
-
-#### **movie-theater-frontend/package.json**
-Node.js project configuration and dependency management:
-
-- **Dependencies**: React, React Router, Axios, testing libraries, and UI components
-- **Scripts**: Development server, build process, testing, and deployment scripts
-- **Build Configuration**: Webpack and Babel configuration for modern JavaScript features
-- **Testing Setup**: Jest and React Testing Library configuration for comprehensive testing
+**Backend** → Django + DRF, PostgreSQL (SQLite for local dev), Celery + Redis  
+**Frontend** → React, Axios, React Router, Bootstrap  
+**Auth** → Django sessions + CSRF  
+**Deployment** → Render (backend + DB), Netlify (frontend)  
+**Containerization** → Docker Compose (backend, frontend, DB, Redis)  
+**CI/CD** → GitHub Actions (Python/Node jobs, lint, tests, coverage, deploy)  
 
 ---
 
-## 🚀 How to Run the Application
+## 📂 File Structure
+- **/movie-theater-project**
+    - **/backend**
+        - **/management** → Main Django app
+            - `admin.py` → Registers models for the Django admin interface for easy management of movies, showtimes, and bookings.
+            - `app.py` → Connects signal handlers on app startup.
+            - `models.py` → Database models (Movie, Showtime, Booking, Review, Watchlist, Auditorium, etc.).
+            - `permissions.py` → Implements fine-grained access control, such as allowing only the review author to edit their review.
+            - `views.py` & `serializers.py` → Defines REST API endpoints and serializes data for frontend consumption.
+            - `signals.py` → Contains Django post_save signals that automatically create notifications when new showtimes are added or when favorite directors/producers release new movies.
+            - `tasks.py` → Implements Celery asynchronous tasks for: Sending upcoming showtime reminders, Notifying users of pending bookings, Automatically canceling unpaid bookings and freeing seats, Updating booking statuses after showtimes to mark attendance and send feedback reminders.
+            - `test_models.py` → Unit tests for models.
+            - `tests/` → Unit tests for bookings, authentication, and seat integrity.
+            - `urls.py` → API routing for all endpoints in the management app.
+        - **/media**
+            - **/posters** → Stores movie poster images used in the app. Only committed poster assets are included; user-uploaded content is ignored in the repository.
+        - **/movie_theater**
+            - `celery.py` → Celery application setup for asynchronous tasks.
+            - `settings.py` → Django configuration including database connections, installed apps, middleware, and static/media settings.
+        - `Dockerfile` → Container configuration for backend services.
+        - `manage.py` → Django CLI entry point for migrations, running the server, and administrative tasks.
+        - `requirements.txt` → Lists all Python dependencies needed for backend functionality, including Django, DRF, Celery, Redis, and others.
+        - ## ⚠️ Notes
+          Local database & ignored files: `db.sqlite3` and Celery runtime files (`celerybeat-schedule.*`) are kept locally and are not committed. Sample data exports (`db.json`, `prod_data.json`) may be included to demonstrate current showtimes and for testing purposes.
+    - **/movie-theater-frontend**
+        - `src/api/` → Handles all HTTP requests to the backend API (movies, showtimes, bookings, reviews, notifications).
+        - `src/components/` → Reusable React components, including:
+            - MovieList – Displays all movies with advanced search & filter.
+            - ShowtimeDetail – Shows showtime info and seat map.
+        - `src/contexts/` → Authentication context and global state management (user session, watchlist, favorites, notifications).
+        - `src/styles/` → CSS/SCSS files for responsive layout, mobile-friendly UI, and component styling.
+        - `src/tests/` → Jest and React Testing Library tests for critical components and UI interactions.
+        - `src/App.js` → Main React entry point, sets up routes, providers, and application layout.
+        - `src/index.js` → Wraps App with context providers and renders the React app.
+        - `package.json` → Frontend dependencies and scripts for development, testing, and build.
+        - `setupTests.js` → Configures Jest and React Testing Library for frontend testing.
+        - `.babelrc` → Babel configuration for JavaScript transpilation.
+        - `jest.config.js` → Jest configuration for unit and integration tests.
+        - `Dockerfile` → Defines frontend container for deployment.
+    - **/posters/** → Contains static assets such as movie posters used in the frontend UI.
+    - **/.env.local/** → (not shared in repo) Local environment variables for development. This file is not pushed to GitHub for security reasons, but it is required when running the project locally.
+    - **/.env.production** → (not shared in repo) Production environment variables (e.g., database credentials, API keys). This file is also excluded from GitHub for security reasons, but is required when deploying the project.
+    - **/docker-compose.yml** → Multi-service configuration file that defines the setup for backend, frontend, PostgreSQL, Redis, and Celery workers.
+    - **/README.md** → Project documentation (this file).
 
-### Prerequisites
-- Docker and Docker Compose installed
-- Node.js 14+ and Python 3.8+ for manual setup
-- Git for cloning the repository
+---
 
-### Quick Start with Docker
+## ▶️ How to Run Locally
+
+### 🚀 Quick Start (Docker)
+Prerequisites: [Docker](https://www.docker.com/get-started) and [Docker Compose](https://docs.docker.com/compose/install/).
+
+```bash
+# Clone the repository
+git clone https://github.com/dalalEg/CS50W.git
+cd movie_theater_project
+
+# Build and run all services
+docker compose up --build
+```
+- Backend → http://localhost:8000
+- Frontend → http://localhost:3000
+### Manual Setup
+1. Clone the repository
 ```bash
 git clone https://github.com/dalalEg/CS50W.git
 cd movie_theater_project
-docker compose up --build
 ```
+2. Backend setup
+```bash
+cd backend
+python -m venv venv
+source venv/bin/activate   # (or venv\Scripts\activate on Windows)
+pip install -r requirements.txt
+python manage.py migrate
+python manage.py runserver
+```
+    - Backend will run at: http://127.0.0.1:8000/
+3.Frontend setup
+```bash
+cd ../movie-theater-frontend
+npm install
+npm start
+```
+
+## 📦 Requirements
+All backend dependencies are listed in requirements.txt.
+Frontend dependencies are listed in frontend/package.json.
+
+## 📱 Mobile Responsiveness
+The application is fully responsive. Seat grids, movie cards, and booking forms adapt to smaller screens to ensure usability on mobile devices.
+
+## 🖼 Screenshots
+### Movies List Page
+
+<img width="1904" height="887" alt="image" src="https://github.com/user-attachments/assets/0500e666-7a9d-4ead-90c1-6e9b267f6c66" />
+
+### Movie Details Page
+
+<img width="498" height="809" alt="image" src="https://github.com/user-attachments/assets/452427b3-c043-4b9e-aaac-a48163bcd980" />
+
+### Movie Reviews Page
+
+<img width="1904" height="890" alt="image" src="https://github.com/user-attachments/assets/4925f12b-4ec7-477e-93c1-116746bb0323" />
+
+### Available Showtime List
+
+<img width="1918" height="894" alt="image" src="https://github.com/user-attachments/assets/95ed4923-92e2-4d5b-92cc-3a62447a96b2" />
+
+### Showtime datails
+
+<img width="1276" height="898" alt="image" src="https://github.com/user-attachments/assets/c17445e8-2d7b-45bc-9a64-6671b67e0473" />
+
+
+### User Bookings Page
+
+<img width="651" alt="user-bookings" src="https://github.com/user-attachments/assets/a213987c-c138-4dd7-b1c2-9f0febe99b42" />
+
+### Booking Status (Confirmed, In Progress, Canceled)
+<img width="741" alt="booking-in-progress" src="https://github.com/user-attachments/assets/d9e31bde-0cdf-4f7d-8fc9-46d08dc7ed37" />
+
+### Latest News Page 
+
+<img width="1919" height="897" alt="image" src="https://github.com/user-attachments/assets/ebd0b028-59b9-4e41-97cd-8cdb81921ab0" />
+
+## 🧪 Testing
+Django tests for models, viewsets, API (bookings, movies, auth, reviews).
+Seat/booking integrity → prevents double booking.
+Celery task tests (unit + integration with Redis).
+### Run tests:
+```bash
+# Inside backend container
+python manage.py test
+```
+### Coverage:
+```bash
+coverage run --source='.' manage.py test
+coverage report -m
+```
+
+## 📝 Additional Notes
+
+The project demonstrates not only full-stack coding but also design considerations for scalability and user experience.
+
+
+
+## 🙌 Acknowledgments
+This project was built as the final project for CS50’s Web Programming with Python and JavaScript.
+It reflects my personal effort to design and implement a realistic full-stack system beyond the course’s earlier projects.
+
+⭐ Star this repo if you find it useful, and check out the live demo to explore the features!
