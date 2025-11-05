@@ -25,14 +25,15 @@ class MovieAdmin(admin.ModelAdmin):
     list_display = ['title', 'release_date', 'rating', 'duration_display', 'poster_preview']
     list_filter = ['release_date', 'rating', 'genre']
     search_fields = ['title', 'description']
-    filter_horizontal = ['genre', 'actors']  # Makes many-to-many easier to manage
+    filter_horizontal = ['genre', 'actors']
     readonly_fields = ['poster_preview', 'created_at']
     fieldsets = (
         ('Basic Information', {
             'fields': ('title', 'description', 'release_date', 'rating')
         }),
         ('Media', {
-            'fields': ('poster', 'poster_preview', 'trailer')
+            'fields': ('poster_url', 'poster', 'poster_preview', 'trailer'),
+            'description': 'Use poster_url for production or poster for local development'
         }),
         ('Details', {
             'fields': ('duration', 'director', 'producer', 'genre', 'actors')
@@ -44,12 +45,15 @@ class MovieAdmin(admin.ModelAdmin):
     )
 
     def poster_preview(self, obj):
-        if obj.poster:
+        poster_url = obj.get_poster_url()
+        if poster_url:
             return format_html(
-                '<img src="{}" style="width: 100px; height: 150px; object-fit: cover; border-radius: 5px;" />',
-                obj.poster.url
+                '<img src="{}" style="width: 100px; height: 150px; object-fit: cover; border-radius: 5px;" '
+                'onerror="this.style.display=\'none\'; this.nextSibling.style.display=\'block\';" />'
+                '<span style="display:none; color:red;">Failed to load image</span>',
+                poster_url
             )
-        return "No poster uploaded"
+        return "No poster available"
     poster_preview.short_description = "Current Poster"
 
     def duration_display(self, obj):

@@ -96,21 +96,24 @@ class MovieSerializer(serializers.ModelSerializer):
         model = Movie
         fields = [
             "id", "title", "description", "release_date", "rating",
-            "poster", "trailer", "duration", "created_at",
+            "poster", "poster_url", "trailer", "duration", "created_at",
             # read-only expanded
             "genres", "director", "producer", "actors",
             # write-only IDs
             "director_id", "producer_id", "genre_ids", "actor_ids",
         ]
 
-    def get_genres(self):
-        return ", ".join([genre.name for genre in self.genre.all()]
-                         ) if self.genre.exists() else "No genres"
-    
     def get_poster(self, obj):
-        request = self.context.get('request')
-        if obj.poster and request:
-            return request.build_absolute_uri(obj.poster.url)
+        """Return absolute URL for poster"""
+        # First check if poster_url exists (for production)
+        if obj.poster_url:
+            return obj.poster_url
+        # Then check if poster file exists (for local dev)
+        if obj.poster and hasattr(obj.poster, 'url'):
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.poster.url)
+            return obj.poster.url
         return None
 
 

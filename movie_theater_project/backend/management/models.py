@@ -13,42 +13,35 @@ class User(AbstractUser):
 
 
 class Movie(models.Model):
-    title = models.CharField(max_length=255, unique=True)
+    title = models.CharField(max_length=255)
     description = models.TextField()
     release_date = models.DateField()
-    rating = models.FloatField(default=0.0)
+    rating = models.DecimalField(max_digits=3, decimal_places=1, default=0.0)
+    duration = models.DurationField(blank=True, null=True)
+    trailer = models.URLField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    genre = models.ManyToManyField(
-        'Genre',
-        related_name='movies',
-        blank=True)  # Add genre field
-    poster = models.ImageField(
-        upload_to='posters/',
-        blank=True,
-        null=True)  # Add poster field
-    trailer = models.URLField(blank=True, null=True)  # Add trailer field
-    director = models.ForeignKey(
-        'Director',
-        on_delete=models.CASCADE,
-        related_name='movies',
-        blank=True,
-        null=True)  # Add director field
-    producer = models.ForeignKey(
-        'Producer',
-        on_delete=models.CASCADE,
-        related_name='movies',
-        blank=True,
-        null=True)
-    actors = models.ManyToManyField(
-        'Actor',
-        related_name='movies',
-        blank=True)  # Add actors field
-    duration = models.DurationField(
-        blank=True, null=True)  # Add duration field
+    # Both fields for flexibility
+    poster = models.ImageField(upload_to='posters/', blank=True, null=True, help_text="Upload poster (for local dev)")
+    poster_url = models.URLField(blank=True, null=True, help_text="Direct URL to poster (for production)")
+    # Add relationships
+    director = models.ForeignKey('Director', on_delete=models.SET_NULL, null=True, blank=True)
+    producer = models.ForeignKey('Producer', on_delete=models.SET_NULL, null=True, blank=True)
+    genre = models.ManyToManyField('Genre', blank=True)
+    actors = models.ManyToManyField('Actor', blank=True)
 
-    def get_genres(self):
-        return ", ".join([genre.name for genre in self.genre.all()]
-                         ) if self.genre.exists() else "No genres"
+    def get_poster_url(self):
+        """Return poster URL - prefer URL field, then uploaded file"""
+        from django.conf import settings
+        # First priority: direct URL (for production)
+        if self.poster_url:
+            return self.poster_url
+        # Second priority: uploaded file (for local dev)
+        if self.poster and hasattr(self.poster, 'url'):
+            # For local development, ensure we return absolute URL
+            if settings.DEBUG:
+                return f"http://localhost:8000{self.poster.url}"
+            return self.poster.url
+        return None
 
     def __str__(self):
         return self.title
