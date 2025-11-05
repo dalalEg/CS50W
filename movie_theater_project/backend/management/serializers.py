@@ -63,7 +63,7 @@ class MovieSerializer(serializers.ModelSerializer):
     actors = ActorSerializer(many=True, read_only=True)
     poster = serializers.SerializerMethodField()
     duration = serializers.DurationField(required=False)
-
+    rating = serializers.DecimalField(max_digits=3, decimal_places=1, default=0.0)
     # ── WRITE-ONLY PK INPUT ────────────────────────────────
     director_id = serializers.PrimaryKeyRelatedField(
         queryset=Director.objects.all(),
@@ -96,7 +96,7 @@ class MovieSerializer(serializers.ModelSerializer):
         model = Movie
         fields = [
             "id", "title", "description", "release_date", "rating",
-            "poster", "poster_url", "trailer", "duration", "created_at",
+            "poster", "trailer", "duration", "created_at",
             # read-only expanded
             "genres", "director", "producer", "actors",
             # write-only IDs
@@ -104,17 +104,26 @@ class MovieSerializer(serializers.ModelSerializer):
         ]
 
     def get_poster(self, obj):
-        """Return absolute URL for poster"""
-        # First check if poster_url exists (for production)
-        if obj.poster_url:
-            return obj.poster_url
-        # Then check if poster file exists (for local dev)
-        if obj.poster and hasattr(obj.poster, 'url'):
-            request = self.context.get('request')
-            if request:
-                return request.build_absolute_uri(obj.poster.url)
-            return obj.poster.url
-        return None
+        """Return poster URL with production safety"""
+        try:
+            # First check if poster_url exists (for production)
+            if obj.poster_url:
+                return obj.poster_url
+            # Then check if poster file exists (for local dev)
+            if obj.poster and hasattr(obj.poster, 'url'):
+                try:
+                    request = self.context.get('request')
+                    if request:
+                        return request.build_absolute_uri(obj.poster.url)
+                    return obj.poster.url
+                except Exception:
+                    # If poster file doesn't exist, return None
+                    return None
+            return None
+        except Exception as e:
+            # Log the error but don't crash
+            print(f"Error getting poster for {obj.title}: {str(e)}")
+            return None
 
 
 class TheaterSerializer(serializers.ModelSerializer):

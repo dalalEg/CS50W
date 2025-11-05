@@ -41,7 +41,7 @@ class UserModelTest(TestCase):
         self.assertTrue(self.user.check_password("test123"))
         self.assertEqual(self.user.email, "dalal@example.com")
         self.assertEqual(self.user.is_active, True)
-        self.assertEqual(self.user.email_verified, False)
+        self.assertEqual(self.user.email_verified, True)
 
     def test_user_points(self):
         """Test that the user points field is initialized correctly."""

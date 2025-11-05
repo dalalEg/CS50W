@@ -43,6 +43,9 @@ class Movie(models.Model):
             return self.poster.url
         return None
 
+    def get_genres(self):
+        return ", ".join([genre.name for genre in self.genre.all()])
+
     def __str__(self):
         return self.title
 
