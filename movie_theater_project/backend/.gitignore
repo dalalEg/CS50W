@@ -1,7 +1,7 @@
 # Python cache
 __pycache__/
 
-
+media/
 
 # Local dev DB
 db.sqlite3

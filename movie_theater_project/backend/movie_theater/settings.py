@@ -160,7 +160,7 @@ STATICFILES_DIRS = [
 ] if DEBUG else []
 
 # Media files (user uploads)
-MEDIA_ROOT = '/opt/render/project/src/media'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
 
 # Static files finders
@@ -221,3 +221,27 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Email
 # ------------------------------------------------------------------------------
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+
+# ------------------------------------------------------------------------------
+# Logging
+# ------------------------------------------------------------------------------
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+        'file': {
+            'level': 'ERROR',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(BASE_DIR, 'django_errors.log'),
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console', 'file'],
+            'level': 'ERROR',
+        },
+    },
+}
