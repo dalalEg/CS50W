@@ -27,7 +27,6 @@ class MovieAdmin(admin.ModelAdmin):
     search_fields = ['title', 'description']
     filter_horizontal = ['genre', 'actors']  # Makes many-to-many easier to manage
     readonly_fields = ['poster_preview', 'created_at']
-    
     fieldsets = (
         ('Basic Information', {
             'fields': ('title', 'description', 'release_date', 'rating')
@@ -61,6 +60,7 @@ class MovieAdmin(admin.ModelAdmin):
             return f"{hours}h {minutes}m"
         return "Not set"
     duration_display.short_description = "Duration"
+
 
 @admin.register(Genre)
 class GenreAdmin(admin.ModelAdmin):
