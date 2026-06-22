@@ -98,7 +98,7 @@ export function AuthProvider({ children }) {
       setUser(null);
       Cookies.remove('csrftoken');
       Cookies.remove('sessionid');
-      window.location.href = '/';  // Force redirect
+      navigate('/');  // Redirect to home after logout
     }
   };
 

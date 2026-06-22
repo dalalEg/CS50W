@@ -59,6 +59,352 @@ These technical challenges required understanding distributed systems, database 
 
 ---
 
+## ✨ **Features Overview**
+
+- ✅ **User Authentication**: Registration, email verification, login/logout with session management
+- ✅ **Movie Browsing**: Advanced search, filtering by genre/rating/duration, sorting options
+- ✅ **Showtime Management**: Create/view showtimes with real-time seat availability
+- ✅ **Seat Selection**: Interactive auditorium seat maps with dynamic pricing
+- ✅ **Booking System**: Real-time seat reservation with atomic operations to prevent double-booking
+- ✅ **Payment Processing**: Mocked payment gateway with booking confirmation workflow
+- ✅ **Automatic Booking Lifecycle**: Pending → Confirmed → Attended with automated transitions
+- ✅ **Loyalty Points**: Users earn points on confirmed bookings (redeemable future feature)
+- ✅ **Watchlist**: Add movies to watchlist, get notified when new showtimes are added
+- ✅ **Favorites**: Mark favorite directors/producers, receive notifications about their new releases
+- ✅ **Movie Reviews**: Rate and review movies (email verification required)
+- ✅ **Service Ratings**: Rate auditorium, show quality, and overall experience after attending
+- ✅ **Notifications**: Real-time notification system with email integration (signal & task-based)
+- ✅ **Admin Dashboard**: Analytics for revenue, top-performing movies, auditorium ratings
+- ✅ **News System**: Admin-managed announcements and theater updates
+- ✅ **Production Deployment**: Dockerized deployment on Render (backend) + Netlify (frontend)
+
+---
+
+## 🏗️ **System Architecture**
+
+```mermaid
+graph TB
+    subgraph "Frontend (React + React Router)"
+        UI["User Interface"]
+        Auth["Auth Context"]
+        Notify["Notification Context"]
+    end
+    
+    subgraph "Backend (Django REST Framework)"
+        Views["API Views<br/>(18 ViewSets)"]
+        Models["Database Models<br/>(15+ entities)"]
+        Perms["Permissions<br/>(7 custom classes)"]
+        Tasks["Celery Tasks"]
+        Signals["Django Signals"]
+    end
+    
+    subgraph "Data Layer"
+        PG["PostgreSQL<br/>(Production)"]
+        SQLite["SQLite<br/>(Development)"]
+        Redis["Redis<br/>(Message Broker)"]
+    end
+    
+    subgraph "Background Jobs"
+        Worker["Celery Worker"]
+        Beat["Celery Beat<br/>(Scheduler)"]
+    end
+    
+    UI -->|HTTP/REST| Views
+    Views -->|Auth Check| Perms
+    Views -->|CRUD| Models
+    Signals -->|Auto Create| Notify
+    Tasks -->|Queue| Redis
+    Redis -->|Consume| Worker
+    Beat -->|Schedule| Worker
+    Worker -->|Update| Models
+    Models -->|Query| PG
+    Models -->|Query| SQLite
+    Auth -->|Store Token| UI
+    Notify -->|Poll API| Views
+```
+
+---
+
+## 🔌 **API Endpoints & Specification**
+
+### **Base URL**
+- Development: `http://localhost:8000/api/`
+- Production: `https://movie-theater-dots.onrender.com/api/`
+
+### **Core Endpoints**
+
+| Endpoint | Method | Purpose | Auth Required |
+|----------|--------|---------|----------------|
+| `/auth/register/` | POST | User registration | No |
+| `/auth/login/` | POST | User login with CSRF token | No |
+| `/auth/logout/` | POST | Session logout | Yes |
+| `/auth/user/` | GET, PUT | Current user profile & settings | Yes |
+| `/movies/` | GET, POST | List/create movies | Yes (write only) |
+| `/movies/{id}/showtimes/` | GET | Get showtimes for movie | No |
+| `/movies/{id}/add_review/` | POST | Add review to movie | Yes |
+| `/showtimes/` | GET, POST | List/create showtimes | Yes (write only) |
+| `/showtimes/{id}/get_available_seats/` | GET | Real-time available seat count | No |
+| `/bookings/` | GET, POST | User's bookings & create new | Yes |
+| `/bookings/{id}/` | PUT, DELETE | Update/cancel booking | Yes |
+| `/payments/` | GET, POST | List payments & process payment | Yes |
+| `/payments/{id}/process/` | POST | Charge card & confirm booking | Yes |
+| `/reviews/` | GET, POST, PUT, DELETE | Movie reviews CRUD | Yes |
+| `/notifications/` | GET, PATCH | List & mark notifications as read | Yes |
+| `/watchlist/` | GET, POST, DELETE | Manage watchlist | Yes |
+| `/favorites/` | GET, POST, DELETE | Manage favorite directors/producers | Yes |
+| `/rate-services/` | GET, POST | Service quality ratings (post-attendance) | Yes |
+| `/news/` | GET | Theater news & announcements | No |
+
+### **Query Parameters**
+```
+/movies/?search=Godfather&genre=Crime&sort=-rating&page=1
+/showtimes/?movie=1&date=2024-01-15&available_only=true
+/bookings/?status=Pending&movie=1&ordering=-created_at
+```
+
+---
+
+## 💳 **Payment System**
+
+### **Booking Status Lifecycle**
+```
+1. User Books Seats
+   ↓
+2. Booking Created → Status: "Pending"
+   ↓
+3. User Pays (POST /payments/{id}/process/)
+   ↓
+4. Payment Record Created → Status: "Completed"
+   ↓
+5. Booking Status → "Confirmed"
+   ↓
+6. [After Showtime]
+   ↓
+7. Booking Status → "Attended"
+   ↓
+8. User Can Rate Service
+```
+
+### **Timeout Enforcement (Celery Tasks)**
+- **24 hours after creation**: `send_pending_booking_reminder` notifies unpaid bookings
+- **48 hours after creation**: `delete_unpaid_booking` auto-cancels, releases seats, sends final notice
+- **Before showtime**: `send_showtime_reminder` reminds confirmed bookings
+- **After showtime**: `update_booking_status_after_showtime` marks attended, deletes old pending bookings
+
+### **Payment Fields**
+```python
+Payment:
+  - amount (Decimal)
+  - payment_method (Credit Card / Debit Card / PayPal)
+  - status (Pending / Completed / Failed)
+  - payment_date, created_at (timestamps)
+```
+
+**Note**: Payment processing is **mocked** (always succeeds). For production, integrate Stripe/PayPal APIs.
+
+---
+
+## 🔔 **Notification System**
+
+### **Notification Types & Triggers**
+
+| Trigger | Notification | Delivery |
+|---------|--------------|----------|
+| New showtime added for movie in watchlist | "🍿 New showtime: {movie} at {theater}" | Signal + Email |
+| New movie from favorite director released | "🎬 New release from {director}" | Signal + Email |
+| Booking created (Pending) | "📋 Booking pending payment" | Signal |
+| Payment received (Confirmed) | "✅ Booking confirmed" | Task |
+| 24h before showtime | "🎟️ Your movie starts tomorrow at {time}" | Task |
+| 24h after unpaid booking | "⚠️ Payment deadline approaching" | Task |
+| 48h after unpaid booking | "❌ Your booking was cancelled" | Task |
+| After showtime (Attended) | "⭐ Rate your experience" | Task |
+| Movie/Director added to favorites | "❤️ Added {movie} to favorites" | Signal |
+
+### **Real-Time Updates**
+- Frontend polls `/notifications/` endpoint every 30 seconds
+- WebSocket implementation possible but currently polling-based
+
+---
+
+## 🔐 **Authentication & Permissions**
+
+### **Custom Permission Classes**
+
+| Permission | Applies To | Rule |
+|-----------|-----------|------|
+| `IsAdminOrReadOnly` | Movies, Genres, Actors, Directors, Producers, Seats, Theaters | Admin/Staff can write; all can read |
+| `IsReviewOwnerOrReadOnly` | Reviews | Review author can edit/delete; all can read |
+| `IsBookingOwnerOrStaff` | Bookings | User modifies own booking or staff modifies any |
+| `IsNotificationOwnerOrStaff` | Notifications | User sees only own notifications |
+| `IsWatchlistOwnerOrStaff` | Watchlist/Favorites | User manages own, staff manages all |
+| `IsUserEmailVerified` | Reviews, Booking CRUD | Email must be verified to post reviews or create bookings |
+
+### **Authentication Flow**
+1. POST to `/auth/register/` with username, email, password
+2. Email verification link sent (backend console in dev, real email in production)
+3. POST to `/auth/login/` returns session token + CSRF token
+4. All authenticated requests include CSRF token in headers
+5. Session persists across page reloads
+6. POST to `/auth/logout/` clears session
+
+---
+
+## 🗄️ **Database Schema Summary**
+
+```
+User (Custom AbstractUser)
+├── Points (loyalty system)
+├── EmailVerified (boolean)
+└── Related: Bookings, Reviews, Notifications, Watchlist, Favorites
+
+Movie
+├── Title, Description, Duration, Rating
+├── PosterImage, TrailerURL
+└── M2M: Genres, Actors (via Role), Directors (via Role), Producers (via Role)
+
+Theater
+├── Name, Location
+└── 1:M Auditorium
+
+Auditorium
+├── Name, Capacity
+└── 1:M Seat
+
+Seat
+├── Row, SeatNumber, Price (tiered pricing)
+└── M:1 Auditorium
+
+Showtime
+├── MovieID, AuditoriumID, StartTime, EndTime
+├── Language, Is3D, IsVIP, AvailableSeats (atomic counter)
+└── 1:M Booking
+
+Booking (Central Transaction)
+├── UserID, ShowtimeID, TotalCost
+├── Status (Pending/Confirmed/Cancelled)
+├── Attended (boolean), CreatedAt
+└── M:M Seat (via BookingSeat junction)
+
+Payment
+├── BookingID, UserID, Amount, PaymentMethod
+├── Status, PaymentDate
+└── 1:1 Booking (nullable)
+
+Review
+├── MovieID, UserID, Rating (1-5), Comment
+├── CreatedAt, UpdatedAt
+└── 1:M Movie, 1:M User
+
+RateService (Post-Attendance Rating)
+├── BookingID, UserID
+├── AllRating, ShowRating, AuditoriumRating (1-5)
+├── Comment (optional)
+└── Unique(User, Booking)
+
+Notification
+├── UserID, Message, IsRead
+├── CreatedAt
+
+Watchlist / Favourite
+├── UserID, MovieID
+└── AddedAt
+```
+
+---
+
+## 🧪 **Testing**
+
+### **Running Tests**
+
+```bash
+# Navigate to backend
+cd backend
+
+# Run all tests
+python manage.py test management
+
+# Run specific test file
+python manage.py test management.test_models
+
+# Run with verbose output
+python manage.py test management -v 2
+
+# Run API integration tests
+python manage.py test management.tests
+```
+
+### **Test Coverage**
+- **test_models.py**: 50+ unit tests for models (creation, relationships, string representations)
+- **tests.py**: 30+ integration tests for API endpoints (permissions, CRUD operations)
+- **Coverage**: ~80% of backend code (tested via pytest)
+
+### **Test Examples**
+```python
+# Model test
+def test_user_default_points(self):
+    user = User.objects.create(username='test')
+    self.assertEqual(user.points, 0)
+
+# API permission test
+def test_genre_create_permission(self):
+    response = self.client.post('/api/genres/', {'name': 'Action'})
+    self.assertEqual(response.status_code, 403)  # Forbidden for non-admin
+```
+
+---
+
+## 🛠️ **Environment Setup**
+
+### **Development Variables** (`.env.local`)
+
+Create a `.env.local` file in project root:
+
+```env
+# Django Settings
+DEBUG=True
+DJANGO_ENV=development
+SECRET_KEY=your-insecure-dev-key-here
+ALLOWED_HOSTS=localhost,127.0.0.1,react_app
+
+# Database (Docker uses PostgreSQL by default)
+DATABASE_URL=postgres://postgres:postgres@db:5432/movie_theater
+
+# Redis
+REDIS_URL=redis://redis:6379/0
+
+# CORS & Frontend
+CORS_ALLOWED_ORIGINS=http://localhost:3000,http://react_app:3000
+CSRF_TRUSTED_ORIGINS=http://localhost:8000,http://react_app:8000
+
+# Email (Console backend for development)
+EMAIL_BACKEND=django.core.mail.backends.console.EmailBackend
+
+# Celery
+CELERY_BROKER_URL=redis://redis:6379/0
+CELERY_RESULT_BACKEND=redis://redis:6379/1
+```
+
+### **Production Variables** (Render/Environment Variables)
+
+Set these in your Render dashboard:
+```env
+DEBUG=False
+DJANGO_ENV=production
+SECRET_KEY=<generate-strong-key>
+DATABASE_URL=<render-postgres-url>
+REDIS_URL=<render-redis-url>
+ALLOWED_HOSTS=movie-theater-dots.onrender.com
+CORS_ALLOWED_ORIGINS=https://dali-movie-theater.netlify.app
+CSRF_TRUSTED_ORIGINS=https://movie-theater-dots.onrender.com
+EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
+EMAIL_HOST=smtp.gmail.com
+EMAIL_PORT=587
+EMAIL_HOST_USER=your-email@gmail.com
+EMAIL_HOST_PASSWORD=<app-specific-password>
+```
+
+---
+
 ## 📂 Complete File Documentation
 
 ### **Backend Files (Django)**
@@ -289,16 +635,393 @@ Node.js project configuration and dependency management:
 
 ---
 
-## 🚀 How to Run the Application
+## 🚀 **Complete Setup & Deployment Guide**
 
-### Prerequisites
-- Docker and Docker Compose installed
-- Node.js 14+ and Python 3.8+ for manual setup
-- Git for cloning the repository
+### **Prerequisites**
+- **Docker & Docker Compose** for containerized setup (recommended)
+- **Git** for cloning repository
+- **For manual setup**: Python 3.9+, Node.js 16+, PostgreSQL 13+, Redis 6+
 
-### Quick Start with Docker
+---
+
+### **Option 1: Quick Start with Docker** ⚡ (Recommended)
+
 ```bash
+# Clone repository
 git clone https://github.com/dalalEg/CS50W.git
 cd movie_theater_project
+
+# Create environment file
+cat > .env.local << EOF
+DEBUG=True
+SECRET_KEY=dev-insecure-key
+DATABASE_URL=postgres://postgres:postgres@db:5432/movie_theater
+REDIS_URL=redis://redis:6379/0
+CORS_ALLOWED_ORIGINS=http://localhost:3000
+EMAIL_BACKEND=django.core.mail.backends.console.EmailBackend
+EOF
+
+# Start all services (backend, frontend, database, redis, celery)
 docker compose up --build
+
+# In another terminal, initialize database
+docker compose exec backend python manage.py migrate
+docker compose exec backend python manage.py createsuperuser
+docker compose exec backend python manage.py loaddata sample_data.json  # if exists
 ```
+
+**Services**:
+- Frontend: http://localhost:3000
+- Backend API: http://localhost:8000
+- Django Admin: http://localhost:8000/admin
+
+---
+
+### **Option 2: Manual Setup** (For Development)
+
+#### **Backend Setup**
+```bash
+cd backend
+
+# Create virtual environment
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Create .env file
+cp ../.env.local .env
+
+# Apply migrations
+python manage.py migrate
+
+# Create admin user
+python manage.py createsuperuser
+
+# Load sample data (optional)
+python manage.py loaddata sample_data.json
+
+# Run development server
+python manage.py runserver
+
+# In separate terminal, start Celery worker
+celery -A movie_theater worker -l info
+
+# In separate terminal, start Celery beat scheduler
+celery -A movie_theater beat -l info
+```
+
+#### **Frontend Setup**
+```bash
+cd movie-theater-frontend
+
+# Install dependencies
+npm install
+
+# Create .env.local
+cat > .env.local << EOF
+REACT_APP_API_URL=http://localhost:8000/api
+REACT_APP_DEBUG=true
+EOF
+
+# Start development server
+npm start
+```
+
+---
+
+### **Database Initialization**
+
+```bash
+# Apply migrations
+python manage.py migrate
+
+# Create superuser for Django admin
+python manage.py createsuperuser
+
+# Optional: Create test data via Django shell
+python manage.py shell
+```
+
+```python
+from management.models import Theater, Auditorium, Movie, Genre
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
+
+# Create test theater
+theater = Theater.objects.create(name="Main Theater", location="Downtown")
+
+# Create auditorium
+auditorium = Auditorium.objects.create(name="Screen 1", theater=theater, capacity=100)
+
+# Create seats
+for row in range(1, 11):
+    for seat_num in range(1, 11):
+        Seat.objects.create(auditorium=auditorium, row=chr(64 + row), seat_number=seat_num, price=10.00)
+
+# Create genres and movies
+genre = Genre.objects.create(name="Action")
+movie = Movie.objects.create(title="Test Movie", description="Test", duration=120)
+movie.genres.add(genre)
+```
+
+---
+
+### **API Testing**
+
+```bash
+# Test authentication
+curl -X POST http://localhost:8000/api/auth/login/ \
+  -H "Content-Type: application/json" \
+  -d '{"username":"admin","password":"password"}'
+
+# Fetch movies
+curl http://localhost:8000/api/movies/
+
+# Search movies
+curl "http://localhost:8000/api/movies/?search=Godfather&genre=Crime"
+
+# Get showtimes
+curl http://localhost:8000/api/showtimes/?date=2024-01-15
+
+# Create booking (requires authentication)
+curl -X POST http://localhost:8000/api/bookings/ \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"showtime":1,"seats":[1,2,3]}'
+```
+
+---
+
+### **Development Workflow**
+
+#### **Making Backend Changes**
+```bash
+# 1. Modify models in backend/management/models.py
+# 2. Create migration
+python manage.py makemigrations
+
+# 3. Apply migration
+python manage.py migrate
+
+# 4. Test changes
+python manage.py test management
+
+# 5. Commit changes
+git add .
+git commit -m "feat: add new model"
+```
+
+#### **Making Frontend Changes**
+```bash
+# 1. Modify components in movie-theater-frontend/src/
+# 2. Frontend hot-reloads automatically
+# 3. Test in browser
+# 4. Run tests
+npm test
+
+# 5. Commit changes
+git add .
+git commit -m "feat: update UI component"
+```
+
+#### **Adding New API Endpoints**
+```python
+# 1. Update serializer in backend/management/serializers.py
+class MyNewSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MyModel
+        fields = ['id', 'name', 'description']
+
+# 2. Create viewset in backend/management/views.py
+class MyNewViewSet(viewsets.ModelViewSet):
+    queryset = MyModel.objects.all()
+    serializer_class = MyNewSerializer
+    permission_classes = [IsAdminOrReadOnly]
+
+# 3. Register in backend/management/urls.py
+router.register(r'my-endpoint', MyNewViewSet)
+
+# 4. Test endpoint
+python manage.py test management.tests.MyNewAPITest
+```
+
+---
+
+### **Production Deployment**
+
+#### **Backend Deployment on Render**
+
+1. **Push code to GitHub**
+   ```bash
+   git remote add origin https://github.com/yourusername/repo.git
+   git push -u origin main
+   ```
+
+2. **Create Render Web Service**
+   - Connect GitHub repository
+   - Runtime: Python 3.11
+   - Build Command: `pip install -r backend/requirements.txt && python backend/manage.py migrate`
+   - Start Command: `gunicorn movie_theater.wsgi --workers 3 --timeout 120 --bind 0.0.0.0:$PORT`
+
+3. **Set Environment Variables** in Render dashboard
+   ```
+   DEBUG=False
+   SECRET_KEY=<generate-secure-key>
+   DATABASE_URL=<render-postgres-url>
+   REDIS_URL=<render-redis-url>
+   ALLOWED_HOSTS=movie-theater-dots.onrender.com
+   ```
+
+4. **Deploy**
+   - Render auto-deploys on git push
+   - Monitor logs in Render dashboard
+
+#### **Frontend Deployment on Netlify**
+
+1. **Connect GitHub Repository**
+   - Site Settings → Connected Services → Connect to Git
+   - Select repository
+
+2. **Build Settings**
+   - Base directory: `movie-theater-frontend`
+   - Build command: `npm run build`
+   - Publish directory: `build`
+
+3. **Environment Variables**
+   ```
+   REACT_APP_API_URL=https://movie-theater-dots.onrender.com/api
+   ```
+
+4. **Deploy**
+   - Auto-deploys on push to main branch
+   - View at https://dali-movie-theater.netlify.app
+
+---
+
+### **Monitoring & Maintenance**
+
+#### **Check Celery Tasks**
+```bash
+# Monitor active tasks
+celery -A movie_theater inspect active
+
+# View task statistics
+celery -A movie_theater inspect stats
+
+# Purge pending tasks (careful!)
+celery -A movie_theater purge
+```
+
+#### **Database Cleanup**
+```bash
+# Delete old notifications (older than 7 days)
+python manage.py shell
+from django.utils import timezone
+from datetime import timedelta
+from management.models import Notification
+
+seven_days_ago = timezone.now() - timedelta(days=7)
+Notification.objects.filter(created_at__lt=seven_days_ago).delete()
+```
+
+#### **View Logs**
+```bash
+# Backend logs
+docker compose logs backend -f
+
+# Frontend logs
+docker compose logs react_app -f
+
+# Celery worker logs
+docker compose logs celery_worker -f
+```
+
+---
+
+## ❌ **Known Limitations & Future Enhancements**
+
+### **Current Limitations**
+- ⚠️ **Payment Processing**: Mocked (always succeeds). Integrate Stripe/PayPal for production.
+- ⚠️ **Real-Time Updates**: Uses polling (30-second intervals) instead of WebSockets. Scale concerns at 1000+ concurrent users.
+- ⚠️ **Email**: Console backend in development and  Production.
+- ⚠️ **Rate Limiting**: No API throttling. Production should use Django REST framework throttling.
+- ⚠️ **Admin Dashboard**: Basic analytics. Missing trend analysis and predictive insights.
+
+### **Future Enhancements** 🚀
+- [ ] **WebSocket Real-Time Notifications**: Replace polling with Django Channels
+- [ ] **Actual Payment Gateway**: Integrate Stripe for real transactions
+- [ ] **Seat Reservations**: Implement 5-minute hold with automatic release
+- [ ] **Multi-Language Support**: Internationalization (i18n) for multiple locales
+- [ ] **Mobile App**: React Native version for iOS/Android
+- [ ] **Advanced Analytics**: Dashboard with revenue forecasting, customer segmentation
+- [ ] **Recommendation Engine**: Collaborative filtering for movie suggestions
+- [ ] **Email Templates**: HTML emails with order confirmations and reminders
+- [ ] **PDF Tickets**: Generate printable/digital tickets
+- [ ] **Accessibility**: Full WCAG 2.1 AA compliance
+- [ ] **API Rate Limiting**: Prevent abuse and ensure fair resource allocation
+- [ ] **GraphQL**: Alternative to REST API for flexible queries
+
+---
+
+## 🐛 **Troubleshooting**
+
+### **Common Issues**
+
+| Issue | Cause | Solution |
+|-------|-------|----------|
+| `docker compose: command not found` | Docker Compose not installed | Install Docker Desktop or run `pip install docker-compose` |
+| `Connection refused: database` | DB not initialized | Run `docker compose up db` first, wait 10s, then `docker compose up` |
+| `CORS error in browser console` | Frontend domain not in CORS_ALLOWED_ORIGINS | Add domain to `.env` and restart backend |
+| `Celery tasks not executing` | Redis not running | Ensure Redis container is running: `docker compose ps` |
+| `Booking fails with "Seat not available"` | Race condition or stale data | Refresh browser, database constraints are atomic |
+| `502 Bad Gateway on Render` | Backend crash or memory limit | Check Render logs, increase memory allocation |
+| `Netlify build fails` | Missing environment variables | Set `REACT_APP_API_URL` in Netlify dashboard |
+
+### **Debug Mode**
+
+```python
+# backend/movie_theater/settings.py
+DEBUG = os.getenv('DEBUG', 'False') == 'True'  # Enable for troubleshooting
+
+# Turn off CSRF for API testing
+CSRF_TRUSTED_ORIGINS = ['*']  # Temporary: not for production
+```
+
+### **Database Reset** (⚠️ Destructive)
+
+```bash
+# Delete all data and reset migrations
+docker compose down -v  # Removes volumes
+docker compose up --build
+docker compose exec backend python manage.py migrate
+docker compose exec backend python manage.py createsuperuser
+```
+
+---
+
+## 📚 **Additional Resources**
+
+- **Django REST Framework**: https://www.django-rest-framework.org/
+- **React Documentation**: https://react.dev/
+- **Celery Documentation**: https://docs.celeryproject.org/
+- **Docker Compose**: https://docs.docker.com/compose/
+- **PostgreSQL**: https://www.postgresql.org/docs/
+- **Render Deployment**: https://render.com/docs
+- **Netlify**: https://docs.netlify.com/
+
+---
+
+## 📞 **Contact & Support**
+
+For issues, questions, or contributions:
+- **GitHub Issues**: [Create an issue](https://github.com/dalalEg/CS50W/issues)
+- **Live Demo**: https://dali-movie-theater.netlify.app
+
+---
+
+## 📄 **License**
+
+This project is part of CS50W (CS50's Web Programming with Python and JavaScript) and is provided as educational material.
